@@ -1,0 +1,24 @@
+Window {
+    title: "Hello world"
+    background: "#2d2d2d"
+
+    // One line comment
+    Rectangle {
+        x: 150; y: 150; w: 300; h: 300
+        radius: w / 2;
+        color: "#FF0000FF"
+    }
+
+    Rectangle {
+        x: 450; y: 450; w: 350; h: 250;
+        radius: h / 2;
+        color: rgba(255, 0, 255, 0.5)
+        borderWidth: 2
+        borderColor: rgb(0, 0, 0, 1)
+    }
+
+    /** this is a
+    multiple line
+    comment over
+    multiple lines */
+}
