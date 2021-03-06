@@ -4,10 +4,11 @@
 
 #include <vector>
 #include <optional>
+#include <string>
 
 struct ParsedApplication
 {
-	std::optional<std::string> applicationName;
+	std::optional<std::string> applicationName{};
 	// std::optional <
 };
 

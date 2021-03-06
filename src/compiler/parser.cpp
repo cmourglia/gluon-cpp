@@ -354,6 +354,9 @@ std::vector<RectangleInfo> ParseGluonFile(const char* file)
 				{
 					currentNode = currentNode->parent;
 				}
+
+				default:
+					break;
 			}
 		}
 

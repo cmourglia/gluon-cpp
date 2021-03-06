@@ -19,10 +19,10 @@ foreach(SHADER ${IN_SHADERS})
 endforeach()
 
 add_executable(gluon src/main.cpp
-    src/gluon_app.cpp src/resources.cpp src/shader.cpp src/swapchain.cpp src/vkhelpers.cpp src/types.cpp src/compiler/tokenizer.cpp src/compiler/parser.cpp
-    src/gluon_app.h src/resources.h src/shader.h src/swapchain.h src/vkhelpers.h src/types.h src/compiler/tokenizer.h src/compiler/parser.h
-    src/vkcommon.h src/defines.h
+    src/gluon_app.cpp src/types.cpp src/compiler/tokenizer.cpp src/compiler/parser.cpp
+    src/gluon_app.h src/types.h src/compiler/tokenizer.h src/compiler/parser.h
+    src/defines.h
     ${OUT_SHADERS})
-target_link_libraries(gluon PRIVATE volk::volk loguru::loguru glfw::glfw glm::glm nlohmann_json::nlohmann_json)
+target_link_libraries(gluon PRIVATE loguru::loguru glfw::glfw glm::glm bgfx)
 target_compile_definitions(${PROJECT_NAME} PRIVATE $<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>)
 target_include_directories(${PROJECT_NAME} PRIVATE src)
