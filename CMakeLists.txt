@@ -19,8 +19,8 @@ foreach(SHADER ${IN_SHADERS})
 endforeach()
 
 add_executable(gluon src/main.cpp
-    src/gluon_app.cpp src/types.cpp src/compiler/tokenizer.cpp src/compiler/parser.cpp
-    src/gluon_app.h src/types.h src/compiler/tokenizer.h src/compiler/parser.h
+    src/gluon_app.cpp src/types.cpp src/utils.cpp src/compiler/tokenizer.cpp src/compiler/parser.cpp
+    src/gluon_app.h src/types.h src/utils.h src/compiler/tokenizer.h src/compiler/parser.h
     src/defines.h
     ${OUT_SHADERS})
 target_link_libraries(gluon PRIVATE loguru::loguru glfw::glfw glm::glm bgfx)

@@ -1,5 +1,6 @@
 #include "gluon_app.h"
 
+#include "utils.h"
 #include "compiler/parser.h"
 
 #include <bgfx/bgfx.h>
@@ -88,7 +89,6 @@ GluonApp::GluonApp(int argc, char** argv)
 	init.resolution.width  = width;
 	init.resolution.height = height;
 	init.resolution.reset  = BGFX_RESET_NONE;
-	init.type              = bgfx::RendererType::Vulkan;
 	bgfx::init(init);
 
 	bgfx::setDebug(BGFX_DEBUG_TEXT);
@@ -107,11 +107,12 @@ int GluonApp::Run()
 	glm::mat4 proj;
 	glm::mat4 view = glm::mat4(1.0f); // Identity
 
-	namespace fs                     = std::filesystem;
-	fs::file_time_type lastWriteTime = {};
+	i64 lastWriteTime = 0;
 
 	double avgFps       = 0.0;
 	double avgFrameTime = 0.0;
+
+	glfwSwapInterval(0);
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -129,10 +130,12 @@ int GluonApp::Run()
 		glfwPollEvents();
 
 		// Check if gluon file update is needed
-		auto writeTime = fs::last_write_time("test.gluon");
-		if (writeTime > lastWriteTime)
+		i64 writeTime;
+
+		std::string fileContent;
+		if (FileUtils::ReadFileIfNewer("test.gluon", lastWriteTime, &writeTime, &fileContent))
 		{
-			rectangles = ParseGluonFile("test.gluon");
+			rectangles = ParseGluonBuffer(fileContent);
 			UpdateRectangles();
 			lastWriteTime = writeTime;
 		}

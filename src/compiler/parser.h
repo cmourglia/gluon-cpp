@@ -13,4 +13,4 @@ struct ParsedApplication
 };
 
 // TODO: Output an intermediate scene graph instead of a flat RectangleInfo vector
-std::vector<RectangleInfo> ParseGluonFile(const char* file);
+std::vector<RectangleInfo> ParseGluonBuffer(std::string_view buffer);

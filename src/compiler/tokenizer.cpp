@@ -1,10 +1,12 @@
 #include "tokenizer.h"
 
-#include <fstream>
-#include <locale>
-#include <codecvt>
+#include "utils.h"
+
+#include <loguru.hpp>
 
 #include <assert.h>
+
+#include <Windows.h>
 
 inline void AdvanceChars(Tokenizer* tokenizer, u32 count)
 {
@@ -50,8 +52,8 @@ inline Token GetToken(Tokenizer* tokenizer)
 	    .line     = tokenizer->line,
 	};
 
-	char* start = tokenizer->stream;
-	char  c     = tokenizer->stream[0];
+	const char* start = tokenizer->stream;
+	const char  c     = tokenizer->stream[0];
 	AdvanceChars(tokenizer, 1);
 
 	switch (c)
@@ -253,27 +255,19 @@ inline Token GetToken(Tokenizer* tokenizer)
 	return token;
 }
 
-std::vector<Token> Tokenize(const char* filename)
+std::vector<Token> Tokenize(std::string_view buffer)
 {
-	std::ifstream file(filename);
-	if (!file)
-	{
-		return {};
-	}
-
-	std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-
 	std::vector<Token> tokens;
 
 	bool done = false;
 
-	char* t = content.data();
+	const char* t = buffer.data();
 
 	Tokenizer tokenizer = {
-	    .filename = filename,
-	    .column   = 0,
-	    .line     = 0,
-	    .stream   = content.data(),
+	    // .filename = filename,
+	    .column = 0,
+	    .line   = 0,
+	    .stream = buffer.data(),
 	};
 
 	for (;;)

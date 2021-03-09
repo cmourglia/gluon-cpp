@@ -51,7 +51,7 @@ struct Tokenizer
 	std::string filename;
 	u32         column, line;
 
-	char* stream;
+	const char* stream;
 };
 
-std::vector<Token> Tokenize(const char* filename);
+std::vector<Token> Tokenize(std::string_view buffer);
