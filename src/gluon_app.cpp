@@ -91,15 +91,11 @@ int GluonApp::Run()
 
 		BeginDrawing();
 		{
-			Rectangle r = {(f32)GetScreenWidth() / 4 * 2 - 40, 150.0f, 250.0f, 150.0f};
-			DrawRectangleRounded(r, 0.2f, 1, YELLOW);
-			DrawRectangleRoundedLines(r, 0.2f, 1, 5.0f, BLACK);
-
 			for (const auto& rect : rectangles)
 			{
 				Rectangle r         = {rect.position.x, rect.position.y, rect.size.x, rect.size.y};
 				f32       smallSide = Min(r.width, r.height);
-				f32       roundness = Max(rect.radius, smallSide) / smallSide;
+				f32       roundness = Min(rect.radius, smallSide) / smallSide;
 				DrawRectangleRounded(r, roundness, 32, GetColor(rect.fillColor));
 
 				if (rect.borderWidth > 0.0f)

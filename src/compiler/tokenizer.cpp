@@ -59,52 +59,52 @@ inline Token GetToken(Tokenizer* tokenizer)
 	switch (c)
 	{
 		case '\0':
-			token.type = Token_EndOfStream;
+			token.type = TokenType::EndOfStream;
 			break;
 
 		case '{':
-			token.type = Token_OpenBrace;
+			token.type = TokenType::OpenBrace;
 			break;
 		case '}':
-			token.type = Token_CloseBrace;
+			token.type = TokenType::CloseBrace;
 			break;
 		case '(':
-			token.type = Token_OpenParen;
+			token.type = TokenType::OpenParen;
 			break;
 		case ')':
-			token.type = Token_CloseParen;
+			token.type = TokenType::CloseParen;
 			break;
 		case '[':
-			token.type = Token_OpenBracket;
+			token.type = TokenType::OpenBracket;
 			break;
 		case ']':
-			token.type = Token_CloseBracket;
+			token.type = TokenType::CloseBracket;
 			break;
 		case ',':
-			token.type = Token_Comma;
+			token.type = TokenType::Comma;
 			break;
 		case ':':
-			token.type = Token_Colon;
+			token.type = TokenType::Colon;
 			break;
 		case ';':
-			token.type = Token_Semicolon;
+			token.type = TokenType::Semicolon;
 			break;
 		case '.':
-			token.type = Token_Dot;
+			token.type = TokenType::Dot;
 			break;
 		case '+':
-			token.type = Token_Plus;
+			token.type = TokenType::Plus;
 			break;
 		case '-':
-			token.type = Token_Minus;
+			token.type = TokenType::Minus;
 			break;
 		case '*':
-			token.type = Token_Asterisk;
+			token.type = TokenType::Asterisk;
 			break;
 
 		case '"':
 		{
-			token.type = Token_String;
+			token.type = TokenType::String;
 
 			while (tokenizer->stream[0] && tokenizer->stream[0] != '"')
 			{
@@ -121,7 +121,7 @@ inline Token GetToken(Tokenizer* tokenizer)
 
 		case '\'':
 		{
-			token.type = Token_String;
+			token.type = TokenType::String;
 
 			while (tokenizer->stream[0] && tokenizer->stream[0] != '\'')
 			{
@@ -140,7 +140,7 @@ inline Token GetToken(Tokenizer* tokenizer)
 		{
 			if (tokenizer->stream[0] == '/')
 			{
-				token.type = Token_Comment;
+				token.type = TokenType::Comment;
 
 				while (tokenizer->stream[0] && !IsEndOfLine(tokenizer->stream[0]))
 				{
@@ -149,7 +149,7 @@ inline Token GetToken(Tokenizer* tokenizer)
 			}
 			else if (tokenizer->stream[0] == '*')
 			{
-				token.type = Token_Comment;
+				token.type = TokenType::Comment;
 
 				while ((tokenizer->stream[0] && tokenizer->stream[1]) &&
 				       !(tokenizer->stream[0] == '*' && tokenizer->stream[1] == '/'))
@@ -175,7 +175,7 @@ inline Token GetToken(Tokenizer* tokenizer)
 			}
 			else
 			{
-				token.type = Token_Slash;
+				token.type = TokenType::Slash;
 			}
 		}
 		break;
@@ -184,7 +184,7 @@ inline Token GetToken(Tokenizer* tokenizer)
 		{
 			if (IsEndOfLine(c))
 			{
-				token.type = Token_EndOfLine;
+				token.type = TokenType::EndOfLine;
 
 				if ((c == '\r' && tokenizer->stream[0] == '\n') || (c == '\n' && tokenizer->stream[0] == '\r'))
 				{
@@ -196,7 +196,7 @@ inline Token GetToken(Tokenizer* tokenizer)
 			}
 			else if (IsSpacing(c))
 			{
-				token.type = Token_Spacing;
+				token.type = TokenType::Spacing;
 				while (tokenizer->stream[0] && IsSpacing(tokenizer->stream[0]))
 				{
 					AdvanceChars(tokenizer, 1);
@@ -204,7 +204,7 @@ inline Token GetToken(Tokenizer* tokenizer)
 			}
 			else if (IsAlpha(c))
 			{
-				token.type = Token_Identifier;
+				token.type = TokenType::Identifier;
 
 				while (tokenizer->stream[0] &&
 				       (IsAlpha(tokenizer->stream[0]) || IsNumber(tokenizer->stream[0]) || tokenizer->stream[0] == '_'))
@@ -214,7 +214,7 @@ inline Token GetToken(Tokenizer* tokenizer)
 			}
 			else if (IsNumber(c))
 			{
-				token.type = Token_Number;
+				token.type = TokenType::Number;
 
 				f32 value = (f32)(c - '0');
 
@@ -276,7 +276,7 @@ std::vector<Token> Tokenize(std::string_view buffer)
 
 		tokens.push_back(token);
 
-		if (token.type == Token_EndOfStream)
+		if (token.type == TokenType::EndOfStream)
 		{
 			break;
 		}

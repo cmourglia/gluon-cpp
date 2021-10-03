@@ -5,35 +5,35 @@
 #include <string>
 #include <vector>
 
-enum TokenType
+enum class TokenType
 {
-	Token_Unknown,
+	Unknown,
 
-	Token_OpenBrace,
-	Token_CloseBrace,
-	Token_OpenParen,
-	Token_CloseParen,
-	Token_OpenBracket,
-	Token_CloseBracket,
-	Token_Comma,
-	Token_Colon,
-	Token_Semicolon,
-	Token_Dot,
+	OpenBrace,
+	CloseBrace,
+	OpenParen,
+	CloseParen,
+	OpenBracket,
+	CloseBracket,
+	Comma,
+	Colon,
+	Semicolon,
+	Dot,
 
-	Token_Plus,
-	Token_Minus,
-	Token_Asterisk,
-	Token_Slash,
+	Plus,
+	Minus,
+	Asterisk,
+	Slash,
 
-	Token_Number,
-	Token_String,
-	Token_Identifier,
+	Number,
+	String,
+	Identifier,
 
-	Token_Spacing,
-	Token_EndOfLine,
-	Token_Comment,
+	Spacing,
+	EndOfLine,
+	Comment,
 
-	Token_EndOfStream,
+	EndOfStream,
 };
 
 struct Token
