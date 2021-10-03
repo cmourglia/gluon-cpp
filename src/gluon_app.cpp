@@ -3,23 +3,11 @@
 #include "utils.h"
 #include "compiler/parser.h"
 
-#include <bgfx/bgfx.h>
-#include <bgfx/platform.h>
-
-#if BX_PLATFORM_LINUX
-#	define GLFW_EXPOSE_NATIVE_X11
-#	define GLFW_EXPOSE_NATIVE_GLX
-#elif BX_PLATFORM_WINDOWS
-#	define GLFW_EXPOSE_NATIVE_WIN32
-#	define GLFW_EXPOSE_NATIVE_WGL
-#else
-#	error "Uh oh"
-#endif
-#include <GLFW/glfw3.h>
-#include <GLFW/glfw3native.h>
+#include <raylib.h>
 
 #include <loguru.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include <vector>
 #include <unordered_set>
@@ -37,8 +25,6 @@ struct FrameInfos
 	glm::vec2 viewport;
 };
 
-constexpr u32 MAX_FRAMES_IN_FLIGHT = 2u;
-
 std::vector<glm::vec4> defaultColors = {
     {1.0f, 0.0f, 0.0f, 1.0f},
     {0.0f, 1.0f, 0.0f, 1.0f},
@@ -47,12 +33,6 @@ std::vector<glm::vec4> defaultColors = {
     {1.0f, 0.0f, 1.0f, 1.0f},
     {0.0f, 1.0f, 1.0f, 1.0f},
 };
-
-namespace
-{
-
-void KeyCallback(GLFWwindow* window, i32 key, i32 scancode, i32 action, i32 mods) { }
-} // namespace
 
 GluonApp* GluonApp::Get()
 {
@@ -65,43 +45,22 @@ GluonApp::GluonApp(int argc, char** argv)
 	s_instance = this;
 
 	// TODO: Extract window infos if set
+	SetConfigFlags(FLAG_MSAA_4X_HINT | FLAG_WINDOW_HIGHDPI);
+	InitWindow(1024, 768, "Gluon Muon Whatever");
 
-	glfwInit();
-	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-	window = glfwCreateWindow(width, height, "Gluon App", nullptr, nullptr);
-	glfwSetWindowUserPointer(window, this);
-	// TODO: Setup callbacks
-
-	glfwSetKeyCallback(window, KeyCallback);
-
-	bgfx::PlatformData pd = {};
-#if BX_PLATFORM_LINUX
-	pd.nwh = (void*)(uintptr_t)glfwGetX11Window(window);
-	pd.ndt = glfwGetX11Display();
-#elif BX_PLATFORM_WINDOWS
-	pd.nwh = glfwGetWin32Window(window);
-#else
-#	error "Uh oh"
-#endif
-	bgfx::setPlatformData(pd);
-
-	bgfx::Init init        = {};
-	init.resolution.width  = width;
-	init.resolution.height = height;
-	init.resolution.reset  = BGFX_RESET_NONE;
-	bgfx::init(init);
-
-	bgfx::setDebug(BGFX_DEBUG_TEXT);
-	bgfx::setViewClear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0x303030FF, 1.0f, 0);
+	SetTargetFPS(-1);
 }
 
-GluonApp::~GluonApp() { }
+GluonApp::~GluonApp()
+{
+	CloseWindow();
+}
 
 int GluonApp::Run()
 {
 	u32 currentFrame = 0;
 
-	f64 t0         = glfwGetTime();
+	f64 t0         = GetTime();
 	u32 frameCount = 0;
 
 	glm::mat4 proj;
@@ -109,83 +68,50 @@ int GluonApp::Run()
 
 	i64 lastWriteTime = 0;
 
-	double avgFps       = 0.0;
-	double avgFrameTime = 0.0;
+	f64 avgFps       = 0.0;
+	f64 avgFrameTime = 0.0;
 
-	glfwSwapInterval(0);
+	auto GetColor = [](const glm::vec4& color) -> Color {
+		return Color{(u8)(color.r * 255), (u8)(color.g * 255), (u8)(color.b * 255), (u8)(color.a * 255)};
+	};
 
-	while (!glfwWindowShouldClose(window))
+	while (!WindowShouldClose())
 	{
-		if (++frameCount == 100)
-		{
-			const f64 t1 = glfwGetTime();
-			const f64 t  = t1 - t0;
-			t0           = t1;
-			frameCount   = 0;
-
-			avgFps       = 100.0 / t;
-			avgFrameTime = (t / 100.0) * 1000.0;
-		}
-
-		glfwPollEvents();
-
 		// Check if gluon file update is needed
 		i64 writeTime;
 
 		std::string fileContent;
 		if (FileUtils::ReadFileIfNewer("test.gluon", lastWriteTime, &writeTime, &fileContent))
 		{
-			rectangles = ParseGluonBuffer(fileContent);
-			UpdateRectangles();
+			rectangles    = ParseGluonBuffer(fileContent);
 			lastWriteTime = writeTime;
 		}
 
-		bgfx::setViewRect(0, 0, 0, width, height);
-		bgfx::touch(0);
+		ClearBackground(RAYWHITE);
 
-		const bgfx::Stats* stats = bgfx::getStats();
+		BeginDrawing();
+		{
+			Rectangle r = {(f32)GetScreenWidth() / 4 * 2 - 40, 150.0f, 250.0f, 150.0f};
+			DrawRectangleRounded(r, 0.2f, 1, YELLOW);
+			DrawRectangleRoundedLines(r, 0.2f, 1, 5.0f, BLACK);
 
-		bgfx::dbgTextClear();
-		bgfx::dbgTextPrintf(0, 1, 0x0f, "Avg fps: %lf, Avg frame time: %lf", avgFps, avgFrameTime);
-		bgfx::frame();
+			for (const auto& rect : rectangles)
+			{
+				Rectangle r         = {rect.position.x, rect.position.y, rect.size.x, rect.size.y};
+				f32       smallSide = Min(r.width, r.height);
+				f32       roundness = Max(rect.radius, smallSide) / smallSide;
+				DrawRectangleRounded(r, roundness, 32, GetColor(rect.fillColor));
+
+				if (rect.borderWidth > 0.0f)
+				{
+					DrawRectangleRoundedLines(r, roundness, 32, rect.borderWidth, GetColor(rect.borderColor));
+				}
+			}
+
+			DrawFPS(10, 10);
+		}
+		EndDrawing();
 	}
 
 	return 0;
-}
-
-void GluonApp::UpdateRectangles()
-{
-	vertices.clear();
-	vertices.reserve(rectangles.size() * 4);
-
-	indices.clear();
-	indices.reserve(rectangles.size() * 5);
-
-	u32 i = 0;
-	for (const auto& rect : rectangles)
-	{
-		const glm::vec2 p = rect.position;
-		const glm::vec2 s = rect.size * 0.5f;
-
-		const f32 l = p.x - s.x;
-		const f32 r = p.x + s.x;
-		const f32 b = p.y - s.y;
-		const f32 t = p.y + s.y;
-
-		vertices.push_back({{l, b}, (f32)i});
-		vertices.push_back({{r, b}, (f32)i});
-		vertices.push_back({{l, t}, (f32)i});
-		vertices.push_back({{r, t}, (f32)i});
-
-		indices.push_back(i * 4 + 0);
-		indices.push_back(i * 4 + 1);
-		indices.push_back(i * 4 + 2);
-		indices.push_back(i * 4 + 3);
-		indices.push_back(0xFFFFFFFF);
-
-		++i;
-	}
-
-	vertexBufferDirty    = true;
-	rectangleBufferDirty = true;
 }

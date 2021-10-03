@@ -7,7 +7,7 @@
 #include <string_view>
 #include <unordered_map>
 
-namespace Color
+namespace MuColor
 {
 inline glm::vec4 FromRgba(i32 r, i32 g, i32 b, f32 a = 1.0f)
 {
@@ -259,14 +259,14 @@ extern const std::unordered_map<std::string_view, glm::vec4> ColorsByName;
 
 struct RectangleInfo
 {
-	glm::vec2 position           = {0.0f, 0.0f};
-	glm::vec2 size               = {0.0f, 0.0f};
-	glm::vec4 fillColor          = {0.0f, 0.0f, 0.0f, 1.0f};
-	f32       radius             = 0.0f;
-	glm::vec4 borderColor        = {0.0f, 0.0f, 0.0f, 1.0f};
-	f32       borderWidth        = 0.0f;
-	glm::vec2 dropShadowOffset   = {0.0f, 0.0f};
-	glm::vec4 dropShadowColor    = {0.3f, 0.3f, 0.3f, 1.0f};
-	f32       dropShadowScale    = 0.0f;
-	f32       dropShadowStrength = 15.0f;
+	glm::vec2 position    = {0.0f, 0.0f};
+	glm::vec2 size        = {0.0f, 0.0f};
+	glm::vec4 fillColor   = {0.0f, 0.0f, 0.0f, 1.0f};
+	f32       radius      = 0.0f;
+	glm::vec4 borderColor = {0.0f, 0.0f, 0.0f, 1.0f};
+	f32       borderWidth = 0.0f;
+	// glm::vec2 dropShadowOffset   = {0.0f, 0.0f};
+	// glm::vec4 dropShadowColor    = {0.3f, 0.3f, 0.3f, 1.0f};
+	// f32       dropShadowScale    = 0.0f;
+	// f32       dropShadowStrength = 15.0f;
 };

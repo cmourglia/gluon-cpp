@@ -1,6 +1,6 @@
 #include "types.h"
 
-namespace Color
+namespace MuColor
 {
 const glm::vec4 AliceBlue            = FromRgba(240, 248, 255);
 const glm::vec4 AntiqueWhite         = FromRgba(250, 235, 215);

@@ -1,17 +1,20 @@
 #include "utils.h"
 
 #include <loguru.hpp>
-#include <bx/platform.h>
 
-#if BX_PLATFORM_WINDOWS
+#if _WIN32
 #	include <Windows.h>
 #elif
 #	error TODO
 #endif
 
+#if !_WIN32
+static_assert(false, "Hello ?");
+#endif
+
 namespace
 {
-#if BX_PLATFORM_WINDOWS
+#if _WIN32
 struct HandleRAII
 {
 	HandleRAII(HANDLE handle)
@@ -42,7 +45,7 @@ namespace FileUtils
 {
 i64 GetFileWriteTime(const char* filename)
 {
-#if BX_PLATFORM_WINDOWS
+#if _WIN32
 	HandleRAII fileHandle{CreateFileA(filename,
 	                                  GENERIC_READ,
 	                                  FILE_SHARE_READ | FILE_SHARE_WRITE,
@@ -83,7 +86,7 @@ i64 GetFileWriteTime(const char* filename)
 std::string ReadWholeFile(const char* filename)
 {
 	std::string result;
-#if BX_PLATFORM_WINDOWS
+#if _WIN32
 	HandleRAII fileHandle{CreateFileA(filename,
 	                                  GENERIC_READ,
 	                                  FILE_SHARE_READ | FILE_SHARE_WRITE,
@@ -133,7 +136,7 @@ std::string ReadWholeFile(const char* filename)
 
 bool ReadFileIfNewer(const char* filename, i64 lastWrite, i64* newLastWrite, std::string* content)
 {
-#if BX_PLATFORM_WINDOWS
+#if _WIN32
 	HandleRAII fileHandle{CreateFileA(filename,
 	                                  GENERIC_READ,
 	                                  FILE_SHARE_READ | FILE_SHARE_WRITE,
