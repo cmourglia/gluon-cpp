@@ -289,8 +289,6 @@ void Window::ParsePropertyInternal(Parser::Node::Ptr node, const u32 nodeHash)
 {
 	pos  = {0.0f, 0.0f};
 	size = {1024.0f, 768.0f};
-
-	LOG_F(INFO, "Hello window property %s", node->name.c_str());
 }
 
 void Window::BuildRenderInfosInternal(std::vector<RectangleInfo>* result)
@@ -300,8 +298,6 @@ void Window::BuildRenderInfosInternal(std::vector<RectangleInfo>* result)
 
 void Rectangle::ParsePropertyInternal(Parser::Node::Ptr node, const u32 nodeHash)
 {
-	LOG_F(INFO, "Hello rectangle property %s", node->name.c_str());
-
 	if (nodeHash == NodeHash::Color)
 	{
 		assert(!node->children.empty());

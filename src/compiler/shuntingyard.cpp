@@ -135,7 +135,6 @@ Expression Expression::Build(const std::vector<Token>& tokens, Widget* rootWidge
 		{
 			case TokenType::Number:
 			{
-				LOG_F(INFO, "Pushing value %f to stack", token.number);
 				result.evaluationQueue.push(std::make_shared<ConstantNode>(token.number));
 			}
 			break;
@@ -174,8 +173,6 @@ Expression Expression::Build(const std::vector<Token>& tokens, Widget* rootWidge
 				{
 					f32 mult = token.type == TokenType::Minus ? -1.0f : 1.0f;
 					result.evaluationQueue.push(std::make_shared<ConstantNode>(mult * tokens[++i].number));
-
-					LOG_F(INFO, "Pushing value %f to the stack", mult * tokens[i].number);
 
 					continue;
 				}
