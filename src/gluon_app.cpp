@@ -4,6 +4,8 @@
 #include "compiler/parser.h"
 
 #include <raylib.h>
+#include <nanosvg.h>
+#include <nanovg.h>
 
 #include <loguru.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -103,7 +105,36 @@ int GluonApp::Run()
 				{
 					if (rect.imageInfo->isVectorial)
 					{
-						// TODO
+						NSVGshape* shape = rect.imageInfo->svgImage->shapes;
+						while (shape != nullptr)
+						{
+							if (shape->flags & NSVG_FLAGS_VISIBLE == 0)
+							{
+								continue;
+							}
+
+							Color color = *(Color*)&shape->stroke.color;
+							color.a     = u8(shape->opacity * 255);
+
+							NSVGpath* path = shape->paths;
+							while (path != nullptr)
+							{
+								for (int i = 0; i < path->npts - 1; i += 3)
+								{
+									float* p = &path->pts[i * 2];
+									DrawLineBezierCubic(Vector2{p[0] + r.x, p[1] + r.y},
+									                    Vector2{p[6] + r.x, p[7] + r.y},
+									                    Vector2{p[2] + r.x, p[3] + r.y},
+									                    Vector2{p[4] + r.x, p[5] + r.y},
+									                    shape->strokeWidth,
+									                    color);
+								}
+
+								path = path->next;
+							}
+
+							shape = shape->next;
+						}
 					}
 					else
 					{

@@ -359,7 +359,7 @@ void MuImage::ParsePropertyInternal(Parser::Node::Ptr node, const u32 nodeHash)
 			imageUrl = node->children[0]->name;
 			std::filesystem::path fp(imageUrl);
 
-			if (fp.extension().string() == "svg")
+			if (fp.extension().string() == ".svg")
 			{
 				imageInfo.isVectorial = true;
 			}
