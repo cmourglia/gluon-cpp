@@ -75,6 +75,8 @@ int GluonApp::Run()
 		return Color{(u8)(color.r * 255), (u8)(color.g * 255), (u8)(color.b * 255), (u8)(color.a * 255)};
 	};
 
+	SetTargetFPS(120);
+
 	while (!WindowShouldClose())
 	{
 		// Check if gluon file update is needed
@@ -96,11 +98,31 @@ int GluonApp::Run()
 				Rectangle r         = {rect.position.x, rect.position.y, rect.size.x, rect.size.y};
 				f32       smallSide = Min(r.width, r.height);
 				f32       roundness = Min(rect.radius, smallSide) / smallSide;
-				DrawRectangleRounded(r, roundness, 32, GetColor(rect.fillColor));
 
-				if (rect.borderWidth > 0.0f)
+				if (rect.isImage)
 				{
-					DrawRectangleRoundedLines(r, roundness, 32, rect.borderWidth, GetColor(rect.borderColor));
+					if (rect.imageInfo->isVectorial)
+					{
+						// TODO
+					}
+					else
+					{
+						Texture2D* texture = (Texture2D*)rect.imageInfo->rasterImage->data;
+						DrawTexture(*texture,
+						            r.x + rect.imageInfo->rasterImage->offsetX,
+						            r.y + rect.imageInfo->rasterImage->offsetY,
+						            GetColor(rect.fillColor));
+						DrawRectangleRoundedLines(r, 0, 1, 5, BLACK);
+					}
+				}
+				else
+				{
+					DrawRectangleRounded(r, roundness, 32, GetColor(rect.fillColor));
+
+					if (rect.borderWidth > 0.0f)
+					{
+						DrawRectangleRoundedLines(r, roundness, 32, rect.borderWidth, GetColor(rect.borderColor));
+					}
 				}
 			}
 

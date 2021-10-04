@@ -257,6 +257,22 @@ extern const glm::vec4 YellowGreen;
 extern const std::unordered_map<std::string_view, glm::vec4> ColorsByName;
 }
 
+struct NSVGimage;
+
+struct RasterImage
+{
+	i32   width, height;
+	f32   offsetX = 0.0f, offsetY = 0.0f;
+	void* data = nullptr;
+};
+
+struct ImageInfo
+{
+	bool         isVectorial = false;
+	NSVGimage*   svgImage    = nullptr;
+	RasterImage* rasterImage = nullptr;
+};
+
 struct RectangleInfo
 {
 	glm::vec2 position    = {0.0f, 0.0f};
@@ -265,6 +281,10 @@ struct RectangleInfo
 	f32       radius      = 0.0f;
 	glm::vec4 borderColor = {0.0f, 0.0f, 0.0f, 1.0f};
 	f32       borderWidth = 0.0f;
+
+	ImageInfo* imageInfo;
+
+	bool isImage = false;
 	// glm::vec2 dropShadowOffset   = {0.0f, 0.0f};
 	// glm::vec4 dropShadowColor    = {0.3f, 0.3f, 0.3f, 1.0f};
 	// f32       dropShadowScale    = 0.0f;

@@ -3,25 +3,38 @@
 #include "parser.h"
 #include "utils.h"
 
+#include <raylib.h>
+
+#include <nanosvg.h>
+#include <stb_image.h>
+#include <stb_image_resize.h>
+
 #include <loguru.hpp>
+
+#include <filesystem>
 
 namespace NodeHash
 {
 // Generic node names
-static constexpr uint32_t ID      = Utils::Crc32("id");
-static constexpr uint32_t X       = Utils::Crc32("x");
-static constexpr uint32_t Y       = Utils::Crc32("y");
-static constexpr uint32_t Width   = Utils::Crc32("width");
-static constexpr uint32_t Height  = Utils::Crc32("height");
-static constexpr uint32_t Anchors = Utils::Crc32("anchors");
-static constexpr uint32_t Padding = Utils::Crc32("padding");
-static constexpr uint32_t Margins = Utils::Crc32("margins");
+static constexpr u32 ID      = Utils::Crc32("id");
+static constexpr u32 X       = Utils::Crc32("x");
+static constexpr u32 Y       = Utils::Crc32("y");
+static constexpr u32 Width   = Utils::Crc32("width");
+static constexpr u32 Height  = Utils::Crc32("height");
+static constexpr u32 Anchors = Utils::Crc32("anchors");
+static constexpr u32 Padding = Utils::Crc32("padding");
+static constexpr u32 Margins = Utils::Crc32("margins");
 
 // Window
-static constexpr uint32_t Title = Utils::Crc32("title");
+static constexpr u32 Title = Utils::Crc32("title");
 
 // Rectangle
-static constexpr uint32_t Color = Utils::Crc32("color");
+static constexpr u32 Color = Utils::Crc32("color");
+
+// Image
+static constexpr u32 Url     = Utils::Crc32("url");
+static constexpr u32 FitMode = Utils::Crc32("fitMode");
+static constexpr u32 Tint    = Utils::Crc32("tint");
 }
 
 namespace
@@ -165,19 +178,18 @@ inline glm::vec4 ExtractColor(const std::vector<Token>& tokens)
 
 }
 
-std::vector<Widget*> Widget::widgetMap = {};
+std::vector<MuWidget::Ptr> MuWidget::widgetMap = {};
 
 extern std::unordered_map<std::string, WidgetFactory*> widgetFactories;
 
-void Widget::Deserialize(Parser::Node::Ptr node)
+void MuWidget::Deserialize(Parser::Node::Ptr node)
 {
-	widgetMap.push_back(this);
-
 	for (auto c : node->children)
 	{
 		if (c->type == Parser::Node_Structure)
 		{
 			auto child = (*widgetFactories[c->name])();
+			widgetMap.push_back(child);
 			children.push_back(child);
 
 			child->parent = this;
@@ -191,7 +203,7 @@ void Widget::Deserialize(Parser::Node::Ptr node)
 	}
 }
 
-void Widget::BuildRenderInfos(std::vector<RectangleInfo>* result)
+void MuWidget::BuildRenderInfos(std::vector<RectangleInfo>* result)
 {
 	BuildRenderInfosInternal(result);
 	for (auto c : children)
@@ -200,7 +212,7 @@ void Widget::BuildRenderInfos(std::vector<RectangleInfo>* result)
 	}
 }
 
-void Widget::Evaluate()
+void MuWidget::Evaluate()
 {
 	if (dirty)
 	{
@@ -218,7 +230,7 @@ void Widget::Evaluate()
 	}
 }
 
-void Widget::Touch()
+void MuWidget::Touch()
 {
 	dirty = true;
 	for (auto d : dependants)
@@ -227,7 +239,7 @@ void Widget::Touch()
 	}
 }
 
-void Widget::ParseProperty(Parser::Node::Ptr node)
+void MuWidget::ParseProperty(Parser::Node::Ptr node)
 {
 	const auto nodeHash = Utils::Crc32(node->name);
 	switch (nodeHash)
@@ -261,7 +273,7 @@ void Widget::ParseProperty(Parser::Node::Ptr node)
 
 		case NodeHash::Anchors:
 		{
-			LOG_F(INFO, "I am an anchor");
+			LOG_F(WARNING, "Anchors not handled yet");
 		}
 		break;
 
@@ -285,18 +297,18 @@ void Widget::ParseProperty(Parser::Node::Ptr node)
 	}
 }
 
-void Window::ParsePropertyInternal(Parser::Node::Ptr node, const u32 nodeHash)
+void MuWindow::ParsePropertyInternal(Parser::Node::Ptr node, const u32 nodeHash)
 {
 	pos  = {0.0f, 0.0f};
 	size = {1024.0f, 768.0f};
 }
 
-void Window::BuildRenderInfosInternal(std::vector<RectangleInfo>* result)
+void MuWindow::BuildRenderInfosInternal(std::vector<RectangleInfo>* result)
 {
 	// Passthrough
 }
 
-void Rectangle::ParsePropertyInternal(Parser::Node::Ptr node, const u32 nodeHash)
+void MuRectangle::ParsePropertyInternal(Parser::Node::Ptr node, const u32 nodeHash)
 {
 	if (nodeHash == NodeHash::Color)
 	{
@@ -305,7 +317,7 @@ void Rectangle::ParsePropertyInternal(Parser::Node::Ptr node, const u32 nodeHash
 	}
 }
 
-void Rectangle::BuildRenderInfosInternal(std::vector<RectangleInfo>* result)
+void MuRectangle::BuildRenderInfosInternal(std::vector<RectangleInfo>* result)
 {
 	RectangleInfo rect = {
 	    .position  = pos,
@@ -316,7 +328,193 @@ void Rectangle::BuildRenderInfosInternal(std::vector<RectangleInfo>* result)
 	result->push_back(rect);
 }
 
-Widget* GetWidgetById(Widget* rootWidget, const std::string& name)
+MuImage::~MuImage()
+{
+	if (imageInfo.svgImage != nullptr)
+	{
+		nsvgDelete(imageInfo.svgImage);
+	}
+
+	if (imageInfo.rasterImage != nullptr)
+	{
+#if 0
+		stbi_image_free(rasterImage->data);
+#else
+		Texture2D* texture = (Texture2D*)imageInfo.rasterImage->data;
+		UnloadTexture(*texture);
+		delete texture;
+#endif
+		delete imageInfo.rasterImage;
+	}
+}
+
+void MuImage::ParsePropertyInternal(Parser::Node::Ptr node, const u32 nodeHash)
+{
+	switch (nodeHash)
+	{
+		case NodeHash::Url:
+		{
+			assert(!node->children.empty());
+
+			imageUrl = node->children[0]->name;
+			std::filesystem::path fp(imageUrl);
+
+			if (fp.extension().string() == "svg")
+			{
+				imageInfo.isVectorial = true;
+			}
+			else
+			{
+				imageInfo.isVectorial = false;
+				imageInfo.rasterImage = new RasterImage;
+
+#if 0
+			i32 componentCount = 0;
+			rasterImage->data  = stbi_load(imageUrl.c_str(),
+                                          &rasterImage->width,
+                                          &rasterImage->height,
+                                          &componentCount,
+                                          4);
+#else
+				Image* image                = new Image;
+				*image                      = LoadImage(imageUrl.c_str());
+				imageInfo.rasterImage->data = (void*)image;
+#endif
+
+				size.x = image->width;
+				size.y = image->height;
+
+				if (imageInfo.rasterImage->data == nullptr)
+				{
+					LOG_F(ERROR, "Cannot load image %s: %s", imageUrl.c_str(), stbi_failure_reason());
+				}
+			}
+		}
+		break;
+
+		case NodeHash::FitMode:
+		{
+			std::string fit = node->children[0]->name.c_str();
+			std::transform(fit.begin(), fit.end(), fit.begin(), ::tolower);
+
+			if (strcmp(fit.c_str(), "stretch") == 0)
+			{
+				fitMode = FitMode::Stretch;
+			}
+			else if (strcmp(fit.c_str(), "fit") == 0)
+			{
+				fitMode = FitMode::Fit;
+			}
+			else if (strcmp(fit.c_str(), "crop") == 0)
+			{
+				fitMode = FitMode::Crop;
+			}
+			else
+			{
+				LOG_F(ERROR,
+				      "%s is not a valid fit mode. Valid modes are Stretch, Fit or Crop",
+				      node->children[0]->name.c_str());
+			}
+		}
+		break;
+
+		case NodeHash::Tint:
+		{
+			imageTint = ExtractColor(node->children[0]->associatedTokens);
+		}
+		break;
+	}
+}
+
+void MuImage::PostEvaluate()
+{
+	if (imageInfo.isVectorial)
+	{
+		// TODO: This should be evaluated
+		imageInfo.svgImage = nsvgParseFromFile(imageUrl.c_str(), "px", Min(size.x, size.y));
+	}
+	else
+	{
+		Image* image = (Image*)imageInfo.rasterImage->data;
+
+		switch (fitMode)
+		{
+			case FitMode::Stretch:
+			{
+				ImageResize(image, (i32)size.x, (i32)size.y);
+			}
+			break;
+
+			case FitMode::Fit:
+			{
+				i32 targetWidth, targetHeight;
+
+				f32 imageRatio = (f32)image->width / image->height;
+				if (size.x < size.y)
+				{
+					targetWidth  = (i32)size.x;
+					targetHeight = size.x / imageRatio;
+				}
+				else
+				{
+					targetHeight = (i32)size.y;
+					targetWidth  = size.y * imageRatio;
+				}
+
+				ImageResize(image, targetWidth, targetHeight);
+
+				// Compute offsets to center in the target quad
+				imageInfo.rasterImage->offsetX = (size.x - targetWidth) * 0.5f;
+				imageInfo.rasterImage->offsetY = (size.y - targetHeight) * 0.5f;
+			}
+			break;
+
+			case FitMode::Crop:
+			{
+				i32 targetWidth, targetHeight;
+
+				f32 imageRatio = (f32)image->width / image->height;
+				if (size.x > size.y)
+				{
+					targetWidth  = (i32)size.x;
+					targetHeight = size.x / imageRatio;
+				}
+				else
+				{
+					targetHeight = (i32)size.y;
+					targetWidth  = size.y * imageRatio;
+				}
+
+				ImageResize(image, targetWidth, targetHeight);
+
+				Rectangle r = {(targetWidth - size.x) * 0.5f, (targetHeight - size.y) * 0.5f, size.x, size.y};
+				ImageCrop(image, r);
+			}
+			break;
+		}
+
+		Texture2D* texture = new Texture2D;
+		*texture           = LoadTextureFromImage(*image);
+
+		imageInfo.rasterImage->data = (void*)texture;
+
+		UnloadImage(*image);
+		delete image;
+	}
+}
+
+void MuImage::BuildRenderInfosInternal(std::vector<RectangleInfo>* result)
+{
+	RectangleInfo info = {};
+	info.position      = pos;
+	info.size          = size;
+	info.fillColor     = imageTint;
+	info.isImage       = true;
+	info.imageInfo     = &imageInfo;
+	result->push_back(std::move(info));
+}
+
+MuWidget* GetWidgetById(MuWidget* rootWidget, const std::string& name)
 {
 	if (rootWidget->id == name)
 	{
@@ -334,11 +532,11 @@ Widget* GetWidgetById(Widget* rootWidget, const std::string& name)
 	return nullptr;
 }
 
-void BuildDependencyGraph(Widget* rootWidget, Widget* currentWidget)
+void BuildDependencyGraph(MuWidget* rootWidget, MuWidget* currentWidget)
 {
 	for (auto id : currentWidget->dependencyIds)
 	{
-		Widget* dep = id == "parent" ? currentWidget->parent : GetWidgetById(rootWidget, id);
+		MuWidget* dep = id == "parent" ? currentWidget->parent : GetWidgetById(rootWidget, id);
 
 		if (dep != nullptr)
 		{
@@ -353,7 +551,7 @@ void BuildDependencyGraph(Widget* rootWidget, Widget* currentWidget)
 	}
 }
 
-void BuildExpressionEvaluators(Widget* rootWidget, Widget* currentWidget)
+void BuildExpressionEvaluators(MuWidget* rootWidget, MuWidget* currentWidget)
 {
 	auto GetHashIndex = [](u32 hash)
 	{
