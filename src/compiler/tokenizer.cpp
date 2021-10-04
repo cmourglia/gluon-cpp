@@ -250,7 +250,15 @@ inline Token GetToken(Tokenizer* tokenizer)
 		}
 	}
 
-	token.text = std::string(start, tokenizer->stream);
+	if (token.type == TokenType::String)
+	{
+		// Do not keep "" or ''
+		token.text = std::string(start + 1, tokenizer->stream - 1);
+	}
+	else
+	{
+		token.text = std::string(start, tokenizer->stream);
+	}
 
 	return token;
 }
