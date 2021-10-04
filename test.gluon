@@ -16,19 +16,47 @@ Window {
 
     Rectangle {
         id: rect1
-        x: parent.width * 0.25
-        y: parent.height / 2 + 100
-        width: parent.width * 1.25
+        x: 0 // parent.width * 0.25
+        y: 0 // parent.height / 2 - 50
+        width: parent.width
         height: 100
         color: rgb(32, 129, 239)
+
+        fitMode: Stretch // Fit, Crop
     }
 
     Rectangle {
         id: rect2
-        x: parent.width / 2 - 25
-        y: rect1.bottom + 50
+        x: image2.right + 50
+        y: image1.bottom + 50
         width: rect1.width * 0.25
         height: 50
         color: rgb(227, 138, 55)
+    }
+
+    Image {
+        id: image1
+
+        url: "W:/gluon/data/cat.jpg"
+        x: rect1.x
+        y: rect1.y
+        width: rect1.width
+        height: 3 * rect1.height
+        fitMode: Fit
+
+        tint: Color.LightBlue
+    }
+
+    Image {
+        id: image2
+
+        url: "data/dice.png"
+        x: 150
+        y: 250
+        width: 250
+        height: 500
+        fitMode: Crop
+
+        tint: rgba(0, 0, 0, 0.5)
     }
 }

@@ -5,7 +5,7 @@
 #include <queue>
 #include <memory>
 
-class Widget;
+class MuWidget;
 
 namespace ShuntingYard
 {
@@ -74,22 +74,22 @@ struct OperatorNode : public Node
 
 struct FunctionNode : public Node
 {
-	FunctionNode(Function _fn, Widget* _widget)
+	FunctionNode(Function _fn, MuWidget* _widget)
 	    : Node(NodeType::Function)
 	    , fn(_fn)
 	    , widget(_widget)
 	{
 	}
 
-	Function fn;
-	Widget*  widget;
+	Function  fn;
+	MuWidget* widget;
 };
 
 struct Expression
 {
 	std::queue<std::shared_ptr<Node>> evaluationQueue;
 
-	static Expression Build(const std::vector<Token>& tokens, Widget* rootWidget, Widget* currentWidget);
+	static Expression Build(const std::vector<Token>& tokens, MuWidget* rootWidget, MuWidget* currentWidget);
 
 	static Expression Zero()
 	{

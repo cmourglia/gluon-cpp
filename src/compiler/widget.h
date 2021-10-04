@@ -8,9 +8,11 @@
 #include <unordered_map>
 #include <string>
 
-struct Widget
+struct MuWidget
 {
-	using Ptr = std::shared_ptr<Widget>;
+	using Ptr = std::shared_ptr<MuWidget>;
+
+	virtual ~MuWidget() = default;
 
 	virtual void Deserialize(Parser::Node::Ptr node) final;
 	virtual void BuildRenderInfos(std::vector<RectangleInfo>* result) final;
@@ -18,8 +20,10 @@ struct Widget
 	virtual void Evaluate() final;
 	virtual void Touch() final;
 
-	std::vector<Widget::Ptr> children;
-	Widget*                  parent = nullptr;
+	virtual void PostEvaluate() { }
+
+	std::vector<MuWidget::Ptr> children;
+	MuWidget*                  parent = nullptr;
 
 	std::string id = "";
 
@@ -29,53 +33,84 @@ struct Widget
 	std::unordered_set<std::string>             dependencyIds;
 	std::unordered_map<u32, std::vector<Token>> geometryExpressions;
 
-	std::vector<Widget*> dependencies;
-	std::vector<Widget*> dependants;
-	bool                 dirty = true;
+	std::vector<MuWidget*> dependencies;
+	std::vector<MuWidget*> dependants;
+	bool                   dirty = true;
 
 	std::vector<std::pair<f32*, ShuntingYard::Expression>> evaluators;
 
-	static std::vector<Widget*> widgetMap;
+	static std::vector<MuWidget::Ptr> widgetMap;
 
 private:
 	virtual void ParseProperty(Parser::Node::Ptr node) final;
-	virtual void ParsePropertyInternal(Parser::Node::Ptr node, const uint32_t nodeHash) = 0;
+	virtual void ParsePropertyInternal(Parser::Node::Ptr node, const u32 nodeHash) = 0;
 
 	virtual void BuildRenderInfosInternal(std::vector<RectangleInfo>* result) = 0;
 };
 
-typedef std::shared_ptr<Widget> WidgetFactory(void);
+typedef std::shared_ptr<MuWidget> WidgetFactory(void);
 
-struct Window : public Widget
+struct MuWindow : public MuWidget
 {
-	static Widget::Ptr Create()
+	static MuWidget::Ptr Create()
 	{
-		return std::make_shared<Window>();
+		return std::make_shared<MuWindow>();
 	}
 
 	std::string title           = "Gluon";
 	glm::vec4   backgroundColor = MuColor::Chocolate;
 
 private:
-	virtual void ParsePropertyInternal(Parser::Node::Ptr node, const uint32_t nodeHash) override;
+	virtual void ParsePropertyInternal(Parser::Node::Ptr node, const u32 nodeHash) override;
 	virtual void BuildRenderInfosInternal(std::vector<RectangleInfo>* result) override;
 };
 
-struct Rectangle : public Widget
+struct MuRectangle : public MuWidget
 {
-	static Widget::Ptr Create()
+	static MuWidget::Ptr Create()
 	{
-		return std::make_shared<Rectangle>();
+		return std::make_shared<MuRectangle>();
 	}
 
 	glm::vec4 fillColor;
 	glm::vec4 borderColor;
 
 private:
-	virtual void ParsePropertyInternal(Parser::Node::Ptr node, const uint32_t nodeHash) override;
+	virtual void ParsePropertyInternal(Parser::Node::Ptr node, const u32 nodeHash) override;
 	virtual void BuildRenderInfosInternal(std::vector<RectangleInfo>* result) override;
 };
 
-Widget* GetWidgetById(Widget* rootWidget, const std::string& name);
-void    BuildDependencyGraph(Widget* rootWidget, Widget* currentWidget);
-void    BuildExpressionEvaluators(Widget* rootWidget, Widget* currentWidget);
+struct NSVGimage;
+struct MuImage : public MuWidget
+{
+	enum class FitMode
+	{
+		Stretch,
+		Fit,
+		Crop,
+	};
+
+	static MuWidget::Ptr Create()
+	{
+		return std::make_shared<MuImage>();
+	}
+
+	virtual ~MuImage();
+
+	virtual void PostEvaluate() override;
+
+	std::string imageUrl;
+
+	FitMode fitMode = FitMode::Stretch;
+
+	glm::vec4 imageTint = glm::vec4{1.0f, 1.0f, 1.0f, 1.0f};
+	ImageInfo imageInfo = {};
+
+private:
+	virtual void ParsePropertyInternal(Parser::Node::Ptr node, const u32 nodeHash) override;
+	virtual void BuildRenderInfosInternal(std::vector<RectangleInfo>* result) override;
+};
+
+MuWidget* GetWidgetById(MuWidget* rootWidget, const std::string& name);
+void      BuildDependencyGraph(MuWidget* rootWidget, MuWidget* currentWidget);
+void      BuildExpressionEvaluators(MuWidget* rootWidget, MuWidget* currentWidget);

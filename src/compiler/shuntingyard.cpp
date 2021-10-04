@@ -77,7 +77,7 @@ f32 Expression::EvaluateOperator(OperatorNode* op, f32 left, f32 right)
 	return 0.0f;
 }
 
-Expression Expression::Build(const std::vector<Token>& tokens, Widget* rootWidget, Widget* currentWidget)
+Expression Expression::Build(const std::vector<Token>& tokens, MuWidget* rootWidget, MuWidget* currentWidget)
 {
 	Expression result;
 
@@ -205,7 +205,7 @@ Expression Expression::Build(const std::vector<Token>& tokens, Widget* rootWidge
 				bool nextIsDot        = hasTwoNextValues && (tokens[i + 1].type == TokenType::Dot);
 				bool nextIsProperty   = hasTwoNextValues && (tokens[i + 2].type == TokenType::Identifier);
 
-				Widget* widget;
+				MuWidget* widget;
 
 				std::string binding;
 

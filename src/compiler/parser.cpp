@@ -33,7 +33,7 @@ enum class GeometryPolicy
 
 std::unordered_map<std::string, WidgetFactory*> widgetFactories;
 
-void EvaluateWidgets(Widget* rootWidget) { }
+void EvaluateWidgets(MuWidget* rootWidget) { }
 
 // TODO: Output an intermediate scene graph instead of a flat RectangleInfo vector
 std::vector<RectangleInfo> ParseGluonBuffer(std::string_view buffer)
@@ -41,8 +41,9 @@ std::vector<RectangleInfo> ParseGluonBuffer(std::string_view buffer)
 	if (widgetFactories.empty())
 	{
 		// FIXME: How / when do we wanna build this map ?
-		widgetFactories["Window"]    = &Window::Create;
-		widgetFactories["Rectangle"] = &Rectangle::Create;
+		widgetFactories["Window"]    = &MuWindow::Create;
+		widgetFactories["Rectangle"] = &MuRectangle::Create;
+		widgetFactories["Image"]     = &MuImage::Create;
 	}
 
 	auto tokens = Tokenize(buffer);
@@ -188,17 +189,23 @@ std::vector<RectangleInfo> ParseGluonBuffer(std::string_view buffer)
 
 	if (root)
 	{
-		Widget::widgetMap.clear();
+		MuWidget::widgetMap.clear();
 
 		auto rootWidget = (*widgetFactories[root->name])();
+		MuWidget::widgetMap.push_back(rootWidget);
 		rootWidget->Deserialize(root);
 
 		BuildDependencyGraph(rootWidget.get(), rootWidget.get());
 		BuildExpressionEvaluators(rootWidget.get(), rootWidget.get());
 
-		for (auto&& widget : Widget::widgetMap)
+		for (auto&& widget : MuWidget::widgetMap)
 		{
 			widget->Evaluate();
+		}
+
+		for (auto&& widget : MuWidget::widgetMap)
+		{
+			widget->PostEvaluate();
 		}
 
 		rootWidget->BuildRenderInfos(&result);
