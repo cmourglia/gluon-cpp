@@ -2,6 +2,7 @@
 
 #include "utils.h"
 #include "compiler/parser.h"
+#include "widgets/widget.h"
 
 #include <raylib.h>
 #include <nanosvg.h>
@@ -47,7 +48,7 @@ GluonApp::GluonApp(int argc, char** argv)
 	s_instance = this;
 
 	// TODO: Extract window infos if set
-	SetConfigFlags(FLAG_MSAA_4X_HINT | FLAG_WINDOW_HIGHDPI);
+	SetConfigFlags(FLAG_MSAA_4X_HINT | FLAG_WINDOW_RESIZABLE);
 	InitWindow(1024, 768, "Gluon Muon Whatever");
 
 	SetTargetFPS(-1);
@@ -79,6 +80,8 @@ int GluonApp::Run()
 
 	SetTargetFPS(120);
 
+	GluonWidget* rootWidget = nullptr;
+
 	while (!WindowShouldClose())
 	{
 		// Check if gluon file update is needed
@@ -87,11 +90,27 @@ int GluonApp::Run()
 		std::string fileContent;
 		if (FileUtils::ReadFileIfNewer("test.gluon", lastWriteTime, &writeTime, &fileContent))
 		{
-			rectangles    = ParseGluonBuffer(fileContent);
+			rectangles.clear();
+			delete rootWidget;
+			rootWidget = ParseGluonBuffer(fileContent);
+			GluonWidget::Evaluate();
+			rootWidget->BuildRenderInfos(&rectangles);
 			lastWriteTime = writeTime;
 		}
 
-		ClearBackground(RAYWHITE);
+		if (IsWindowResized() && rootWidget != nullptr)
+		{
+			i32 w = GetScreenWidth();
+			i32 h = GetScreenHeight();
+			if (rootWidget->WindowResized(w, h))
+			{
+				GluonWidget::Evaluate();
+				rectangles.clear();
+				rootWidget->BuildRenderInfos(&rectangles);
+			}
+		}
+
+		ClearBackground(GetColor(backgroundColor));
 
 		BeginDrawing();
 		{
@@ -138,7 +157,7 @@ int GluonApp::Run()
 					}
 					else
 					{
-						Texture2D* texture = (Texture2D*)rect.imageInfo->rasterImage->data;
+						Texture2D* texture = rect.imageInfo->rasterImage->texture;
 						DrawTexture(*texture,
 						            r.x + rect.imageInfo->rasterImage->offsetX,
 						            r.y + rect.imageInfo->rasterImage->offsetY,
@@ -163,4 +182,16 @@ int GluonApp::Run()
 	}
 
 	return 0;
+}
+
+void GluonApp::SetTitle(const char* title)
+{
+	SetWindowTitle(title);
+}
+
+void GluonApp::SetWindowSize(u32 w, u32 h)
+{
+	::SetWindowSize(w, h);
+	width  = w;
+	height = h;
 }

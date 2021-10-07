@@ -1,7 +1,8 @@
 #pragma once
 
+#include "compiler/tokenizer.h"
+
 #include "types.h"
-#include "tokenizer.h"
 
 #include <vector>
 #include <optional>
@@ -13,8 +14,9 @@ struct ParsedApplication
 	std::optional<std::string> applicationName{};
 };
 
-// TODO: Output an intermediate scene graph instead of a flat RectangleInfo vector
-std::vector<RectangleInfo> ParseGluonBuffer(std::string_view buffer);
+struct GluonWidget;
+
+GluonWidget* ParseGluonBuffer(std::string_view buffer);
 
 namespace Parser
 {
@@ -68,5 +70,4 @@ struct ValueNode : Node
 	{
 	}
 };
-
 }
