@@ -1,8 +1,10 @@
 Window {
     id: root
 
-    title: "Hello world"
-    background: "#2d2d2d"
+    title: "Toto tata titi tutu"
+    color: "#617dfc"
+    //windowWidth: 2048
+    //windowHeight: 1500
 
     // Rectangle {
     //    id: rect1
