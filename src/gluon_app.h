@@ -16,6 +16,18 @@ public:
 
 	int Run();
 
+	void SetTitle(const char* title);
+	void SetWindowSize(u32 w, u32 h);
+	void SetBackgroundColor(const glm::vec4& color)
+	{
+		backgroundColor = color;
+	}
+
+	glm::vec2 GetWindowSize() const
+	{
+		return glm::vec2{(f32)width, (f32)height};
+	}
+
 private:
 	static GluonApp* s_instance;
 
@@ -26,6 +38,8 @@ private:
 
 	u32 width  = 1024;
 	u32 height = 768;
+
+	glm::vec4 backgroundColor;
 
 	std::vector<RectangleInfo> rectangles;
 };

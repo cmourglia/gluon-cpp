@@ -1,7 +1,12 @@
-#include "parser.h"
+#include "compiler/parser.h"
 
-#include "tokenizer.h"
-#include "widget.h"
+#include "compiler/tokenizer.h"
+
+#include "widgets/widget.h"
+#include "widgets/window.h"
+#include "widgets/rectangle.h"
+#include "widgets/image.h"
+#include "widgets/text.h"
 
 #include <loguru.hpp>
 
@@ -33,17 +38,15 @@ enum class GeometryPolicy
 
 std::unordered_map<std::string, WidgetFactory*> widgetFactories;
 
-void EvaluateWidgets(MuWidget* rootWidget) { }
-
-// TODO: Output an intermediate scene graph instead of a flat RectangleInfo vector
-std::vector<RectangleInfo> ParseGluonBuffer(std::string_view buffer)
+GluonWidget* ParseGluonBuffer(std::string_view buffer)
 {
 	if (widgetFactories.empty())
 	{
 		// FIXME: How / when do we wanna build this map ?
-		widgetFactories["Window"]    = &MuWindow::Create;
-		widgetFactories["Rectangle"] = &MuRectangle::Create;
-		widgetFactories["Image"]     = &MuImage::Create;
+		widgetFactories["Window"]    = &GluonWindow::Create;
+		widgetFactories["Rectangle"] = &GluonRectangle::Create;
+		widgetFactories["Image"]     = &GluonImage::Create;
+		widgetFactories["Text"]      = &GluonText::Create;
 	}
 
 	auto tokens = Tokenize(buffer);
@@ -187,33 +190,20 @@ std::vector<RectangleInfo> ParseGluonBuffer(std::string_view buffer)
 
 	std::vector<RectangleInfo> result;
 
+	GluonWidget* rootWidget = nullptr;
+
 	if (root)
 	{
-		MuWidget::widgetMap.clear();
-
-		auto rootWidget = (*widgetFactories[root->name])();
-		MuWidget::widgetMap.push_back(rootWidget);
+		rootWidget = (*widgetFactories[root->name])();
 		rootWidget->Deserialize(root);
 
-		BuildDependencyGraph(rootWidget.get(), rootWidget.get());
-		BuildExpressionEvaluators(rootWidget.get(), rootWidget.get());
-
-		for (auto&& widget : MuWidget::widgetMap)
-		{
-			widget->Evaluate();
-		}
-
-		for (auto&& widget : MuWidget::widgetMap)
-		{
-			widget->PostEvaluate();
-		}
-
-		rootWidget->BuildRenderInfos(&result);
+		BuildDependencyGraph(rootWidget, rootWidget);
+		BuildExpressionEvaluators(rootWidget, rootWidget);
 	}
 	else
 	{
 		LOG_F(ERROR, "Something wrong happened");
 	}
 
-	return result;
+	return rootWidget;
 }

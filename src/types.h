@@ -258,12 +258,16 @@ extern const std::unordered_map<std::string_view, glm::vec4> ColorsByName;
 }
 
 struct NSVGimage;
+struct Image;
+struct Texture;
 
 struct RasterImage
 {
-	i32   width, height;
-	f32   offsetX = 0.0f, offsetY = 0.0f;
-	void* data = nullptr;
+	i32 width, height;
+	f32 offsetX = 0.0f, offsetY = 0.0f;
+
+	Image*   image   = nullptr;
+	Texture* texture = nullptr;
 };
 
 struct ImageInfo

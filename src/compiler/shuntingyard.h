@@ -1,11 +1,11 @@
 #pragma once
 
-#include "tokenizer.h"
+#include "compiler/tokenizer.h"
 
 #include <queue>
 #include <memory>
 
-class MuWidget;
+struct GluonWidget;
 
 namespace ShuntingYard
 {
@@ -74,22 +74,22 @@ struct OperatorNode : public Node
 
 struct FunctionNode : public Node
 {
-	FunctionNode(Function _fn, MuWidget* _widget)
+	FunctionNode(Function _fn, GluonWidget* _widget)
 	    : Node(NodeType::Function)
 	    , fn(_fn)
 	    , widget(_widget)
 	{
 	}
 
-	Function  fn;
-	MuWidget* widget;
+	Function     fn;
+	GluonWidget* widget;
 };
 
 struct Expression
 {
 	std::queue<std::shared_ptr<Node>> evaluationQueue;
 
-	static Expression Build(const std::vector<Token>& tokens, MuWidget* rootWidget, MuWidget* currentWidget);
+	static Expression Build(const std::vector<Token>& tokens, GluonWidget* rootWidget, GluonWidget* currentWidget);
 
 	static Expression Zero()
 	{
