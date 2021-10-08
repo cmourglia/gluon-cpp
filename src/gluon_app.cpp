@@ -5,37 +5,14 @@
 #include "widgets/widget.h"
 
 #include <raylib.h>
+#include <raymath.h>
 #include <nanosvg.h>
-#include <nanovg.h>
-
-#include <loguru.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
 #include <vector>
-#include <unordered_set>
-#include <filesystem>
-#include <chrono>
 
 #include <assert.h>
 
 GluonApp* GluonApp::s_instance = nullptr;
-
-struct FrameInfos
-{
-	glm::mat4 view;
-	glm::mat4 proj;
-	glm::vec2 viewport;
-};
-
-std::vector<glm::vec4> defaultColors = {
-    {1.0f, 0.0f, 0.0f, 1.0f},
-    {0.0f, 1.0f, 0.0f, 1.0f},
-    {0.0f, 0.0f, 1.0f, 1.0f},
-    {1.0f, 1.0f, 0.0f, 1.0f},
-    {1.0f, 0.0f, 1.0f, 1.0f},
-    {0.0f, 1.0f, 1.0f, 1.0f},
-};
 
 GluonApp* GluonApp::Get()
 {
@@ -43,7 +20,12 @@ GluonApp* GluonApp::Get()
 }
 
 GluonApp::GluonApp(int argc, char** argv)
+    : backgroundColor(0.8f, 0.8f, 0.8f, 1.0f)
 {
+	// TODO: Do stuff with argc, argv;
+	(void)argc;
+	(void)argv;
+
 	assert(s_instance == nullptr);
 	s_instance = this;
 
@@ -61,18 +43,7 @@ GluonApp::~GluonApp()
 
 int GluonApp::Run()
 {
-	u32 currentFrame = 0;
-
-	f64 t0         = GetTime();
-	u32 frameCount = 0;
-
-	glm::mat4 proj;
-	glm::mat4 view = glm::mat4(1.0f); // Identity
-
 	i64 lastWriteTime = 0;
-
-	f64 avgFps       = 0.0;
-	f64 avgFrameTime = 0.0;
 
 	auto GetColor = [](const glm::vec4& color) -> Color {
 		return Color{(u8)(color.r * 255), (u8)(color.g * 255), (u8)(color.b * 255), (u8)(color.a * 255)};
@@ -88,24 +59,39 @@ int GluonApp::Run()
 		i64 writeTime;
 
 		std::string fileContent;
+
+		bool drawNeedsUpdate = false;
+
 		if (FileUtils::ReadFileIfNewer("test.gluon", lastWriteTime, &writeTime, &fileContent))
 		{
-			rectangles.clear();
 			delete rootWidget;
-			rootWidget = ParseGluonBuffer(fileContent);
-			GluonWidget::Evaluate();
-			rootWidget->BuildRenderInfos(&rectangles);
+			rootWidget      = ParseGluonBuffer(fileContent);
+			drawNeedsUpdate = true;
+
 			lastWriteTime = writeTime;
 		}
 
-		if (IsWindowResized() && rootWidget != nullptr)
+		if (rootWidget != nullptr)
 		{
-			i32 w = GetScreenWidth();
-			i32 h = GetScreenHeight();
-			if (rootWidget->WindowResized(w, h))
+			if (IsWindowResized())
 			{
-				GluonWidget::Evaluate();
+				i32 w = GetScreenWidth();
+				i32 h = GetScreenHeight();
+				drawNeedsUpdate |= rootWidget->WindowResized(w, h);
+			}
+
+			Vector2 mouseDelta = GetMouseDelta();
+			if (Vector2LengthSqr(mouseDelta) > 0.0f)
+			{
+				Vector2 mousePos = GetMousePosition();
+
+				drawNeedsUpdate |= rootWidget->MouseMoved({mousePos.x, mousePos.y});
+			}
+
+			if (drawNeedsUpdate)
+			{
 				rectangles.clear();
+				GluonWidget::Evaluate();
 				rootWidget->BuildRenderInfos(&rectangles);
 			}
 		}
@@ -127,7 +113,7 @@ int GluonApp::Run()
 						NSVGshape* shape = rect.imageInfo->svgImage->shapes;
 						while (shape != nullptr)
 						{
-							if (shape->flags & NSVG_FLAGS_VISIBLE == 0)
+							if ((shape->flags & NSVG_FLAGS_VISIBLE) == 0)
 							{
 								continue;
 							}
@@ -159,8 +145,8 @@ int GluonApp::Run()
 					{
 						Texture2D* texture = rect.imageInfo->rasterImage->texture;
 						DrawTexture(*texture,
-						            r.x + rect.imageInfo->rasterImage->offsetX,
-						            r.y + rect.imageInfo->rasterImage->offsetY,
+						            (int)(r.x + rect.imageInfo->rasterImage->offsetX),
+						            (int)(r.y + rect.imageInfo->rasterImage->offsetY),
 						            GetColor(rect.fillColor));
 						DrawRectangleRoundedLines(r, 0, 1, 5, BLACK);
 					}
@@ -189,7 +175,7 @@ void GluonApp::SetTitle(const char* title)
 	SetWindowTitle(title);
 }
 
-void GluonApp::SetWindowSize(u32 w, u32 h)
+void GluonApp::SetWindowSize(i32 w, i32 h)
 {
 	::SetWindowSize(w, h);
 	width  = w;
