@@ -1,8 +1,8 @@
 #pragma once
 
-#include "compiler/tokenizer.h"
+#include "Gluon/Compiler/Tokenizer.h"
 
-#include "types.h"
+#include "Gluon/Core/Types.h"
 
 #include <vector>
 #include <optional>

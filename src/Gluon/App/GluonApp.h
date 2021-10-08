@@ -1,6 +1,6 @@
 #pragma once
 
-#include "types.h"
+#include "Gluon/Core/Types.h"
 
 #include <glm/glm.hpp>
 

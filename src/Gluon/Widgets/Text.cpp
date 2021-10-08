@@ -1,4 +1,4 @@
-#include "widgets/text.h"
+#include "Gluon/Widgets/Text.h"
 
 namespace Utils
 {

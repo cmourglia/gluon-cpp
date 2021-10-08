@@ -1,12 +1,12 @@
-#include "compiler/parser.h"
+#include "Gluon/Compiler/Parser.h"
 
-#include "compiler/tokenizer.h"
+#include "Gluon/Compiler/Tokenizer.h"
 
-#include "widgets/widget.h"
-#include "widgets/window.h"
-#include "widgets/rectangle.h"
-#include "widgets/image.h"
-#include "widgets/text.h"
+#include "Gluon/Widgets/Widget.h"
+#include "Gluon/Widgets/Window.h"
+#include "Gluon/Widgets/Rectangle.h"
+#include "Gluon/Widgets/Image.h"
+#include "Gluon/Widgets/Text.h"
 
 #include <loguru.hpp>
 

@@ -1,6 +1,4 @@
-#include <iostream>
-
-#include "gluon_app.h"
+#include "Gluon/App/GluonApp.h"
 
 int main(int argc, char** argv)
 {

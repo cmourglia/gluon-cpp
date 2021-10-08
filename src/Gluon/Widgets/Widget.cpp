@@ -1,8 +1,8 @@
-#include "widgets/widget.h"
+#include "Gluon/Widgets/Widget.h"
 
-#include "widgets/hashes.h"
+#include "Gluon/Widgets/Hashes.h"
 
-#include "utils.h"
+#include "Gluon/Core/Utils.h"
 
 #include <loguru.hpp>
 

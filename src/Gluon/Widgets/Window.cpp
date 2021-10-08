@@ -1,8 +1,8 @@
-#include "widgets/window.h"
+#include "Gluon/Widgets/Window.h"
 
-#include "widgets/hashes.h"
+#include "Gluon/Widgets/Hashes.h"
 
-#include "gluon_app.h"
+#include "Gluon/App/GluonApp.h"
 
 namespace Utils
 {

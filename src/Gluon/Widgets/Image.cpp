@@ -1,6 +1,6 @@
-#include "widgets/image.h"
+#include "Gluon/Widgets/Image.h"
 
-#include "widgets/hashes.h"
+#include "Gluon/Widgets/Hashes.h"
 
 #include <raylib.h>
 

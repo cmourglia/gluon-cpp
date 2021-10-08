@@ -1,7 +1,7 @@
 #pragma once
 
-#include "compiler/parser.h"
-#include "compiler/shuntingyard.h"
+#include "Gluon/Compiler/Parser.h"
+#include "Gluon/Compiler/ShuntingYard.h"
 
 #include <memory>
 #include <unordered_set>

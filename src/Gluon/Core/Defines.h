@@ -11,6 +11,9 @@ using u16 = uint16_t;
 using u32 = uint32_t;
 using u64 = uint64_t;
 
+using intptr  = intptr_t;
+using uintptr = uintptr_t;
+
 using isize = intptr_t;
 using usize = uintptr_t;
 

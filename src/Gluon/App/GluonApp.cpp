@@ -1,8 +1,8 @@
-#include "gluon_app.h"
+#include "Gluon/App/GluonApp.h"
 
-#include "utils.h"
-#include "compiler/parser.h"
-#include "widgets/widget.h"
+#include "Gluon/Core/Utils.h"
+#include "Gluon/Compiler/Parser.h"
+#include "Gluon/Widgets/Widget.h"
 
 #include <raylib.h>
 #include <raymath.h>
@@ -85,7 +85,7 @@ int GluonApp::Run()
 			{
 				Vector2 mousePos = GetMousePosition();
 
-				drawNeedsUpdate |= rootWidget->MouseMoved({mousePos.x, mousePos.y});
+				// drawNeedsUpdate |= rootWidget->MouseMoved({mousePos.x, mousePos.y});
 			}
 
 			if (drawNeedsUpdate)

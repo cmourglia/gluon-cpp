@@ -1,18 +1,16 @@
 #pragma once
 
-#include "widgets/widget.h"
+#include "Gluon/Widgets/Widget.h"
 
-struct GluonText : public GluonWidget
+struct GluonRectangle : public GluonWidget
 {
 	static GluonWidget* Create()
 	{
-		return new GluonText{};
+		return new GluonRectangle{};
 	}
 
-	std::string content   = "";
-	std::string font      = "";
-	u32         pointSize = 16;
-	glm::vec4   textColor = MuColor::Black;
+	glm::vec4 fillColor;
+	glm::vec4 borderColor;
 
 private:
 	virtual void ParsePropertyInternal(Parser::Node::Ptr node, const u32 nodeHash) override;

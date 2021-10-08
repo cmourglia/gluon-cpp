@@ -1,6 +1,6 @@
-#include "widgets/rectangle.h"
+#include "Gluon/Widgets/Rectangle.h"
 
-#include "widgets/hashes.h"
+#include "Gluon/Widgets/Hashes.h"
 
 namespace Utils
 {

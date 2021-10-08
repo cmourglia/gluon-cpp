@@ -6,37 +6,53 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
 add_subdirectory(thirdparty)
 
-add_executable(gluon src/main.cpp
-    src/gluon_app.cpp
-    src/types.cpp
-    src/utils.cpp
 
-    src/compiler/tokenizer.cpp
-    src/compiler/parser.cpp
-    src/compiler/shuntingyard.cpp
+set(CORE_SRC
+    src/Gluon/Core/Types.cpp
+    src/Gluon/Core/Utils.cpp
 
-    src/widgets/widget.cpp
-    src/widgets/window.cpp
-    src/widgets/rectangle.cpp
-    src/widgets/image.cpp
-    src/widgets/text.cpp
-
-    src/gluon_app.h
-    src/types.h
-    src/utils.h
-    src/defines.h
-
-    src/compiler/tokenizer.h
-    src/compiler/parser.h
-    src/compiler/shuntingyard.h
-
-    src/widgets/widget.h
-    src/widgets/window.h
-    src/widgets/rectangle.h
-    src/widgets/image.h
-    src/widgets/text.h
-    src/widgets/hashes.h
+    src/Gluon/Core/Defines.h
+    src/Gluon/Core/Types.h
+    src/Gluon/Core/Utils.h
 )
+
+set(COMPILER_SRC
+    src/Gluon/Compiler/Tokenizer.cpp
+    src/Gluon/Compiler/Parser.cpp
+    src/Gluon/Compiler/ShuntingYard.cpp
+
+    src/Gluon/Compiler/Tokenizer.h
+    src/Gluon/Compiler/Parser.h
+    src/Gluon/Compiler/ShuntingYard.h
+)
+
+set(WIDGETS_SRC
+    src/Gluon/Widgets/Widget.cpp
+    src/Gluon/Widgets/Window.cpp
+    src/Gluon/Widgets/Rectangle.cpp
+    src/Gluon/Widgets/Image.cpp
+    src/Gluon/Widgets/Text.cpp
+
+    src/Gluon/Widgets/Widget.h
+    src/Gluon/Widgets/Window.h
+    src/Gluon/Widgets/Rectangle.h
+    src/Gluon/Widgets/Image.h
+    src/Gluon/Widgets/Text.h
+)
+
+set(APP_SRC
+    src/Gluon/App/GluonApp.cpp
+
+    src/Gluon/App/GluonApp.h
+)
+
+add_executable(gluon src/main.cpp
+    ${CORE_SRC}
+    ${COMPILER_SRC}
+    ${WIDGETS_SRC}
+    ${APP_SRC}
+)
+
 target_link_libraries(${PROJECT_NAME} PRIVATE loguru::loguru glm::glm raylib stb nanovg)
 target_compile_definitions(${PROJECT_NAME} PRIVATE $<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>)
 target_include_directories(${PROJECT_NAME} PRIVATE src)

@@ -1,6 +1,6 @@
 #include "shuntingyard.h"
 
-#include "widgets/widget.h"
+#include "Gluon/Widgets/Widget.h"
 
 #include <loguru.hpp>
 

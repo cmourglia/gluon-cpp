@@ -1,6 +1,6 @@
 #pragma once
 
-#include "widgets/widget.h"
+#include "Gluon/Widgets/Widget.h"
 
 struct NSVGimage;
 struct GluonImage : public GluonWidget
