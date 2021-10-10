@@ -55,7 +55,7 @@ glm::vec4 ExtractColor(const std::vector<Token>& tokens)
 					{
 						if (values.size() == 3)
 						{
-							color = MuColor::FromRgba(values[0], values[1], values[2]);
+							color = MuColor::FromRgba((i32)values[0], (i32)values[1], (i32)values[2]);
 						}
 						else
 						{
@@ -70,7 +70,7 @@ glm::vec4 ExtractColor(const std::vector<Token>& tokens)
 					{
 						if (values.size() == 4)
 						{
-							color = MuColor::FromRgba(values[0], values[1], values[2], values[3]);
+							color = MuColor::FromRgba((i32)values[0], (i32)values[1], (i32)values[2], values[3]);
 						}
 						else
 						{
@@ -85,7 +85,7 @@ glm::vec4 ExtractColor(const std::vector<Token>& tokens)
 					{
 						if (values.size() == 3)
 						{
-							color = MuColor::FromHsla(values[0], values[1], values[2]);
+							color = MuColor::FromHsla((i32)values[0], (i32)values[1], (i32)values[2]);
 						}
 						else
 						{
@@ -100,7 +100,7 @@ glm::vec4 ExtractColor(const std::vector<Token>& tokens)
 					{
 						if (values.size() == 4)
 						{
-							color = MuColor::FromHsla(values[0], values[1], values[2], values[3]);
+							color = MuColor::FromHsla((i32)values[0], (i32)values[1], (i32)values[2], values[3]);
 						}
 						else
 						{

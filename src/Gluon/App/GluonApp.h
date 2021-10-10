@@ -2,8 +2,6 @@
 
 #include "Gluon/Core/Types.h"
 
-#include <glm/glm.hpp>
-
 #include <vector>
 
 class GluonApp

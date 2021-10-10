@@ -52,7 +52,7 @@ GluonWidget* ParseGluonBuffer(std::string_view buffer)
 	auto tokens = Tokenize(buffer);
 
 	Node::Ptr root;
-	Node*     currentNode;
+	Node*     currentNode = nullptr;
 
 	auto remove_it = std::remove_if(tokens.begin(),
 	                                tokens.end(),
