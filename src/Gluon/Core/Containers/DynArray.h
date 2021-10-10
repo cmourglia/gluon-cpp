@@ -21,6 +21,11 @@ public:
 	{
 	}
 
+	DynArray(std::initializer_list<T> list)
+	    : m_dynArray(std::move(list))
+	{
+	}
+
 	~DynArray() noexcept = default;
 
 	DEFAULT_CTORS(DynArray);
