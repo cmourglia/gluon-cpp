@@ -33,13 +33,17 @@ set(COMPILER_SRC
 
 set(VM_SRC
     src/Gluon/VM/AST.cpp
+    src/Gluon/VM/Cell.cpp
     src/Gluon/VM/Function.cpp
+    src/Gluon/VM/Heap.cpp
     src/Gluon/VM/Interpreter.cpp
     src/Gluon/VM/Object.cpp
     src/Gluon/VM/Value.cpp
 
     src/Gluon/VM/AST.h
+    src/Gluon/VM/Cell.h
     src/Gluon/VM/Function.h
+    src/Gluon/VM/Heap.h
     src/Gluon/VM/Interpreter.h
     src/Gluon/VM/Object.h
     src/Gluon/VM/Value.h

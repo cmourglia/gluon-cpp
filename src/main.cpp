@@ -10,6 +10,7 @@ int main(int argc, char** argv)
 
 #	include <Gluon/VM/AST.h>
 #	include <Gluon/VM/Interpreter.h>
+#	include <Gluon/VM/Object.h>
 
 int main()
 {
@@ -43,6 +44,12 @@ int main()
 	printf("Interpreter returned: ");
 	result.Dump();
 	printf("\n");
+
+	interpreter.GetHeap()->Allocate<VM::Object>();
+	interpreter.GetGlobalObject()
+	    ->Add("foo", VM::Value{interpreter.GetHeap()->Allocate<VM::Object>()});
+
+	interpreter.GetHeap()->Garbage();
 
 	return 0;
 }

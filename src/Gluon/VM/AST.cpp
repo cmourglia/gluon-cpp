@@ -19,7 +19,7 @@ Value FunctionDeclaration::Execute(Interpreter* interpreter)
 {
 	auto* function = interpreter->GetHeap()->Allocate<Function>(m_name,
 	                                                            m_body.get());
-	interpreter->GlobalObject()->Add(m_name, Value{function});
+	interpreter->GetGlobalObject()->Add(m_name, Value{function});
 	return Value{function};
 }
 
@@ -37,7 +37,7 @@ Value ReturnStatement::Execute(Interpreter* interpreter)
 
 Value CallExpression::Execute(Interpreter* interpreter)
 {
-	Value functionValue = interpreter->GlobalObject()->Get(m_callee);
+	Value functionValue = interpreter->GetGlobalObject()->Get(m_callee);
 	auto* object        = functionValue.AsObject();
 
 	Assert(object->IsFunction(), "Could this happen in real life ?");
@@ -105,7 +105,7 @@ void ScopeNode::Dump(i32 indent) const
 {
 	ASTNode::Dump(indent);
 
-	printf("%s\n", TypeName());
+	printf("%s\n", GetTypename());
 
 	if (!m_body.IsEmpty())
 	{

@@ -16,7 +16,7 @@ public:
 	{
 	}
 
-	const char* TypeName() const override { return "Function"; }
+	const char* GetTypename() const override { return "Function"; }
 
 	std::string GetName() const { return m_name; }
 
