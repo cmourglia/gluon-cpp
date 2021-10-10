@@ -4,8 +4,6 @@
 
 #include <loguru.hpp>
 
-#include <assert.h>
-
 #include <Windows.h>
 
 inline void AdvanceChars(Tokenizer* tokenizer, u32 count)
