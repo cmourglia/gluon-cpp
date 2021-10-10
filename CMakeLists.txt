@@ -8,10 +8,12 @@ add_subdirectory(thirdparty)
 
 
 set(CORE_SRC
+    src/Gluon/Core/Timer.cpp
     src/Gluon/Core/Types.cpp
     src/Gluon/Core/Utils.cpp
 
     src/Gluon/Core/Defines.h
+    src/Gluon/Core/Timer.h
     src/Gluon/Core/Types.h
     src/Gluon/Core/Utils.h
 
