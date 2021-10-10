@@ -1,5 +1,7 @@
 #pragma once
 
+#include <loguru.hpp>
+
 #include <stdint.h>
 
 using i8  = int8_t;
@@ -20,7 +22,54 @@ using usize = uintptr_t;
 using f32 = float;
 using f64 = double;
 
-#define ARRAY_SIZE(x) (sizeof(x) / sizeof(x[0]))
+#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
+
+#define NONCOPYABLE(T)                                                                                                 \
+	T(const T&)  = delete;                                                                                             \
+	void operator=(const T&) = delete
+#define NONMOVEABLE(T)                                                                                                 \
+	T(T&&) noexcept = delete;                                                                                          \
+	void operator=(T&&) noexcept = delete
+
+#define DEFAULT_COPYABLE(T)                                                                                            \
+	T(const T&) = default;                                                                                             \
+	T& operator=(const T&) = default
+
+#define DEFAULT_MOVEABLE(T)                                                                                            \
+	T(T&&) noexcept = default;                                                                                         \
+	T& operator=(T&&) noexcept = default
+
+#define DEFAULT_CTORS(T)                                                                                               \
+	DEFAULT_COPYABLE(T);                                                                                               \
+	DEFAULT_MOVEABLE(T)
+
+#ifdef MSVC
+#	define DEBUGBREAK __debugbreak()
+#else
+// TODO: Handle other cases
+#	define DEBUGBREAK                                                                                                 \
+		int* trap = reinterpret_cast<int*>(3L);                                                                        \
+		*trap     = 3
+#endif
+
+#define NOOP(...)
+
+#ifdef _DEBUG
+#	define Assert(x, ...)                                                                                             \
+		do                                                                                                             \
+		{                                                                                                              \
+			if (!(x))                                                                                                  \
+			{                                                                                                          \
+				LOG_F(ERROR, "Assertion `%s` failed (%s:%d): %s", #x, __FILE__, __LINE__, __VA_ARGS__);                \
+				DEBUGBREAK;                                                                                            \
+			}                                                                                                          \
+		} while (false)
+
+#	define AssertUnreachable() Assert(false, "Unreachable path")
+#else
+#	define Assert(x) NOOP(x)
+#	define AssertUnreachable() NOOP()
+#endif
 
 template <typename T>
 inline constexpr T Min(T a, T b)

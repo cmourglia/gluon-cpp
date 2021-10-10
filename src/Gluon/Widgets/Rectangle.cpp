@@ -11,7 +11,7 @@ void GluonRectangle::ParsePropertyInternal(Parser::Node::Ptr node, const u32 nod
 {
 	if (nodeHash == NodeHash::Color)
 	{
-		assert(!node->children.empty());
+		Assert(!node->children.empty(), "No children is bad for a property");
 		fillColor = Utils::ExtractColor(node->children[0]->associatedTokens);
 	}
 }

@@ -21,7 +21,7 @@ glm::vec4 ExtractColor(const std::vector<Token>& tokens)
 		{
 			case TokenType::String:
 			{
-				assert(tokens.size() == 1);
+				Assert(tokens.size() == 1, "A color as a string can only be defined by one token");
 				firstToken.text.erase(std::remove_if(firstToken.text.begin(),
 				                                     firstToken.text.end(),
 				                                     [](const char c) { return c == '"'; }),
@@ -114,7 +114,8 @@ glm::vec4 ExtractColor(const std::vector<Token>& tokens)
 					{
 						if (firstToken.text.compare("Color") == 0)
 						{
-							assert(tokens.size() == 3 && tokens[2].type == TokenType::Identifier);
+							Assert(tokens.size() == 3 && tokens[2].type == TokenType::Identifier,
+							       "We are looking for `Color.ColorName`");
 							auto it = MuColor::ColorsByName.find(tokens[2].text);
 							if (it != MuColor::ColorsByName.end())
 							{
@@ -259,7 +260,7 @@ void GluonWidget::ParseProperty(Parser::Node::Ptr node)
 	{
 		case NodeHash::ID:
 		{
-			assert(node->children.size() == 1);
+			Assert(node->children.size() == 1, "id: <id>");
 			id = node->children[0]->name;
 		}
 		break;
@@ -363,7 +364,7 @@ void BuildExpressionEvaluators(GluonWidget* rootWidget, GluonWidget* currentWidg
 				return 3;
 
 			default:
-				assert(false);
+				AssertUnreachable();
 				return -1;
 		}
 	};
@@ -382,7 +383,7 @@ void BuildExpressionEvaluators(GluonWidget* rootWidget, GluonWidget* currentWidg
 				return &currentWidget->size.y;
 
 			default:
-				assert(false);
+				AssertUnreachable();
 				return nullptr;
 		}
 	};

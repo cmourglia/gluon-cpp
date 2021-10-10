@@ -43,7 +43,7 @@ void GluonImage::ParsePropertyInternal(Parser::Node::Ptr node, const u32 nodeHas
 	{
 		case NodeHash::Url:
 		{
-			assert(!node->children.empty());
+			Assert(!node->children.empty(), "No children is bad");
 
 			imageUrl = node->children[0]->name;
 			std::filesystem::path fp(imageUrl);

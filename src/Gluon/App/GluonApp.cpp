@@ -10,8 +10,6 @@
 
 #include <vector>
 
-#include <assert.h>
-
 GluonApp* GluonApp::s_instance = nullptr;
 
 GluonApp* GluonApp::Get()
@@ -26,14 +24,18 @@ GluonApp::GluonApp(int argc, char** argv)
 	(void)argc;
 	(void)argv;
 
-	assert(s_instance == nullptr);
-	s_instance = this;
+	Assert(s_instance == nullptr, "Multiple initializations");
 
-	// TODO: Extract window infos if set
-	SetConfigFlags(FLAG_MSAA_4X_HINT | FLAG_WINDOW_RESIZABLE);
-	InitWindow(1024, 768, "Gluon Muon Whatever");
+	if (s_instance == nullptr)
+	{
+		s_instance = this;
 
-	SetTargetFPS(-1);
+		// TODO: Extract window infos if set
+		SetConfigFlags(FLAG_MSAA_4X_HINT | FLAG_WINDOW_RESIZABLE);
+		InitWindow(1024, 768, "Gluon Muon Whatever");
+
+		SetTargetFPS(-1);
+	}
 }
 
 GluonApp::~GluonApp()

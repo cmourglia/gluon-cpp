@@ -70,7 +70,7 @@ f32 Expression::EvaluateOperator(OperatorNode* op, f32 left, f32 right)
 		case Operator::OpenParen:
 		case Operator::CloseParen:
 			// We should never have those in the evaluation queue
-			assert(false);
+			AssertUnreachable();
 			break;
 	}
 
