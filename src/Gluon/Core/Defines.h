@@ -24,6 +24,8 @@ using f64 = double;
 
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 
+#define UNUSED(x) (void)(x)
+
 #define NONCOPYABLE(T)                                                                                                 \
 	T(const T&)  = delete;                                                                                             \
 	void operator=(const T&) = delete

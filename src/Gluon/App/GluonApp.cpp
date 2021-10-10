@@ -21,8 +21,8 @@ GluonApp::GluonApp(int argc, char** argv)
     : backgroundColor(0.8f, 0.8f, 0.8f, 1.0f)
 {
 	// TODO: Do stuff with argc, argv;
-	(void)argc;
-	(void)argv;
+	UNUSED(argc);
+	UNUSED(argv);
 
 	Assert(s_instance == nullptr, "Multiple initializations");
 
