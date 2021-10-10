@@ -93,19 +93,19 @@ inline constexpr usize operator"" _GiB(usize size) { return size * GiB; }
 
 #ifdef _DEBUG
 #	define Assert(x, msg, ...)                                                \
-		do                                                                     \
+		__pragma(warning(push));                                               \
+		__pragma(warning(disable : 4002));                                     \
+		if (!(x))                                                              \
 		{                                                                      \
-			if (!(x))                                                          \
-			{                                                                  \
-				LOG_F(ERROR,                                                   \
-				      "Assertion `%s` failed (%s:%d): \"" msg "\"",            \
-				      #x,                                                      \
-				      __FILE__,                                                \
-				      __LINE__,                                                \
-				      __VA_ARGS__);                                            \
-				DEBUGBREAK;                                                    \
-			}                                                                  \
-		} while (false)
+			LOG_F(ERROR,                                                       \
+			      "Assertion `%s` failed (%s:%d): \"" msg "\"",                \
+			      #x,                                                          \
+			      __FILE__,                                                    \
+			      __LINE__,                                                    \
+			      __VA_ARGS__);                                                \
+			DEBUGBREAK;                                                        \
+		}                                                                      \
+		__pragma(warning(pop))
 
 #	define AssertUnreachable() Assert(false, "Unreachable path")
 #else
