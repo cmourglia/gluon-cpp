@@ -92,7 +92,7 @@ inline constexpr usize operator"" _GiB(usize size) { return size * GiB; }
 #define NOOP(...)
 
 #ifdef _DEBUG
-#	define Assert(x, ...)                                                     \
+#	define Assert(x, msg, ...)                                                \
 		do                                                                     \
 		{                                                                      \
 			if (!(x))                                                          \
@@ -102,6 +102,7 @@ inline constexpr usize operator"" _GiB(usize size) { return size * GiB; }
 				      #x,                                                      \
 				      __FILE__,                                                \
 				      __LINE__,                                                \
+				      msg,                                                     \
 				      __VA_ARGS__);                                            \
 				DEBUGBREAK;                                                    \
 			}                                                                  \
