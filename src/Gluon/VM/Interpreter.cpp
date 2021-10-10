@@ -7,14 +7,15 @@ namespace VM
 {
 
 Interpreter::Interpreter()
-    : m_globalObject{new Object{}}
 {
+	m_heap         = std::make_unique<Heap>(this);
+	m_globalObject = m_heap->Allocate<Object>();
 }
 
 Interpreter::~Interpreter()
 {
-	delete m_globalObject;
 	m_globalObject = nullptr;
+	m_heap->Garbage();
 }
 
 Value Interpreter::Run(ScopeNode* node)
@@ -42,5 +43,4 @@ void Interpreter::PopScope(ScopeNode* node)
 
 	m_stack.Pop();
 }
-
 }

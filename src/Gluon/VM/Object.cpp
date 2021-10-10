@@ -13,4 +13,16 @@ void Object::Add(const std::string& propertyName, Value value)
 	m_values[propertyName] = value;
 }
 
+void Object::VisitGraph(VisitorCallback callback) // NOLINT
+{
+	Cell::VisitGraph(callback);
+
+	for (auto&& value : m_values)
+	{
+		if (value.second.IsObject())
+		{
+			value.second.AsObject()->VisitGraph(callback);
+		}
+	}
+}
 }

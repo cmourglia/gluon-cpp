@@ -38,7 +38,7 @@ protected:
 	ASTNode() = default;
 
 private:
-	virtual const char* TypeName() const = 0;
+	virtual const char* GetTypename() const = 0;
 };
 
 using ASTNodePtr = std::shared_ptr<ASTNode>;
@@ -63,7 +63,7 @@ protected:
 	ScopeNode() = default;
 
 private:
-	const char* TypeName() const override = 0;
+	const char* GetTypename() const override = 0;
 
 	DynArray<ASTNodePtr> m_body;
 };
@@ -73,7 +73,7 @@ using ScopeNodePtr = std::shared_ptr<ScopeNode>;
 struct Program : public ScopeNode
 {
 private:
-	const char* TypeName() const override { return "Program"; }
+	const char* GetTypename() const override { return "Program"; }
 };
 
 struct FunctionDeclaration : public ASTNode
@@ -95,7 +95,7 @@ struct FunctionDeclaration : public ASTNode
 	Value Execute(Interpreter* interpreter) override;
 
 private:
-	const char* TypeName() const override { return "FunctionDeclaration"; }
+	const char* GetTypename() const override { return "FunctionDeclaration"; }
 
 	std::string  m_name;
 	ScopeNodePtr m_body = nullptr;
@@ -104,13 +104,13 @@ private:
 struct BlockStatement : public ScopeNode
 {
 private:
-	const char* TypeName() const override { return "BlockStatement"; }
+	const char* GetTypename() const override { return "BlockStatement"; }
 };
 
 struct Expression : public ASTNode
 {
 private:
-	const char* TypeName() const override = 0;
+	const char* GetTypename() const override = 0;
 };
 
 using ExpressionPtr = std::shared_ptr<Expression>;
@@ -127,7 +127,7 @@ struct ExpressionStatement : public ASTNode
 	void Dump(i32 indent) const override;
 
 private:
-	const char* TypeName() const override { return "ExpressionStatement"; }
+	const char* GetTypename() const override { return "ExpressionStatement"; }
 
 	ExpressionPtr m_expression;
 };
@@ -144,7 +144,7 @@ struct ReturnStatement : public ASTNode
 	void Dump(i32 indent) const override;
 
 private:
-	const char* TypeName() const override { return "ReturnStatement"; }
+	const char* GetTypename() const override { return "ReturnStatement"; }
 
 	ExpressionPtr m_argument = nullptr;
 };
@@ -181,7 +181,7 @@ struct BinaryExpression : public Expression
 	void Dump(i32 indent) const override;
 
 private:
-	const char* TypeName() const override { return "BinaryExpression"; }
+	const char* GetTypename() const override { return "BinaryExpression"; }
 
 	BinaryOp      m_op    = BinaryOp::Addition;
 	ExpressionPtr m_left  = nullptr;
@@ -200,7 +200,7 @@ struct CallExpression : public Expression
 	void Dump(i32 indent) const override;
 
 private:
-	const char* TypeName() const override { return "CallExpression\n"; }
+	const char* GetTypename() const override { return "CallExpression\n"; }
 
 	std::string m_callee;
 };
@@ -217,7 +217,7 @@ struct Identifier : public Expression
 	void Dump(i32 indent) const override;
 
 private:
-	const char* TypeName() const override { return "Identifier"; }
+	const char* GetTypename() const override { return "Identifier"; }
 
 	std::string m_name;
 };
@@ -234,7 +234,7 @@ struct Literal : public Expression
 	Value Execute(Interpreter* Interpreter) override;
 
 private:
-	const char* TypeName() const override { return "Literal"; }
+	const char* GetTypename() const override { return "Literal"; }
 
 	Value m_value;
 };

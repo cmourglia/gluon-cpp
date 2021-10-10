@@ -1,8 +1,11 @@
 #pragma once
 
 #include <Gluon/VM/Value.h>
+#include <Gluon/VM/Heap.h>
 
 #include <Gluon/Core/Containers/DynArray.h>
+
+#include <memory>
 
 namespace VM
 {
@@ -27,7 +30,9 @@ public:
 
 	Value Run(ScopeNode* node);
 
-	Object* GlobalObject() const { return m_globalObject; }
+	Object* GetGlobalObject() const { return m_globalObject; }
+
+	Heap* GetHeap() const { return m_heap.get(); }
 
 private:
 	void PushScope(ScopeNode* node);
@@ -35,7 +40,8 @@ private:
 
 	DynArray<ScopeFrame> m_stack;
 
-	Object* m_globalObject = nullptr;
+	std::unique_ptr<Heap> m_heap         = nullptr;
+	Object*               m_globalObject = nullptr;
 };
 
 }
