@@ -1,6 +1,6 @@
 #pragma once
 
-#include "defines.h"
+#include <Gluon/Core/Defines.h>
 
 START_EXTERNAL_INCLUDE
 #include <glm/glm.hpp>
@@ -13,9 +13,9 @@ namespace MuColor
 {
 inline glm::vec4 FromRgba(i32 r, i32 g, i32 b, f32 a = 1.0f)
 {
-	const f32 fr = Clamp(r, 0, 255) / 255.0f;
-	const f32 fg = Clamp(g, 0, 255) / 255.0f;
-	const f32 fb = Clamp(b, 0, 255) / 255.0f;
+	const f32 fr = Clamp(static_cast<f32>(r), 0.0f, 255.0f) / 255.0f;
+	const f32 fg = Clamp(static_cast<f32>(g), 0.0f, 255.0f) / 255.0f;
+	const f32 fb = Clamp(static_cast<f32>(b), 0.0f, 255.0f) / 255.0f;
 	const f32 fa = Clamp(a, 0.0f, 1.0f);
 
 	return {fr, fg, fb, fa};
@@ -23,28 +23,30 @@ inline glm::vec4 FromRgba(i32 r, i32 g, i32 b, f32 a = 1.0f)
 
 inline glm::vec4 FromHsla(i32 h, i32 s, i32 l, f32 a = 1.0f)
 {
-	const f32 fh = Clamp((f32)h, 0.0f, 360.0f);
-	const f32 fs = Clamp((f32)s, 0.0f, 100.0f) / 100.0f;
-	const f32 fl = Clamp((f32)l, 0.0f, 100.0f) / 100.0f;
-	const f32 fa = Clamp((f32)a, 0.0f, 1.0f);
+	const f32 fh = Clamp(static_cast<f32>(h), 0.0f, 360.0f);
+	const f32 fs = Clamp(static_cast<f32>(s), 0.0f, 100.0f) / 100.0f;
+	const f32 fl = Clamp(static_cast<f32>(l), 0.0f, 100.0f) / 100.0f;
+	const f32 fa = Clamp(a, 0.0f, 1.0f);
 
 	const f32 c = (1.0f - Abs(2.0f * fl - 1.0f)) * fs;
 	const f32 x = c * (1.0f - Abs(fmodf(fh / 60.0f, 2.0f) - 1.0f));
 	const f32 m = fl - c * 0.5f;
 
-	const glm::vec3 cprime = h < 60.0f    ? glm::vec3(c, x, 0.0f)
-	                         : h < 120.0f ? glm::vec3(x, c, 0.0f)
-	                         : h < 180.0f ? glm::vec3(0.0f, c, x)
-	                         : h < 240.0f ? glm::vec3(0.0f, x, c)
-	                         : h < 300.0f ? glm::vec3(x, 0.0f, c)
-	                                      : glm::vec3(c, 0.0f, x);
+	const glm::vec3 cprime = h < 60    ? glm::vec3{c, x, 0.0f}
+	                         : h < 120 ? glm::vec3{x, c, 0.0f}
+	                         : h < 180 ? glm::vec3{0.0f, c, x}
+	                         : h < 240 ? glm::vec3{0.0f, x, c}
+	                         : h < 300 ? glm::vec3{x, 0.0f, c}
+	                                   : glm::vec3{c, 0.0f, x};
 
-	return {cprime.r + m, cprime.g + m, cprime.b + m, a};
+	return {cprime.r + m, cprime.g + m, cprime.b + m, fa};
 }
 
-inline glm::vec4 FromString(std::string_view value)
+inline glm::vec4 FromString(const std::string& str)
 {
-	auto HexToFloat = [](char* v) { return strtol(v, nullptr, 16) / 255.0f; };
+	std::string value      = str;
+	auto        HexToFloat = [](char* v)
+	{ return static_cast<f32>(strtol(v, nullptr, 16)) / 255.0f; };
 
 	char s[3] = {};
 
@@ -256,7 +258,7 @@ extern const glm::vec4 WhiteSmoke;
 extern const glm::vec4 Yellow;
 extern const glm::vec4 YellowGreen;
 
-extern const std::unordered_map<std::string_view, glm::vec4> ColorsByName;
+extern const std::unordered_map<std::string, glm::vec4> ColorsByName;
 }
 
 struct NSVGimage;
@@ -265,8 +267,10 @@ struct Texture;
 
 struct RasterImage
 {
-	i32 width, height;
-	f32 offsetX = 0.0f, offsetY = 0.0f;
+	i32 width   = 0;
+	i32 height  = 0;
+	f32 offsetX = 0.0f;
+	f32 offsetY = 0.0f;
 
 	Image*   image   = nullptr;
 	Texture* texture = nullptr;

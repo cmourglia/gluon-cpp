@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Gluon/Compiler/Tokenizer.h"
+#include <Gluon/Compiler/Tokenizer.h>
 
 #include <queue>
 #include <memory>
@@ -89,7 +89,9 @@ struct Expression
 {
 	std::queue<std::shared_ptr<Node>> evaluationQueue;
 
-	static Expression Build(const std::vector<Token>& tokens, GluonWidget* rootWidget, GluonWidget* currentWidget);
+	static Expression Build(const std::vector<Token>& tokens,
+	                        GluonWidget*              rootWidget,
+	                        GluonWidget*              currentWidget);
 
 	static Expression Zero()
 	{
@@ -98,10 +100,10 @@ struct Expression
 		return result;
 	}
 
-	f32 Evaluate();
+	f32 Evaluate() const;
 
 private:
-	f32 EvaluateOperator(OperatorNode* op, f32 left, f32 right);
-	f32 EvaluateFunction(FunctionNode* fn);
+	static f32 EvaluateOperator(OperatorNode* op, f32 left, f32 right);
+	static f32 EvaluateFunction(FunctionNode* fn);
 };
 }

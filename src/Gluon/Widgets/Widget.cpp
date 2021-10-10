@@ -1,8 +1,8 @@
-#include "Gluon/Widgets/Widget.h"
+#include <Gluon/Widgets/Widget.h>
 
-#include "Gluon/Widgets/Hashes.h"
+#include <Gluon/Widgets/Hashes.h>
 
-#include "Gluon/Core/Utils.h"
+#include <Gluon/Core/Utils.h>
 
 #include <loguru.hpp>
 
@@ -21,10 +21,12 @@ glm::vec4 ExtractColor(const std::vector<Token>& tokens)
 		{
 			case TokenType::String:
 			{
-				Assert(tokens.size() == 1, "A color as a string can only be defined by one token");
+				Assert(tokens.size() == 1,
+				       "A color as a string can only be defined by one token");
 				firstToken.text.erase(std::remove_if(firstToken.text.begin(),
 				                                     firstToken.text.end(),
-				                                     [](const char c) { return c == '"'; }),
+				                                     [](const char c)
+				                                     { return c == '"'; }),
 				                      firstToken.text.end());
 
 				color = MuColor::FromString(firstToken.text);
@@ -55,12 +57,15 @@ glm::vec4 ExtractColor(const std::vector<Token>& tokens)
 					{
 						if (values.size() == 3)
 						{
-							color = MuColor::FromRgba((i32)values[0], (i32)values[1], (i32)values[2]);
+							color = MuColor::FromRgba((i32)values[0],
+							                          (i32)values[1],
+							                          (i32)values[2]);
 						}
 						else
 						{
 							LOG_F(ERROR,
-							      "line %d: Malformed rgb() call, should be rgb(red, green, blue)",
+							      "line %d: Malformed rgb() call, should be "
+							      "rgb(red, green, blue)",
 							      firstToken.line);
 						}
 					}
@@ -70,12 +75,16 @@ glm::vec4 ExtractColor(const std::vector<Token>& tokens)
 					{
 						if (values.size() == 4)
 						{
-							color = MuColor::FromRgba((i32)values[0], (i32)values[1], (i32)values[2], values[3]);
+							color = MuColor::FromRgba((i32)values[0],
+							                          (i32)values[1],
+							                          (i32)values[2],
+							                          values[3]);
 						}
 						else
 						{
 							LOG_F(ERROR,
-							      "line %d: Malformed rgba() call, should be rgba(red, green, blue, alpha)",
+							      "line %d: Malformed rgba() call, should be "
+							      "rgba(red, green, blue, alpha)",
 							      firstToken.line);
 						}
 					}
@@ -85,12 +94,15 @@ glm::vec4 ExtractColor(const std::vector<Token>& tokens)
 					{
 						if (values.size() == 3)
 						{
-							color = MuColor::FromHsla((i32)values[0], (i32)values[1], (i32)values[2]);
+							color = MuColor::FromHsla((i32)values[0],
+							                          (i32)values[1],
+							                          (i32)values[2]);
 						}
 						else
 						{
 							LOG_F(ERROR,
-							      "line %d: Malformed hsl() call, should be hsl(hue, saturation, lightness)",
+							      "line %d: Malformed hsl() call, should be "
+							      "hsl(hue, saturation, lightness)",
 							      firstToken.line);
 						}
 					}
@@ -100,12 +112,16 @@ glm::vec4 ExtractColor(const std::vector<Token>& tokens)
 					{
 						if (values.size() == 4)
 						{
-							color = MuColor::FromHsla((i32)values[0], (i32)values[1], (i32)values[2], values[3]);
+							color = MuColor::FromHsla((i32)values[0],
+							                          (i32)values[1],
+							                          (i32)values[2],
+							                          values[3]);
 						}
 						else
 						{
 							LOG_F(ERROR,
-							      "line %d: Malformed hsla() call, should be hsla(hue, saturation, lightness, alpha",
+							      "line %d: Malformed hsla() call, should be "
+							      "hsla(hue, saturation, lightness, alpha",
 							      firstToken.line);
 						}
 					}
@@ -114,9 +130,11 @@ glm::vec4 ExtractColor(const std::vector<Token>& tokens)
 					{
 						if (firstToken.text.compare("Color") == 0)
 						{
-							Assert(tokens.size() == 3 && tokens[2].type == TokenType::Identifier,
+							Assert(tokens.size() == 3 &&
+							           tokens[2].type == TokenType::Identifier,
 							       "We are looking for `Color.ColorName`");
-							auto it = MuColor::ColorsByName.find(tokens[2].text);
+							auto it = MuColor::ColorsByName.find(
+							    tokens[2].text);
 							if (it != MuColor::ColorsByName.end())
 							{
 								color = it->second;
@@ -124,8 +142,10 @@ glm::vec4 ExtractColor(const std::vector<Token>& tokens)
 							else
 							{
 								LOG_F(ERROR,
-								      "ling %d: Color '%s' is not a valid color name. See "
-								      "https://www.w3schools.com/colors/colors_names.asp for a complete list.",
+								      "ling %d: Color '%s' is not a valid "
+								      "color name. See "
+								      "https://www.w3schools.com/colors/"
+								      "colors_names.asp for a complete list.",
 								      firstToken.line,
 								      tokens[2].text.c_str());
 							}
@@ -133,7 +153,8 @@ glm::vec4 ExtractColor(const std::vector<Token>& tokens)
 						else
 						{
 							LOG_F(ERROR,
-							      "line %d: Could not parse color given '%s' value",
+							      "line %d: Could not parse color given '%s' "
+							      "value",
 							      firstToken.line,
 							      firstToken.text.c_str());
 						}
@@ -333,7 +354,8 @@ void BuildDependencyGraph(GluonWidget* rootWidget, GluonWidget* currentWidget)
 {
 	for (auto id : currentWidget->dependencyIds)
 	{
-		GluonWidget* dep = id == "parent" ? currentWidget->parent : GetWidgetById(rootWidget, id);
+		GluonWidget* dep = id == "parent" ? currentWidget->parent
+		                                  : GetWidgetById(rootWidget, id);
 
 		if (dep != nullptr)
 		{
@@ -348,7 +370,8 @@ void BuildDependencyGraph(GluonWidget* rootWidget, GluonWidget* currentWidget)
 	}
 }
 
-void BuildExpressionEvaluators(GluonWidget* rootWidget, GluonWidget* currentWidget)
+void BuildExpressionEvaluators(GluonWidget* rootWidget,
+                               GluonWidget* currentWidget)
 {
 	auto GetHashIndex = [](u32 hash)
 	{
@@ -388,14 +411,20 @@ void BuildExpressionEvaluators(GluonWidget* rootWidget, GluonWidget* currentWidg
 		}
 	};
 
-	std::unordered_set<u32> remainingAttributes = {NodeHash::X, NodeHash::Y, NodeHash::Width, NodeHash::Height};
+	std::unordered_set<u32> remainingAttributes = {NodeHash::X,
+	                                               NodeHash::Y,
+	                                               NodeHash::Width,
+	                                               NodeHash::Height};
 	for (auto expr : currentWidget->geometryExpressions)
 	{
 		remainingAttributes.erase(expr.first);
 
-		auto expression = ShuntingYard::Expression::Build(expr.second, rootWidget, currentWidget);
+		auto expression = ShuntingYard::Expression::Build(expr.second,
+		                                                  rootWidget,
+		                                                  currentWidget);
 
-		currentWidget->evaluators.push_back(std::make_pair(GetPropertyPtr(expr.first), expression));
+		currentWidget->evaluators.push_back(
+		    std::make_pair(GetPropertyPtr(expr.first), expression));
 	}
 
 	for (auto c : currentWidget->children)

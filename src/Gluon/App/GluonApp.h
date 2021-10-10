@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Gluon/Core/Types.h"
+#include <Gluon/Core/Types.h>
 
 #include <vector>
 
@@ -21,14 +21,11 @@ public:
 
 	void SetTitle(const char* title);
 	void SetWindowSize(i32 w, i32 h);
-	void SetBackgroundColor(const glm::vec4& color)
-	{
-		backgroundColor = color;
-	}
+	void SetBackgroundColor(const glm::vec4& color) { backgroundColor = color; }
 
 	[[nodiscard]] glm::vec2 GetWindowSize() const
 	{
-		return glm::vec2{(f32)width, (f32)height};
+		return glm::vec2{static_cast<f32>(width), static_cast<f32>(height)};
 	}
 
 private:

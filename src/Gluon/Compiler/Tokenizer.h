@@ -1,9 +1,8 @@
 #pragma once
 
-#include "Gluon/Core/Types.h"
+#include <Gluon/Core/Types.h>
 
 #include <string>
-#include <string_view>
 #include <vector>
 
 enum class TokenType
@@ -55,4 +54,4 @@ struct Tokenizer
 	const char* stream;
 };
 
-std::vector<Token> Tokenize(std::string_view buffer);
+std::vector<Token> Tokenize(const char* buffer);

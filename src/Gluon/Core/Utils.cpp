@@ -1,4 +1,4 @@
-#include "utils.h"
+#include <Gluon/Core/Utils.h>
 
 #include <loguru.hpp>
 
@@ -33,10 +33,7 @@ struct HandleRAII
 		}
 	}
 
-	operator HANDLE() const
-	{
-		return handle;
-	}
+	operator HANDLE() const { return handle; }
 
 	HANDLE handle = {0};
 };
@@ -70,7 +67,10 @@ i64 GetFileWriteTime(const char* filename)
 
 	FILE_BASIC_INFO infos;
 
-	bool ok = GetFileInformationByHandleEx(fileHandle, FileBasicInfo, &infos, sizeof(infos));
+	bool ok = GetFileInformationByHandleEx(fileHandle,
+	                                       FileBasicInfo,
+	                                       &infos,
+	                                       sizeof(infos));
 	if (!ok)
 	{
 		DWORD error = GetLastError();
@@ -115,7 +115,10 @@ std::string ReadWholeFile(const char* filename)
 
 	FILE_STANDARD_INFO infos;
 
-	bool ok = GetFileInformationByHandleEx(fileHandle, FileStandardInfo, &infos, sizeof(infos));
+	bool ok = GetFileInformationByHandleEx(fileHandle,
+	                                       FileStandardInfo,
+	                                       &infos,
+	                                       sizeof(infos));
 	if (!ok)
 	{
 		DWORD error = GetLastError();
@@ -127,7 +130,11 @@ std::string ReadWholeFile(const char* filename)
 	result.resize(infos.EndOfFile.QuadPart);
 
 	DWORD bytesRead = 0;
-	ReadFile(fileHandle, result.data(), static_cast<DWORD>(infos.EndOfFile.QuadPart), &bytesRead, nullptr);
+	ReadFile(fileHandle,
+	         result.data(),
+	         static_cast<DWORD>(infos.EndOfFile.QuadPart),
+	         &bytesRead,
+	         nullptr);
 
 #else
 	static_assert(false, "TODO");
@@ -136,7 +143,10 @@ std::string ReadWholeFile(const char* filename)
 	return result;
 }
 
-bool ReadFileIfNewer(const char* filename, i64 lastWrite, i64* newLastWrite, std::string* content)
+bool ReadFileIfNewer(const char*  filename,
+                     i64          lastWrite,
+                     i64*         newLastWrite,
+                     std::string* content)
 {
 #if _WIN32
 	HandleRAII fileHandle{CreateFileA(filename,
@@ -166,7 +176,10 @@ bool ReadFileIfNewer(const char* filename, i64 lastWrite, i64* newLastWrite, std
 	bool ok = true;
 
 	FILE_BASIC_INFO basicInfos;
-	ok = GetFileInformationByHandleEx(fileHandle, FileBasicInfo, &basicInfos, sizeof(basicInfos));
+	ok = GetFileInformationByHandleEx(fileHandle,
+	                                  FileBasicInfo,
+	                                  &basicInfos,
+	                                  sizeof(basicInfos));
 	if (!ok)
 	{
 		DWORD error = GetLastError();
@@ -181,7 +194,10 @@ bool ReadFileIfNewer(const char* filename, i64 lastWrite, i64* newLastWrite, std
 	}
 
 	FILE_STANDARD_INFO standardInfos;
-	ok = GetFileInformationByHandleEx(fileHandle, FileStandardInfo, &standardInfos, sizeof(standardInfos));
+	ok = GetFileInformationByHandleEx(fileHandle,
+	                                  FileStandardInfo,
+	                                  &standardInfos,
+	                                  sizeof(standardInfos));
 	if (!ok)
 	{
 		DWORD error = GetLastError();

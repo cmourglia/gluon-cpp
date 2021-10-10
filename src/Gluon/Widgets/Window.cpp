@@ -1,21 +1,17 @@
-#include "Gluon/Widgets/Window.h"
+#include <Gluon/Widgets/Window.h>
 
-#include "Gluon/Widgets/Hashes.h"
+#include <Gluon/Widgets/Hashes.h>
 
-#include "Gluon/App/GluonApp.h"
+#include <Gluon/App/GluonApp.h>
 
 namespace Utils
 {
 glm::vec4 ExtractColor(const std::vector<Token>& tokens);
 }
 
-GluonWindow::GluonWindow()
-    : GluonWidget()
-{
-	size = GluonApp::Get()->GetWindowSize();
-}
+GluonWindow::GluonWindow() { size = GluonApp::Get()->GetWindowSize(); }
 
-void GluonWindow::ParsePropertyInternal(Parser::Node::Ptr node, const u32 nodeHash)
+void GluonWindow::ParsePropertyInternal(Parser::Node::Ptr node, u32 nodeHash)
 {
 	switch (nodeHash)
 	{
@@ -39,9 +35,15 @@ void GluonWindow::ParsePropertyInternal(Parser::Node::Ptr node, const u32 nodeHa
 
 		case NodeHash::Color:
 		{
-			glm::vec4 color = Utils::ExtractColor(node->children[0]->associatedTokens);
+			glm::vec4 color = Utils::ExtractColor(
+			    node->children[0]->associatedTokens);
 			GluonApp::Get()->SetBackgroundColor(color);
 		}
+		break;
+
+		default:
+			AssertUnreachable();
+			break;
 	}
 }
 
@@ -53,7 +55,8 @@ void GluonWindow::PreEvaluate()
 
 void GluonWindow::PostEvaluate()
 {
-	GluonApp::Get()->SetWindowSize(static_cast<i32>(size.x), static_cast<i32>(size.y));
+	GluonApp::Get()->SetWindowSize(static_cast<i32>(size.x),
+	                               static_cast<i32>(size.y));
 	// GluonApp::Get()->SetWindowPos((i32)pos.x, (i32)pos.y);
 }
 
