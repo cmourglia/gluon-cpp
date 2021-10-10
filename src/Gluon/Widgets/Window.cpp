@@ -53,17 +53,17 @@ void GluonWindow::PreEvaluate()
 
 void GluonWindow::PostEvaluate()
 {
-	GluonApp::Get()->SetWindowSize((i32)size.x, (i32)size.y);
+	GluonApp::Get()->SetWindowSize(static_cast<i32>(size.x), static_cast<i32>(size.y));
 	// GluonApp::Get()->SetWindowPos((i32)pos.x, (i32)pos.y);
 }
 
 bool GluonWindow::WindowResized(i32 w, i32 h)
 {
 	bool resized = false;
-	if ((i32)size.x != w || (i32)size.y != h)
+	if (static_cast<i32>(size.x) != w || static_cast<i32>(size.y) != h)
 	{
-		size.x = w;
-		size.y = h;
+		size.x = static_cast<f32>(w);
+		size.y = static_cast<f32>(h);
 		Touch();
 		resized = true;
 	}
@@ -75,5 +75,6 @@ bool GluonWindow::WindowResized(i32 w, i32 h)
 
 void GluonWindow::BuildRenderInfosInternal(std::vector<RectangleInfo>* result)
 {
+	UNUSED(result);
 	// Passthrough
 }

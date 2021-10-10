@@ -4,8 +4,6 @@
 
 #include <loguru.hpp>
 
-#include <Windows.h>
-
 inline void AdvanceChars(Tokenizer* tokenizer, u32 count)
 {
 	tokenizer->column += count;
@@ -264,10 +262,6 @@ inline Token GetToken(Tokenizer* tokenizer)
 std::vector<Token> Tokenize(std::string_view buffer)
 {
 	std::vector<Token> tokens;
-
-	bool done = false;
-
-	const char* t = buffer.data();
 
 	Tokenizer tokenizer = {
 	    // .filename = filename,

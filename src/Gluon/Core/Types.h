@@ -2,7 +2,9 @@
 
 #include "defines.h"
 
+START_EXTERNAL_INCLUDE
 #include <glm/glm.hpp>
+END_EXTERNAL_INCLUDE
 
 #include <string_view>
 #include <unordered_map>
@@ -21,10 +23,10 @@ inline glm::vec4 FromRgba(i32 r, i32 g, i32 b, f32 a = 1.0f)
 
 inline glm::vec4 FromHsla(i32 h, i32 s, i32 l, f32 a = 1.0f)
 {
-	const f32 fh = Clamp(h, 0, 360);
-	const f32 fs = Clamp(s, 0, 100) / 100.0f;
-	const f32 fl = Clamp(l, 0, 100) / 100.0f;
-	const f32 fa = Clamp(a, 0.0f, 1.0f);
+	const f32 fh = Clamp((f32)h, 0.0f, 360.0f);
+	const f32 fs = Clamp((f32)s, 0.0f, 100.0f) / 100.0f;
+	const f32 fl = Clamp((f32)l, 0.0f, 100.0f) / 100.0f;
+	const f32 fa = Clamp((f32)a, 0.0f, 1.0f);
 
 	const f32 c = (1.0f - Abs(2.0f * fl - 1.0f)) * fs;
 	const f32 x = c * (1.0f - Abs(fmodf(fh / 60.0f, 2.0f) - 1.0f));

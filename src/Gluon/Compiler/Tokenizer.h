@@ -3,6 +3,7 @@
 #include "Gluon/Core/Types.h"
 
 #include <string>
+#include <string_view>
 #include <vector>
 
 enum class TokenType

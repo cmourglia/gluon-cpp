@@ -82,7 +82,10 @@ void GluonImage::ParsePropertyInternal(Parser::Node::Ptr node, const u32 nodeHas
 		case NodeHash::FitMode:
 		{
 			std::string fit = node->children[0]->name.c_str();
-			std::transform(fit.begin(), fit.end(), fit.begin(), ::tolower);
+			std::transform(fit.begin(),
+			               fit.end(),
+			               fit.begin(),
+			               [](char c) { return static_cast<char>(std::tolower(c)); });
 
 			if (strcmp(fit.c_str(), "stretch") == 0)
 			{
@@ -136,18 +139,19 @@ void GluonImage::PostEvaluate()
 
 			case FitMode::Fit:
 			{
-				i32 targetWidth, targetHeight;
+				i32 targetWidth  = 0;
+				i32 targetHeight = 0;
 
-				f32 imageRatio = (f32)image->width / image->height;
+				f32 imageRatio = static_cast<f32>(image->width) / static_cast<f32>(image->height);
 				if (size.x < size.y)
 				{
-					targetWidth  = (i32)size.x;
-					targetHeight = size.x / imageRatio;
+					targetWidth  = static_cast<i32>(size.x);
+					targetHeight = static_cast<i32>(size.x / imageRatio);
 				}
 				else
 				{
-					targetHeight = (i32)size.y;
-					targetWidth  = size.y * imageRatio;
+					targetHeight = static_cast<i32>(size.y);
+					targetWidth  = static_cast<i32>(size.y * imageRatio);
 				}
 
 				ImageResize(image, targetWidth, targetHeight);
@@ -160,18 +164,19 @@ void GluonImage::PostEvaluate()
 
 			case FitMode::Crop:
 			{
-				i32 targetWidth, targetHeight;
+				i32 targetWidth  = 0;
+				i32 targetHeight = 0;
 
-				f32 imageRatio = (f32)image->width / image->height;
+				f32 imageRatio = static_cast<f32>(image->width) / static_cast<f32>(image->height);
 				if (size.x > size.y)
 				{
-					targetWidth  = (i32)size.x;
-					targetHeight = size.x / imageRatio;
+					targetWidth  = static_cast<i32>(size.x);
+					targetHeight = static_cast<i32>(size.x / imageRatio);
 				}
 				else
 				{
-					targetHeight = (i32)size.y;
-					targetWidth  = size.y * imageRatio;
+					targetHeight = static_cast<i32>(size.y);
+					targetWidth  = static_cast<i32>(size.y * imageRatio);
 				}
 
 				ImageResize(image, targetWidth, targetHeight);

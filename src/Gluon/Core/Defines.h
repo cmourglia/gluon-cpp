@@ -24,6 +24,14 @@ using f64 = double;
 
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 
+#ifdef _MSC_VER
+#	define START_EXTERNAL_INCLUDE __pragma(warning(push)) __pragma(warning(disable : 4201))
+#	define END_EXTERNAL_INCLUDE __pragma(warning(pop))
+#else
+#	define START_EXTERNAL_INCLUDE
+#	define END_EXTERNAL_INCLUDE
+#endif
+
 #define UNUSED(x) (void)(x)
 
 #define NONCOPYABLE(T)                                                                                                 \
@@ -45,7 +53,7 @@ using f64 = double;
 	DEFAULT_COPYABLE(T);                                                                                               \
 	DEFAULT_MOVEABLE(T)
 
-#ifdef MSVC
+#ifdef _MSC_VER
 #	define DEBUGBREAK __debugbreak()
 #else
 // TODO: Handle other cases

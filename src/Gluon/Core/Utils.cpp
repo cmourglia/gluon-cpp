@@ -3,7 +3,9 @@
 #include <loguru.hpp>
 
 #if _WIN32
+START_EXTERNAL_INCLUDE
 #	include <Windows.h>
+END_EXTERNAL_INCLUDE
 #elif
 #	error TODO
 #endif
@@ -117,7 +119,7 @@ std::string ReadWholeFile(const char* filename)
 	if (!ok)
 	{
 		DWORD error = GetLastError();
-		LOG_F(ERROR, "Error code %d", error);
+		LOG_F(ERROR, "Error code %lu", error);
 
 		return result;
 	}
@@ -125,7 +127,7 @@ std::string ReadWholeFile(const char* filename)
 	result.resize(infos.EndOfFile.QuadPart);
 
 	DWORD bytesRead = 0;
-	ReadFile(fileHandle, result.data(), infos.EndOfFile.QuadPart, &bytesRead, nullptr);
+	ReadFile(fileHandle, result.data(), static_cast<DWORD>(infos.EndOfFile.QuadPart), &bytesRead, nullptr);
 
 #else
 	static_assert(false, "TODO");
@@ -197,7 +199,11 @@ bool ReadFileIfNewer(const char* filename, i64 lastWrite, i64* newLastWrite, std
 	DWORD       bytesRead = 0;
 	contentTmp.resize(standardInfos.EndOfFile.QuadPart);
 
-	ok = ReadFile(fileHandle, contentTmp.data(), standardInfos.EndOfFile.QuadPart, &bytesRead, nullptr);
+	ok = ReadFile(fileHandle,
+	              contentTmp.data(),
+	              static_cast<DWORD>(standardInfos.EndOfFile.QuadPart),
+	              &bytesRead,
+	              nullptr);
 
 	if (!ok)
 	{
