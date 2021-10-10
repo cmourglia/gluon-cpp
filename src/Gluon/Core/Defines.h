@@ -98,11 +98,10 @@ inline constexpr usize operator"" _GiB(usize size) { return size * GiB; }
 			if (!(x))                                                          \
 			{                                                                  \
 				LOG_F(ERROR,                                                   \
-				      "Assertion `%s` failed (%s:%d): %s",                     \
+				      "Assertion `%s` failed (%s:%d): \"" msg "\"",            \
 				      #x,                                                      \
 				      __FILE__,                                                \
 				      __LINE__,                                                \
-				      msg,                                                     \
 				      __VA_ARGS__);                                            \
 				DEBUGBREAK;                                                    \
 			}                                                                  \
