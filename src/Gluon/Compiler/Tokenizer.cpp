@@ -1,6 +1,6 @@
-#include "tokenizer.h"
+#include <Gluon/Compiler/Tokenizer.h>
 
-#include "utils.h"
+#include <Gluon/Core/Utils.h>
 
 #include <loguru.hpp>
 
@@ -138,7 +138,8 @@ inline Token GetToken(Tokenizer* tokenizer)
 			{
 				token.type = TokenType::Comment;
 
-				while (tokenizer->stream[0] && !IsEndOfLine(tokenizer->stream[0]))
+				while (tokenizer->stream[0] &&
+				       !IsEndOfLine(tokenizer->stream[0]))
 				{
 					AdvanceChars(tokenizer, 1);
 				}
@@ -148,10 +149,13 @@ inline Token GetToken(Tokenizer* tokenizer)
 				token.type = TokenType::Comment;
 
 				while ((tokenizer->stream[0] && tokenizer->stream[1]) &&
-				       !(tokenizer->stream[0] == '*' && tokenizer->stream[1] == '/'))
+				       !(tokenizer->stream[0] == '*' &&
+				         tokenizer->stream[1] == '/'))
 				{
-					if ((tokenizer->stream[0] == '\r' && tokenizer->stream[1] == '\n') ||
-					    (tokenizer->stream[0] == '\n' && tokenizer->stream[1] == '\r'))
+					if ((tokenizer->stream[0] == '\r' &&
+					     tokenizer->stream[1] == '\n') ||
+					    (tokenizer->stream[0] == '\n' &&
+					     tokenizer->stream[1] == '\r'))
 					{
 						AdvanceChars(tokenizer, 1);
 					}
@@ -182,7 +186,8 @@ inline Token GetToken(Tokenizer* tokenizer)
 			{
 				token.type = TokenType::EndOfLine;
 
-				if ((c == '\r' && tokenizer->stream[0] == '\n') || (c == '\n' && tokenizer->stream[0] == '\r'))
+				if ((c == '\r' && tokenizer->stream[0] == '\n') ||
+				    (c == '\n' && tokenizer->stream[0] == '\r'))
 				{
 					AdvanceChars(tokenizer, 1);
 				}
@@ -203,7 +208,9 @@ inline Token GetToken(Tokenizer* tokenizer)
 				token.type = TokenType::Identifier;
 
 				while (tokenizer->stream[0] &&
-				       (IsAlpha(tokenizer->stream[0]) || IsNumber(tokenizer->stream[0]) || tokenizer->stream[0] == '_'))
+				       (IsAlpha(tokenizer->stream[0]) ||
+				        IsNumber(tokenizer->stream[0]) ||
+				        tokenizer->stream[0] == '_'))
 				{
 					AdvanceChars(tokenizer, 1);
 				}
@@ -259,7 +266,7 @@ inline Token GetToken(Tokenizer* tokenizer)
 	return token;
 }
 
-std::vector<Token> Tokenize(std::string_view buffer)
+std::vector<Token> Tokenize(const char* buffer)
 {
 	std::vector<Token> tokens;
 
@@ -267,7 +274,7 @@ std::vector<Token> Tokenize(std::string_view buffer)
 	    // .filename = filename,
 	    .column = 0,
 	    .line   = 0,
-	    .stream = buffer.data(),
+	    .stream = buffer,
 	};
 
 	for (;;)

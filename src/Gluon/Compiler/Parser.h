@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Gluon/Compiler/Tokenizer.h"
+#include <Gluon/Compiler/Tokenizer.h>
 
-#include "Gluon/Core/Types.h"
+#include <Gluon/Core/Types.h>
 
 #include <vector>
 #include <optional>
@@ -16,7 +16,7 @@ struct ParsedApplication
 
 struct GluonWidget;
 
-GluonWidget* ParseGluonBuffer(std::string_view buffer);
+GluonWidget* ParseGluonBuffer(const char* buffer);
 
 namespace Parser
 {

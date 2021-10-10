@@ -1,8 +1,8 @@
-#include "Gluon/App/GluonApp.h"
+#include <Gluon/App/GluonApp.h>
 
-#include "Gluon/Core/Utils.h"
-#include "Gluon/Compiler/Parser.h"
-#include "Gluon/Widgets/Widget.h"
+#include <Gluon/Core/Utils.h>
+#include <Gluon/Compiler/Parser.h>
+#include <Gluon/Widgets/Widget.h>
 
 #include <raylib.h>
 #include <raymath.h>
@@ -12,13 +12,10 @@
 
 GluonApp* GluonApp::s_instance = nullptr;
 
-GluonApp* GluonApp::Get()
-{
-	return s_instance;
-}
+GluonApp* GluonApp::Get() { return s_instance; }
 
 GluonApp::GluonApp(int argc, char** argv)
-    : backgroundColor(0.8f, 0.8f, 0.8f, 1.0f)
+    : backgroundColor{0.8f, 0.8f, 0.8f, 1.0f}
 {
 	// TODO: Do stuff with argc, argv;
 	UNUSED(argc);
@@ -38,17 +35,18 @@ GluonApp::GluonApp(int argc, char** argv)
 	}
 }
 
-GluonApp::~GluonApp()
-{
-	CloseWindow();
-}
+GluonApp::~GluonApp() { CloseWindow(); }
 
 int GluonApp::Run()
 {
 	i64 lastWriteTime = 0;
 
-	auto GetColor = [](const glm::vec4& color) -> Color {
-		return Color{(u8)(color.r * 255), (u8)(color.g * 255), (u8)(color.b * 255), (u8)(color.a * 255)};
+	auto GetColor = [](const glm::vec4& color) -> Color
+	{
+		return Color{static_cast<u8>(color.r * 255),
+		             static_cast<u8>(color.g * 255),
+		             static_cast<u8>(color.b * 255),
+		             static_cast<u8>(color.a * 255)};
 	};
 
 	SetTargetFPS(120);
@@ -58,16 +56,19 @@ int GluonApp::Run()
 	while (!WindowShouldClose())
 	{
 		// Check if gluon file update is needed
-		i64 writeTime;
+		i64 writeTime = -1;
 
 		std::string fileContent;
 
 		bool drawNeedsUpdate = false;
 
-		if (FileUtils::ReadFileIfNewer("test.gluon", lastWriteTime, &writeTime, &fileContent))
+		if (FileUtils::ReadFileIfNewer("test.gluon",
+		                               lastWriteTime,
+		                               &writeTime,
+		                               &fileContent))
 		{
 			delete rootWidget;
-			rootWidget      = ParseGluonBuffer(fileContent);
+			rootWidget      = ParseGluonBuffer(fileContent.c_str());
 			drawNeedsUpdate = true;
 
 			lastWriteTime = writeTime;
@@ -87,7 +88,8 @@ int GluonApp::Run()
 			{
 				Vector2 mousePos = GetMousePosition();
 
-				// drawNeedsUpdate |= rootWidget->MouseMoved({mousePos.x, mousePos.y});
+				// drawNeedsUpdate |= rootWidget->MouseMoved({mousePos.x,
+				// mousePos.y});
 			}
 
 			if (drawNeedsUpdate)
@@ -104,7 +106,10 @@ int GluonApp::Run()
 		{
 			for (const auto& rect : rectangles)
 			{
-				Rectangle r         = {rect.position.x, rect.position.y, rect.size.x, rect.size.y};
+				Rectangle r         = {rect.position.x,
+                               rect.position.y,
+                               rect.size.x,
+                               rect.size.y};
 				f32       smallSide = Min(r.width, r.height);
 				f32       roundness = Min(rect.radius, smallSide) / smallSide;
 
@@ -129,10 +134,14 @@ int GluonApp::Run()
 								for (int i = 0; i < path->npts - 1; i += 3)
 								{
 									float* p = &path->pts[i * 2];
-									DrawLineBezierCubic(Vector2{p[0] + r.x, p[1] + r.y},
-									                    Vector2{p[6] + r.x, p[7] + r.y},
-									                    Vector2{p[2] + r.x, p[3] + r.y},
-									                    Vector2{p[4] + r.x, p[5] + r.y},
+									DrawLineBezierCubic(Vector2{p[0] + r.x,
+									                            p[1] + r.y},
+									                    Vector2{p[6] + r.x,
+									                            p[7] + r.y},
+									                    Vector2{p[2] + r.x,
+									                            p[3] + r.y},
+									                    Vector2{p[4] + r.x,
+									                            p[5] + r.y},
 									                    shape->strokeWidth,
 									                    color);
 								}
@@ -145,21 +154,31 @@ int GluonApp::Run()
 					}
 					else
 					{
-						Texture2D* texture = rect.imageInfo->rasterImage->texture;
+						Texture2D* texture = rect.imageInfo->rasterImage
+						                         ->texture;
 						DrawTexture(*texture,
-						            (int)(r.x + rect.imageInfo->rasterImage->offsetX),
-						            (int)(r.y + rect.imageInfo->rasterImage->offsetY),
+						            (int)(r.x +
+						                  rect.imageInfo->rasterImage->offsetX),
+						            (int)(r.y +
+						                  rect.imageInfo->rasterImage->offsetY),
 						            GetColor(rect.fillColor));
 						DrawRectangleRoundedLines(r, 0, 1, 5, BLACK);
 					}
 				}
 				else
 				{
-					DrawRectangleRounded(r, roundness, 32, GetColor(rect.fillColor));
+					DrawRectangleRounded(r,
+					                     roundness,
+					                     32,
+					                     GetColor(rect.fillColor));
 
 					if (rect.borderWidth > 0.0f)
 					{
-						DrawRectangleRoundedLines(r, roundness, 32, rect.borderWidth, GetColor(rect.borderColor));
+						DrawRectangleRoundedLines(r,
+						                          roundness,
+						                          32,
+						                          rect.borderWidth,
+						                          GetColor(rect.borderColor));
 					}
 				}
 			}
@@ -172,10 +191,7 @@ int GluonApp::Run()
 	return 0;
 }
 
-void GluonApp::SetTitle(const char* title)
-{
-	SetWindowTitle(title);
-}
+void GluonApp::SetTitle(const char* title) { SetWindowTitle(title); }
 
 void GluonApp::SetWindowSize(i32 w, i32 h)
 {

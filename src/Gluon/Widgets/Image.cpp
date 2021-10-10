@@ -1,6 +1,6 @@
-#include "Gluon/Widgets/Image.h"
+#include <Gluon/Widgets/Image.h>
 
-#include "Gluon/Widgets/Hashes.h"
+#include <Gluon/Widgets/Hashes.h>
 
 #include <raylib.h>
 
@@ -37,7 +37,8 @@ GluonImage::~GluonImage()
 	}
 }
 
-void GluonImage::ParsePropertyInternal(Parser::Node::Ptr node, const u32 nodeHash)
+void GluonImage::ParsePropertyInternal(Parser::Node::Ptr node,
+                                       const u32         nodeHash)
 {
 	switch (nodeHash)
 	{
@@ -72,7 +73,9 @@ void GluonImage::ParsePropertyInternal(Parser::Node::Ptr node, const u32 nodeHas
 
 				if (imageInfo.rasterImage->image == nullptr)
 				{
-					LOG_F(ERROR, "Cannot load image %s", imageUrl.c_str()); // stbi_failure_reason());
+					LOG_F(ERROR,
+					      "Cannot load image %s",
+					      imageUrl.c_str()); // stbi_failure_reason());
 				}
 				imageSize = {image->width, image->height};
 			}
@@ -85,7 +88,8 @@ void GluonImage::ParsePropertyInternal(Parser::Node::Ptr node, const u32 nodeHas
 			std::transform(fit.begin(),
 			               fit.end(),
 			               fit.begin(),
-			               [](char c) { return static_cast<char>(std::tolower(c)); });
+			               [](char c)
+			               { return static_cast<char>(std::tolower(c)); });
 
 			if (strcmp(fit.c_str(), "stretch") == 0)
 			{
@@ -102,7 +106,8 @@ void GluonImage::ParsePropertyInternal(Parser::Node::Ptr node, const u32 nodeHas
 			else
 			{
 				LOG_F(ERROR,
-				      "%s is not a valid fit mode. Valid modes are Stretch, Fit or Crop",
+				      "%s is not a valid fit mode. Valid modes are Stretch, "
+				      "Fit or Crop",
 				      node->children[0]->name.c_str());
 			}
 		}
@@ -110,7 +115,8 @@ void GluonImage::ParsePropertyInternal(Parser::Node::Ptr node, const u32 nodeHas
 
 		case NodeHash::Tint:
 		{
-			imageTint = Utils::ExtractColor(node->children[0]->associatedTokens);
+			imageTint = Utils::ExtractColor(
+			    node->children[0]->associatedTokens);
 		}
 		break;
 	}
@@ -121,7 +127,9 @@ void GluonImage::PostEvaluate()
 	if (imageInfo.isVectorial)
 	{
 		// TODO: This should be evaluated
-		imageInfo.svgImage = nsvgParseFromFile(imageUrl.c_str(), "px", Min(size.x, size.y));
+		imageInfo.svgImage = nsvgParseFromFile(imageUrl.c_str(),
+		                                       "px",
+		                                       Min(size.x, size.y));
 	}
 	else
 	{
@@ -142,7 +150,8 @@ void GluonImage::PostEvaluate()
 				i32 targetWidth  = 0;
 				i32 targetHeight = 0;
 
-				f32 imageRatio = static_cast<f32>(image->width) / static_cast<f32>(image->height);
+				f32 imageRatio = static_cast<f32>(image->width) /
+				                 static_cast<f32>(image->height);
 				if (size.x < size.y)
 				{
 					targetWidth  = static_cast<i32>(size.x);
@@ -167,7 +176,8 @@ void GluonImage::PostEvaluate()
 				i32 targetWidth  = 0;
 				i32 targetHeight = 0;
 
-				f32 imageRatio = static_cast<f32>(image->width) / static_cast<f32>(image->height);
+				f32 imageRatio = static_cast<f32>(image->width) /
+				                 static_cast<f32>(image->height);
 				if (size.x > size.y)
 				{
 					targetWidth  = static_cast<i32>(size.x);
@@ -181,7 +191,10 @@ void GluonImage::PostEvaluate()
 
 				ImageResize(image, targetWidth, targetHeight);
 
-				Rectangle r = {(targetWidth - size.x) * 0.5f, (targetHeight - size.y) * 0.5f, size.x, size.y};
+				Rectangle r = {(targetWidth - size.x) * 0.5f,
+				               (targetHeight - size.y) * 0.5f,
+				               size.x,
+				               size.y};
 				ImageCrop(image, r);
 			}
 			break;

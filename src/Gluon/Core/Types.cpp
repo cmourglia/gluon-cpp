@@ -1,4 +1,4 @@
-#include "types.h"
+#include <Gluon/Core/Types.h>
 
 namespace MuColor
 {
@@ -151,7 +151,7 @@ const glm::vec4 WhiteSmoke           = FromRgba(245, 245, 245);
 const glm::vec4 Yellow               = FromRgba(255, 255, 0);
 const glm::vec4 YellowGreen          = FromRgba(154, 205, 50);
 
-const std::unordered_map<std::string_view, glm::vec4> ColorsByName = {
+const std::unordered_map<std::string, glm::vec4> ColorsByName = {
     {"AliceBlue", AliceBlue},
     {"AntiqueWhite", AntiqueWhite},
     {"Aqua", Aqua},

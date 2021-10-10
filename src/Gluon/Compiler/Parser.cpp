@@ -1,12 +1,12 @@
-#include "Gluon/Compiler/Parser.h"
+#include <Gluon/Compiler/Parser.h>
 
-#include "Gluon/Compiler/Tokenizer.h"
+#include <Gluon/Compiler/Tokenizer.h>
 
-#include "Gluon/Widgets/Widget.h"
-#include "Gluon/Widgets/Window.h"
-#include "Gluon/Widgets/Rectangle.h"
-#include "Gluon/Widgets/Image.h"
-#include "Gluon/Widgets/Text.h"
+#include <Gluon/Widgets/Widget.h>
+#include <Gluon/Widgets/Window.h>
+#include <Gluon/Widgets/Rectangle.h>
+#include <Gluon/Widgets/Image.h>
+#include <Gluon/Widgets/Text.h>
 
 #include <loguru.hpp>
 
@@ -38,7 +38,7 @@ enum class GeometryPolicy
 
 std::unordered_map<std::string, WidgetFactory*> widgetFactories;
 
-GluonWidget* ParseGluonBuffer(std::string_view buffer)
+GluonWidget* ParseGluonBuffer(const char* buffer)
 {
 	if (widgetFactories.empty())
 	{
@@ -56,7 +56,9 @@ GluonWidget* ParseGluonBuffer(std::string_view buffer)
 
 	auto remove_it = std::remove_if(tokens.begin(),
 	                                tokens.end(),
-	                                [](const Token& token) { return token.type == TokenType::Spacing; });
+	                                [](const Token& token) {
+		                                return token.type == TokenType::Spacing;
+	                                });
 	tokens.erase(remove_it, tokens.end());
 
 	Token* token = tokens.data();
@@ -77,7 +79,8 @@ GluonWidget* ParseGluonBuffer(std::string_view buffer)
 				++token;
 			}
 
-			while (!(token->type == TokenType::EndOfLine || token->type == TokenType::Semicolon))
+			while (!(token->type == TokenType::EndOfLine ||
+			         token->type == TokenType::Semicolon))
 			{
 				valueTokens.push_back(*token);
 				name += token->text;
@@ -142,7 +145,8 @@ GluonWidget* ParseGluonBuffer(std::string_view buffer)
 
 							state = ParserState::Property;
 						}
-						// FIXME(Charly): Maybe we should try to find a way to avoid code duplication ?
+						// FIXME(Charly): Maybe we should try to find a way to
+						// avoid code duplication ?
 						else if (token[1].type == TokenType::Dot)
 						{
 							auto node    = std::make_shared<PropertyNode>();
@@ -150,7 +154,8 @@ GluonWidget* ParseGluonBuffer(std::string_view buffer)
 							node->parent = currentNode;
 
 							// FIXME(Charly): This loop is not safe
-							for (int i = 2; token[i].type != TokenType::Colon; ++i)
+							for (int i = 2; token[i].type != TokenType::Colon;
+							     ++i)
 							{
 								if (token[i].type == TokenType::Identifier)
 								{

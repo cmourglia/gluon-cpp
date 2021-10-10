@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Gluon/Widgets/Widget.h"
+#include <Gluon/Widgets/Widget.h>
 
 struct NSVGimage;
 struct GluonImage : public GluonWidget
@@ -12,10 +12,7 @@ struct GluonImage : public GluonWidget
 		Crop,
 	};
 
-	static GluonWidget* Create()
-	{
-		return new GluonImage{};
-	}
+	static GluonWidget* Create() { return new GluonImage{}; }
 
 	virtual ~GluonImage();
 
@@ -30,6 +27,8 @@ struct GluonImage : public GluonWidget
 	ImageInfo imageInfo = {};
 
 private:
-	virtual void ParsePropertyInternal(Parser::Node::Ptr node, const u32 nodeHash) override;
-	virtual void BuildRenderInfosInternal(std::vector<RectangleInfo>* result) override;
+	virtual void ParsePropertyInternal(Parser::Node::Ptr node,
+	                                   const u32         nodeHash) override;
+	virtual void BuildRenderInfosInternal(
+	    std::vector<RectangleInfo>* result) override;
 };

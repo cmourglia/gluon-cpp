@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Gluon/Compiler/Parser.h"
-#include "Gluon/Compiler/ShuntingYard.h"
+#include <Gluon/Compiler/Parser.h>
+#include <Gluon/Compiler/ShuntingYard.h>
 
 #include <memory>
 #include <unordered_set>
@@ -13,6 +13,9 @@ struct GluonWidget
 	GluonWidget() = default;
 	virtual ~GluonWidget();
 
+	NONMOVEABLE(GluonWidget);
+	NONCOPYABLE(GluonWidget);
+
 	virtual void Deserialize(Parser::Node::Ptr node) final;
 	virtual void BuildRenderInfos(std::vector<RectangleInfo>* result) final;
 
@@ -22,7 +25,7 @@ struct GluonWidget
 	std::vector<GluonWidget*> children;
 	GluonWidget*              parent = nullptr;
 
-	std::string id = "";
+	std::string id;
 
 	glm::vec2 pos  = glm::vec2(0.0f);
 	glm::vec2 size = glm::vec2(0.0f);
@@ -45,16 +48,19 @@ protected:
 
 private:
 	virtual void ParseProperty(Parser::Node::Ptr node) final;
-	virtual void ParsePropertyInternal(Parser::Node::Ptr node, const u32 nodeHash) = 0;
+	virtual void ParsePropertyInternal(Parser::Node::Ptr node,
+	                                   u32               nodeHash) = 0;
 
-	virtual void BuildRenderInfosInternal(std::vector<RectangleInfo>* result) = 0;
+	virtual void BuildRenderInfosInternal(
+	    std::vector<RectangleInfo>* result) = 0;
 
 	virtual void PreEvaluate() { }
 	virtual void PostEvaluate() { }
 };
 
-typedef GluonWidget* WidgetFactory(void);
+using WidgetFactory = GluonWidget*();
 
 GluonWidget* GetWidgetById(GluonWidget* rootWidget, const std::string& name);
-void         BuildDependencyGraph(GluonWidget* rootWidget, GluonWidget* currentWidget);
-void         BuildExpressionEvaluators(GluonWidget* rootWidget, GluonWidget* currentWidget);
+void BuildDependencyGraph(GluonWidget* rootWidget, GluonWidget* currentWidget);
+void BuildExpressionEvaluators(GluonWidget* rootWidget,
+                               GluonWidget* currentWidget);

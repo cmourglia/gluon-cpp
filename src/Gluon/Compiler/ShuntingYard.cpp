@@ -1,6 +1,6 @@
-#include "shuntingyard.h"
+#include <Gluon/Compiler/ShuntingYard.h>
 
-#include "Gluon/Widgets/Widget.h"
+#include <Gluon/Widgets/Widget.h>
 
 #include <loguru.hpp>
 
@@ -10,7 +10,7 @@
 namespace ShuntingYard
 {
 
-f32 Expression::Evaluate()
+f32 Expression::Evaluate() const
 {
 	std::stack<f32> valueStack;
 
@@ -18,14 +18,15 @@ f32 Expression::Evaluate()
 
 	while (!workingQueue.empty())
 	{
-		auto node = workingQueue.front().get();
+		auto* node = workingQueue.front().get();
 		workingQueue.pop();
 
 		switch (node->type)
 		{
 			case NodeType::Constant:
 			{
-				valueStack.push(reinterpret_cast<ConstantNode*>(node)->constant);
+				valueStack.push(
+				    reinterpret_cast<ConstantNode*>(node)->constant);
 			}
 			break;
 
@@ -39,13 +40,17 @@ f32 Expression::Evaluate()
 				f32 left = valueStack.top();
 				valueStack.pop();
 
-				valueStack.push(EvaluateOperator(reinterpret_cast<OperatorNode*>(node), left, right));
+				valueStack.push(
+				    EvaluateOperator(reinterpret_cast<OperatorNode*>(node),
+				                     left,
+				                     right));
 			}
 			break;
 
 			case NodeType::Function:
 			{
-				valueStack.push(EvaluateFunction(reinterpret_cast<FunctionNode*>(node)));
+				valueStack.push(
+				    EvaluateFunction(reinterpret_cast<FunctionNode*>(node)));
 			}
 			break;
 		}
@@ -77,55 +82,66 @@ f32 Expression::EvaluateOperator(OperatorNode* op, f32 left, f32 right)
 	return 0.0f;
 }
 
-Expression Expression::Build(const std::vector<Token>& tokens, GluonWidget* rootWidget, GluonWidget* currentWidget)
+inline bool IsOperator(TokenType token)
+{
+	switch (token)
+	{
+		case TokenType::Plus:
+		case TokenType::Minus:
+		case TokenType::Asterisk:
+		case TokenType::Slash:
+			return true;
+
+		default:
+			break;
+	}
+
+	return false;
+}
+
+inline Operator GetOperator(TokenType token)
+{
+	// clang-format off
+	switch (token)
+	{
+		case TokenType::Plus: return Operator::Add;
+		case TokenType::Minus: return Operator::Substract;
+		case TokenType::Asterisk: return Operator::Multiply;
+		case TokenType::Slash: return Operator::Divide;
+		default:
+			AssertUnreachable();
+			break;
+	}
+	// clang-format on
+
+	return Operator::OpenParen;
+}
+
+inline i32 GetPrecedence(Operator op)
+{
+	// clang-format off
+	switch (op)
+	{
+		case Operator::Add:       return 2;
+		case Operator::Substract: return 2;
+		case Operator::Multiply:  return 3;
+		case Operator::Divide:    return 3;
+		default:
+			AssertUnreachable();
+			break;
+	}
+	// clang-format on
+
+	return 0;
+}
+
+Expression Expression::Build(const std::vector<Token>& tokens,
+                             GluonWidget*              rootWidget,
+                             GluonWidget*              currentWidget)
 {
 	Expression result;
 
 	std::stack<Operator> operatorStack;
-
-	auto IsOperator = [](TokenType token) -> bool
-	{
-		switch (token)
-		{
-			case TokenType::Plus:
-			case TokenType::Minus:
-			case TokenType::Asterisk:
-			case TokenType::Slash:
-				return true;
-		}
-
-		return false;
-	};
-
-	auto GetOperator = [](TokenType token) -> Operator
-	{
-		// clang-format off
-		switch (token)
-		{
-			case TokenType::Plus: return Operator::Add;
-			case TokenType::Minus: return Operator::Substract;
-			case TokenType::Asterisk: return Operator::Multiply;
-			case TokenType::Slash: return Operator::Divide;
-		}
-		// clang-format on
-
-		return Operator::OpenParen;
-	};
-
-	auto GetPrecedence = [](Operator op) -> i32
-	{
-		// clang-format off
-		switch (op)
-		{
-			case Operator::Add:       return 2;
-			case Operator::Substract: return 2;
-			case Operator::Multiply:  return 3;
-			case Operator::Divide:    return 3;
-		}
-		// clang-format on
-
-		return 0;
-	};
 
 	for (usize i = 0; i < tokens.size(); ++i)
 	{
@@ -135,7 +151,8 @@ Expression Expression::Build(const std::vector<Token>& tokens, GluonWidget* root
 		{
 			case TokenType::Number:
 			{
-				result.evaluationQueue.push(std::make_shared<ConstantNode>(token.number));
+				result.evaluationQueue.push(
+				    std::make_shared<ConstantNode>(token.number));
 			}
 			break;
 
@@ -149,7 +166,9 @@ Expression Expression::Build(const std::vector<Token>& tokens, GluonWidget* root
 			{
 				while (operatorStack.top() != Operator::OpenParen)
 				{
-					result.evaluationQueue.push(std::make_shared<OperatorNode>(operatorStack.top(), false));
+					result.evaluationQueue.push(
+					    std::make_shared<OperatorNode>(operatorStack.top(),
+					                                   false));
 					operatorStack.pop();
 				}
 
@@ -161,18 +180,23 @@ Expression Expression::Build(const std::vector<Token>& tokens, GluonWidget* root
 			case TokenType::Plus:
 			{
 				bool isFirstElement      = (i == 0);
-				bool previousIsOpenParen = (i > 0) && tokens[i - 1].type == TokenType::OpenParen;
-				bool previousIsOperator  = (i > 0) && IsOperator(tokens[i - 1].type);
-				bool isUnary             = isFirstElement || previousIsOpenParen || previousIsOperator;
+				bool previousIsOpenParen = (i > 0) && tokens[i - 1].type ==
+				                                          TokenType::OpenParen;
+				bool previousIsOperator = (i > 0) &&
+				                          IsOperator(tokens[i - 1].type);
+				bool isUnary = isFirstElement || previousIsOpenParen ||
+				               previousIsOperator;
 
 				bool isNotLast    = (i + 1) < tokens.size();
-				bool nextIsNumber = isNotLast && (tokens[i + 1].type == TokenType::Number);
+				bool nextIsNumber = isNotLast &&
+				                    (tokens[i + 1].type == TokenType::Number);
 
 				// Special case for unary plus / minus
 				if (isUnary && nextIsNumber)
 				{
 					f32 mult = token.type == TokenType::Minus ? -1.0f : 1.0f;
-					result.evaluationQueue.push(std::make_shared<ConstantNode>(mult * tokens[++i].number));
+					result.evaluationQueue.push(std::make_shared<ConstantNode>(
+					    mult * tokens[++i].number));
 
 					continue;
 				}
@@ -191,7 +215,8 @@ Expression Expression::Build(const std::vector<Token>& tokens, GluonWidget* root
 					if (GetPrecedence(op) <= GetPrecedence(other))
 					{
 						operatorStack.pop();
-						result.evaluationQueue.push(std::make_shared<OperatorNode>(other, false));
+						result.evaluationQueue.push(
+						    std::make_shared<OperatorNode>(other, false));
 					}
 				}
 
@@ -202,10 +227,13 @@ Expression Expression::Build(const std::vector<Token>& tokens, GluonWidget* root
 			case TokenType::Identifier:
 			{
 				bool hasTwoNextValues = (i + 2) < tokens.size();
-				bool nextIsDot        = hasTwoNextValues && (tokens[i + 1].type == TokenType::Dot);
-				bool nextIsProperty   = hasTwoNextValues && (tokens[i + 2].type == TokenType::Identifier);
+				bool nextIsDot        = hasTwoNextValues &&
+				                 (tokens[i + 1].type == TokenType::Dot);
+				bool nextIsProperty = hasTwoNextValues &&
+				                      (tokens[i + 2].type ==
+				                       TokenType::Identifier);
 
-				GluonWidget* widget;
+				GluonWidget* widget = nullptr;
 
 				std::string binding;
 
@@ -243,21 +271,28 @@ Expression Expression::Build(const std::vector<Token>& tokens, GluonWidget* root
 				else if (binding == "right")  fn = Function::Right;
 				// clang-format on
 
-				result.evaluationQueue.push(std::make_shared<FunctionNode>(fn, widget));
+				result.evaluationQueue.push(
+				    std::make_shared<FunctionNode>(fn, widget));
 			}
 			break;
+
+			default:
+				AssertUnreachable();
+				break;
 		}
 	}
 
 	while (!operatorStack.empty())
 	{
-		if (operatorStack.top() == Operator::OpenParen || operatorStack.top() == Operator::CloseParen)
+		if (operatorStack.top() == Operator::OpenParen ||
+		    operatorStack.top() == Operator::CloseParen)
 		{
 			LOG_F(ERROR, "Imbalanced expression");
 		}
 		else
 		{
-			result.evaluationQueue.push(std::make_shared<OperatorNode>(operatorStack.top(), false));
+			result.evaluationQueue.push(
+			    std::make_shared<OperatorNode>(operatorStack.top(), false));
 		}
 		operatorStack.pop();
 	}
@@ -284,5 +319,4 @@ f32 Expression::EvaluateFunction(FunctionNode* fn)
 
 	return 0.0f;
 }
-
 }

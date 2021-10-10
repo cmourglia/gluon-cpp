@@ -20,27 +20,27 @@ set(CORE_SRC
 )
 
 set(COMPILER_SRC
-    src/Gluon/Compiler/Tokenizer.cpp
     src/Gluon/Compiler/Parser.cpp
     src/Gluon/Compiler/ShuntingYard.cpp
+    src/Gluon/Compiler/Tokenizer.cpp
 
-    src/Gluon/Compiler/Tokenizer.h
     src/Gluon/Compiler/Parser.h
     src/Gluon/Compiler/ShuntingYard.h
+    src/Gluon/Compiler/Tokenizer.h
 )
 
 set(WIDGETS_SRC
+    src/Gluon/Widgets/Image.cpp
+    src/Gluon/Widgets/Rectangle.cpp
+    src/Gluon/Widgets/Text.cpp
     src/Gluon/Widgets/Widget.cpp
     src/Gluon/Widgets/Window.cpp
-    src/Gluon/Widgets/Rectangle.cpp
-    src/Gluon/Widgets/Image.cpp
-    src/Gluon/Widgets/Text.cpp
 
+    src/Gluon/Widgets/Image.h
+    src/Gluon/Widgets/Rectangle.h
+    src/Gluon/Widgets/Text.h
     src/Gluon/Widgets/Widget.h
     src/Gluon/Widgets/Window.h
-    src/Gluon/Widgets/Rectangle.h
-    src/Gluon/Widgets/Image.h
-    src/Gluon/Widgets/Text.h
 )
 
 set(APP_SRC

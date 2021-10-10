@@ -1,13 +1,14 @@
-#include "Gluon/Widgets/Rectangle.h"
+#include <Gluon/Widgets/Rectangle.h>
 
-#include "Gluon/Widgets/Hashes.h"
+#include <Gluon/Widgets/Hashes.h>
 
 namespace Utils
 {
 glm::vec4 ExtractColor(const std::vector<Token>& tokens);
 }
 
-void GluonRectangle::ParsePropertyInternal(Parser::Node::Ptr node, const u32 nodeHash)
+void GluonRectangle::ParsePropertyInternal(Parser::Node::Ptr node,
+                                           const u32         nodeHash)
 {
 	if (nodeHash == NodeHash::Color)
 	{
@@ -16,7 +17,8 @@ void GluonRectangle::ParsePropertyInternal(Parser::Node::Ptr node, const u32 nod
 	}
 }
 
-void GluonRectangle::BuildRenderInfosInternal(std::vector<RectangleInfo>* result)
+void GluonRectangle::BuildRenderInfosInternal(
+    std::vector<RectangleInfo>* result)
 {
 	RectangleInfo rect = {
 	    .position  = pos,
