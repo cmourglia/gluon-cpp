@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Gluon/Compiler/Tokenizer.h>
-#include <Gluon/Core/Containers/DynArray.h>
+#include <Gluon/Core/Containers/Array.h>
 
 #include <memory>
 

@@ -18,7 +18,7 @@ set(CORE_SRC
     src/Gluon/Core/Utils.h
 
     src/Gluon/Core/Containers/HashMap.h
-    src/Gluon/Core/Containers/DynArray.h
+    src/Gluon/Core/Containers/Array.h
 )
 
 set(COMPILER_SRC
