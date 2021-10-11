@@ -16,13 +16,13 @@ public:
 	{
 	}
 
-	const char* GetTypename() const override { return "Function"; }
+	const char* to_string() const override { return "Function"; }
 
-	std::string GetName() const { return m_name; }
+	std::string name() const { return m_name; }
 
-	ScopeNode* GetBody() const { return m_body; }
+	ScopeNode* body() const { return m_body; }
 
-	bool IsFunction() const override { return true; }
+	bool is_function() const override { return true; }
 
 private:
 	std::string m_name;

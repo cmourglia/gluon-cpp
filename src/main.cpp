@@ -14,42 +14,40 @@ int main(int argc, char** argv)
 
 int main()
 {
-	auto program = Make<VM::Program>();
+	auto program = make<VM::Program>();
 
-	auto* function = program->Push<VM::FunctionDeclaration>("foo");
+	auto* function = program->add<VM::FunctionDeclaration>("foo");
 
-	auto* block1 = function->MakeBody<VM::BlockStatement>();
+	auto* block1 = function->make_body<VM::BlockStatement>();
 
-	auto binaryExpression = Make<
+	auto binaryExpression = make<
 	    VM::BinaryExpression>(VM::BinaryOp::Addition,
-	                          Make<VM::BinaryExpression>(VM::BinaryOp::Addition,
-	                                                     Make<VM::Literal>(
+	                          make<VM::BinaryExpression>(VM::BinaryOp::Addition,
+	                                                     make<VM::Literal>(
 	                                                         VM::Value{1}),
-	                                                     Make<VM::Literal>(
+	                                                     make<VM::Literal>(
 	                                                         VM::Value{2})),
-	                          Make<VM::Literal>(VM::Value{3}));
+	                          make<VM::Literal>(VM::Value{3}));
 
-	auto* returnStmt = block1->Push<VM::ReturnStatement>(binaryExpression);
+	auto* returnStmt = block1->add<VM::ReturnStatement>(binaryExpression);
 	UNUSED(returnStmt);
 
-	auto* expressionStmt = program->Push<VM::ExpressionStatement>(
-	    Make<VM::CallExpression>("foo"));
+	auto* expressionStmt = program->add<VM::ExpressionStatement>(
+	    make<VM::CallExpression>("foo"));
 	UNUSED(expressionStmt);
 
-	program->Dump(0);
+	program->dump(0);
 
 	VM::Interpreter interpreter;
-	auto            result = interpreter.Run(program.get());
+	auto            result = interpreter.run(program.get());
 
-	printf("Interpreter returned: ");
-	result.Dump();
-	printf("\n");
+	printf("Interpreter returned: %s\n", result.to_string().c_str());
 
-	interpreter.GetHeap()->Allocate<VM::Object>();
-	interpreter.GetGlobalObject()
-	    ->Add("foo", VM::Value{interpreter.GetHeap()->Allocate<VM::Object>()});
+	interpreter.heap()->allocate<VM::Object>();
+	interpreter.global_object()
+	    ->add("foo", VM::Value{interpreter.heap()->allocate<VM::Object>()});
 
-	interpreter.GetHeap()->Garbage();
+	interpreter.heap()->garbage();
 
 	return 0;
 }

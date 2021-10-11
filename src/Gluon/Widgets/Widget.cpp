@@ -3,6 +3,7 @@
 #include <Gluon/Widgets/Hashes.h>
 
 #include <Gluon/Core/Utils.h>
+#include <Gluon/Core/Containers/HashMap.h>
 
 #include <loguru.hpp>
 
@@ -10,37 +11,37 @@
 
 namespace Utils
 {
-glm::vec4 ExtractColor(const std::vector<Token>& tokens)
+glm::vec4 extract_color(const std::vector<Token>& tokens)
 {
 	glm::vec4 color = {};
 
 	if (!tokens.empty())
 	{
-		Token firstToken = tokens.front();
-		switch (firstToken.type)
+		Token first_token = tokens.front();
+		switch (first_token.type)
 		{
 			case TokenType::String:
 			{
-				Assert(tokens.size() == 1,
+				ASSERT(tokens.size() == 1,
 				       "A color as a string can only be defined by one token");
-				firstToken.text.erase(std::remove_if(firstToken.text.begin(),
-				                                     firstToken.text.end(),
-				                                     [](const char c)
-				                                     { return c == '"'; }),
-				                      firstToken.text.end());
+				first_token.text.erase(std::remove_if(first_token.text.begin(),
+				                                      first_token.text.end(),
+				                                      [](const char c)
+				                                      { return c == '"'; }),
+				                       first_token.text.end());
 
-				color = MuColor::FromString(firstToken.text);
+				color = GluonColor::from_string(first_token.text);
 			}
 			break;
 
 			case TokenType::Identifier:
 			{
-				static constexpr auto RGB_HASH  = Utils::Crc32("rgb");
-				static constexpr auto RGBA_HASH = Utils::Crc32("rgba");
-				static constexpr auto HSL_HASH  = Utils::Crc32("hsl");
-				static constexpr auto HSLA_HASH = Utils::Crc32("hsla");
+				static constexpr auto RGB_HASH  = Utils::crc32("rgb");
+				static constexpr auto RGBA_HASH = Utils::crc32("rgba");
+				static constexpr auto HSL_HASH  = Utils::crc32("hsl");
+				static constexpr auto HSLA_HASH = Utils::crc32("hsla");
 
-				const auto hash = Utils::Crc32(firstToken.text);
+				const auto hash = Utils::crc32(first_token.text);
 
 				std::vector<f32> values;
 				for (const auto& t : tokens)
@@ -57,16 +58,16 @@ glm::vec4 ExtractColor(const std::vector<Token>& tokens)
 					{
 						if (values.size() == 3)
 						{
-							color = MuColor::FromRgba((i32)values[0],
-							                          (i32)values[1],
-							                          (i32)values[2]);
+							color = GluonColor::from_rgba((i32)values[0],
+							                              (i32)values[1],
+							                              (i32)values[2]);
 						}
 						else
 						{
 							LOG_F(ERROR,
 							      "line %d: Malformed rgb() call, should be "
 							      "rgb(red, green, blue)",
-							      firstToken.line);
+							      first_token.line);
 						}
 					}
 					break;
@@ -75,17 +76,17 @@ glm::vec4 ExtractColor(const std::vector<Token>& tokens)
 					{
 						if (values.size() == 4)
 						{
-							color = MuColor::FromRgba((i32)values[0],
-							                          (i32)values[1],
-							                          (i32)values[2],
-							                          values[3]);
+							color = GluonColor::from_rgba((i32)values[0],
+							                              (i32)values[1],
+							                              (i32)values[2],
+							                              values[3]);
 						}
 						else
 						{
 							LOG_F(ERROR,
 							      "line %d: Malformed rgba() call, should be "
 							      "rgba(red, green, blue, alpha)",
-							      firstToken.line);
+							      first_token.line);
 						}
 					}
 					break;
@@ -94,16 +95,16 @@ glm::vec4 ExtractColor(const std::vector<Token>& tokens)
 					{
 						if (values.size() == 3)
 						{
-							color = MuColor::FromHsla((i32)values[0],
-							                          (i32)values[1],
-							                          (i32)values[2]);
+							color = GluonColor::from_hsla((i32)values[0],
+							                              (i32)values[1],
+							                              (i32)values[2]);
 						}
 						else
 						{
 							LOG_F(ERROR,
 							      "line %d: Malformed hsl() call, should be "
 							      "hsl(hue, saturation, lightness)",
-							      firstToken.line);
+							      first_token.line);
 						}
 					}
 					break;
@@ -112,30 +113,30 @@ glm::vec4 ExtractColor(const std::vector<Token>& tokens)
 					{
 						if (values.size() == 4)
 						{
-							color = MuColor::FromHsla((i32)values[0],
-							                          (i32)values[1],
-							                          (i32)values[2],
-							                          values[3]);
+							color = GluonColor::from_hsla((i32)values[0],
+							                              (i32)values[1],
+							                              (i32)values[2],
+							                              values[3]);
 						}
 						else
 						{
 							LOG_F(ERROR,
 							      "line %d: Malformed hsla() call, should be "
 							      "hsla(hue, saturation, lightness, alpha",
-							      firstToken.line);
+							      first_token.line);
 						}
 					}
 					break;
 					default:
 					{
-						if (firstToken.text.compare("Color") == 0)
+						if (first_token.text.compare("Color") == 0)
 						{
-							Assert(tokens.size() == 3 &&
+							ASSERT(tokens.size() == 3 &&
 							           tokens[2].type == TokenType::Identifier,
 							       "We are looking for `Color.ColorName`");
-							auto it = MuColor::ColorsByName.find(
+							auto it = GluonColor::s_colors_by_name.find(
 							    tokens[2].text);
-							if (it != MuColor::ColorsByName.end())
+							if (it != GluonColor::s_colors_by_name.end())
 							{
 								color = it->second;
 							}
@@ -146,7 +147,7 @@ glm::vec4 ExtractColor(const std::vector<Token>& tokens)
 								      "color name. See "
 								      "https://www.w3schools.com/colors/"
 								      "colors_names.asp for a complete list.",
-								      firstToken.line,
+								      first_token.line,
 								      tokens[2].text.c_str());
 							}
 						}
@@ -155,8 +156,8 @@ glm::vec4 ExtractColor(const std::vector<Token>& tokens)
 							LOG_F(ERROR,
 							      "line %d: Could not parse color given '%s' "
 							      "value",
-							      firstToken.line,
-							      firstToken.text.c_str());
+							      first_token.line,
+							      first_token.text.c_str());
 						}
 					}
 					break;
@@ -170,13 +171,14 @@ glm::vec4 ExtractColor(const std::vector<Token>& tokens)
 
 }
 
-std::vector<GluonWidget*> GluonWidget::widgetMap = {};
+std::vector<GluonWidget*> GluonWidget::s_widget_map = {};
 
-extern std::unordered_map<std::string, WidgetFactory*> widgetFactories;
+extern StringHashMap<WidgetFactory*> s_widget_factories;
 
 GluonWidget::~GluonWidget()
 {
-	widgetMap.erase(std::find(widgetMap.begin(), widgetMap.end(), this));
+	s_widget_map.erase(
+	    std::find(s_widget_map.begin(), s_widget_map.end(), this));
 
 	for (auto&& c : children)
 	{
@@ -185,103 +187,103 @@ GluonWidget::~GluonWidget()
 	children.clear();
 }
 
-void GluonWidget::Deserialize(Parser::Node::Ptr node)
+void GluonWidget::deserialize(Parser::Node::Ptr node)
 {
-	widgetMap.push_back(this);
+	s_widget_map.push_back(this);
 
 	for (auto c : node->children)
 	{
 		if (c->type == Parser::Node_Structure)
 		{
-			auto child = (*widgetFactories[c->name])();
+			auto child = (*s_widget_factories[c->name])();
 
 			children.push_back(child);
 
 			child->parent = this;
 
-			child->Deserialize(c);
+			child->deserialize(c);
 		}
 		else if (c->type == Parser::Node_Property)
 		{
-			ParseProperty(c);
+			parse_property(c);
 		}
 	}
 }
 
-void GluonWidget::BuildRenderInfos(std::vector<RectangleInfo>* result)
+void GluonWidget::build_render_infos(std::vector<RectangleInfo>* result)
 {
-	BuildRenderInfosInternal(result);
+	build_render_infos_internal(result);
 	for (auto c : children)
 	{
-		c->BuildRenderInfos(result);
+		c->build_render_infos(result);
 	}
 }
 
-void GluonWidget::Evaluate()
+void GluonWidget::evaluate()
 {
-	for (auto&& w : widgetMap)
+	for (auto&& w : s_widget_map)
 	{
-		w->PreEvaluate();
+		w->pre_evaluate();
 	}
 
-	for (auto&& w : widgetMap)
+	for (auto&& w : s_widget_map)
 	{
-		w->EvaluateInternal();
+		w->evaluate_internal();
 	}
 
-	for (auto&& w : widgetMap)
+	for (auto&& w : s_widget_map)
 	{
-		w->PostEvaluate();
+		w->post_evaluate();
 	}
 }
 
-void GluonWidget::EvaluateInternal()
+void GluonWidget::evaluate_internal()
 {
 	if (dirty)
 	{
 		for (auto d : dependencies)
 		{
-			d->EvaluateInternal();
+			d->evaluate_internal();
 		}
 
 		for (auto&& eval : evaluators)
 		{
-			*eval.first = eval.second.Evaluate();
+			*eval.first = eval.second.evaluate();
 		}
 
 		dirty = false;
 	}
 }
 
-void GluonWidget::Touch()
+void GluonWidget::touch()
 {
 	dirty = true;
 	for (auto d : dependants)
 	{
-		d->Touch();
+		d->touch();
 	}
 }
 
-bool GluonWidget::WindowResized(i32 w, i32 h)
+bool GluonWidget::window_resized(i32 w, i32 h)
 {
 	bool needUpdate = false;
 
 	for (auto c : children)
 	{
-		needUpdate |= c->WindowResized(w, h);
+		needUpdate |= c->window_resized(w, h);
 	}
 
 	return needUpdate;
 }
 
-void GluonWidget::ParseProperty(Parser::Node::Ptr node)
+void GluonWidget::parse_property(Parser::Node::Ptr node)
 {
-	const auto nodeHash = Utils::Crc32(node->name);
-	switch (nodeHash)
+	const auto node_hash = Utils::crc32(node->name);
+	switch (node_hash)
 	{
 		case NodeHash::ID:
 		{
-			Assert(node->children.size() == 1, "id: <id>");
+			ASSERT(node->children.size() == 1, "id: <id>");
 			id = node->children[0]->name;
 		}
 		break;
@@ -293,14 +295,14 @@ void GluonWidget::ParseProperty(Parser::Node::Ptr node)
 		{
 			auto infos = node->children[0];
 
-			geometryExpressions[nodeHash] = infos->associatedTokens;
+			geometry_expressions[node_hash] = infos->associated_tokens;
 
-			for (usize i = 0; i < infos->associatedTokens.size() - 1; ++i)
+			for (usize i = 0; i < infos->associated_tokens.size() - 1; ++i)
 			{
-				if (infos->associatedTokens[i].type == TokenType::Identifier &&
-				    infos->associatedTokens[i + 1].type == TokenType::Dot)
+				if (infos->associated_tokens[i].type == TokenType::Identifier &&
+				    infos->associated_tokens[i + 1].type == TokenType::Dot)
 				{
-					dependencyIds.insert(infos->associatedTokens[i].text);
+					dependency_ids.insert(infos->associated_tokens[i].text);
 				}
 			}
 		}
@@ -326,22 +328,22 @@ void GluonWidget::ParseProperty(Parser::Node::Ptr node)
 
 		default:
 		{
-			ParsePropertyInternal(node, nodeHash);
+			parse_property_internal(node, node_hash);
 		}
 		break;
 	}
 }
 
-GluonWidget* GetWidgetById(GluonWidget* rootWidget, const std::string& name)
+GluonWidget* get_widget_by_id(GluonWidget* root_widget, const std::string& name)
 {
-	if (rootWidget->id == name)
+	if (root_widget->id == name)
 	{
-		return rootWidget;
+		return root_widget;
 	}
 
-	for (auto child : rootWidget->children)
+	for (auto child : root_widget->children)
 	{
-		if (auto node = GetWidgetById(child, name); node != nullptr)
+		if (auto node = get_widget_by_id(child, name); node != nullptr)
 		{
 			return node;
 		}
@@ -350,30 +352,31 @@ GluonWidget* GetWidgetById(GluonWidget* rootWidget, const std::string& name)
 	return nullptr;
 }
 
-void BuildDependencyGraph(GluonWidget* rootWidget, GluonWidget* currentWidget)
+void build_dependency_graph(GluonWidget* root_widget,
+                            GluonWidget* current_widget)
 {
-	for (auto id : currentWidget->dependencyIds)
+	for (auto id : current_widget->dependency_ids)
 	{
-		GluonWidget* dep = id == "parent" ? currentWidget->parent
-		                                  : GetWidgetById(rootWidget, id);
+		GluonWidget* dep = id == "parent" ? current_widget->parent
+		                                  : get_widget_by_id(root_widget, id);
 
 		if (dep != nullptr)
 		{
-			currentWidget->dependencies.push_back(dep);
-			dep->dependants.push_back(currentWidget);
+			current_widget->dependencies.push_back(dep);
+			dep->dependants.push_back(current_widget);
 		}
 	}
 
-	for (auto c : currentWidget->children)
+	for (auto c : current_widget->children)
 	{
-		BuildDependencyGraph(rootWidget, c);
+		build_dependency_graph(root_widget, c);
 	}
 }
 
-void BuildExpressionEvaluators(GluonWidget* rootWidget,
-                               GluonWidget* currentWidget)
+void build_expression_evaluators(GluonWidget* root_widget,
+                                 GluonWidget* current_widget)
 {
-	auto GetHashIndex = [](u32 hash)
+	auto get_hash_index = [](u32 hash)
 	{
 		switch (hash)
 		{
@@ -387,48 +390,48 @@ void BuildExpressionEvaluators(GluonWidget* rootWidget,
 				return 3;
 
 			default:
-				AssertUnreachable();
+				ASSERT_UNREACHABLE();
 				return -1;
 		}
 	};
 
-	auto GetPropertyPtr = [&currentWidget](u32 hash) -> f32*
+	auto get_property_ptr = [&current_widget](u32 hash) -> f32*
 	{
 		switch (hash)
 		{
 			case NodeHash::X:
-				return &currentWidget->pos.x;
+				return &current_widget->pos.x;
 			case NodeHash::Y:
-				return &currentWidget->pos.y;
+				return &current_widget->pos.y;
 			case NodeHash::Width:
-				return &currentWidget->size.x;
+				return &current_widget->size.x;
 			case NodeHash::Height:
-				return &currentWidget->size.y;
+				return &current_widget->size.y;
 
 			default:
-				AssertUnreachable();
+				ASSERT_UNREACHABLE();
 				return nullptr;
 		}
 	};
 
-	std::unordered_set<u32> remainingAttributes = {NodeHash::X,
-	                                               NodeHash::Y,
-	                                               NodeHash::Width,
-	                                               NodeHash::Height};
-	for (auto expr : currentWidget->geometryExpressions)
+	std::unordered_set<u32> remaining_attributes = {NodeHash::X,
+	                                                NodeHash::Y,
+	                                                NodeHash::Width,
+	                                                NodeHash::Height};
+	for (auto expr : current_widget->geometry_expressions)
 	{
-		remainingAttributes.erase(expr.first);
+		remaining_attributes.erase(expr.first);
 
-		auto expression = ShuntingYard::Expression::Build(expr.second,
-		                                                  rootWidget,
-		                                                  currentWidget);
+		auto expression = ShuntingYard::Expression::build(expr.second,
+		                                                  root_widget,
+		                                                  current_widget);
 
-		currentWidget->evaluators.push_back(
-		    std::make_pair(GetPropertyPtr(expr.first), expression));
+		current_widget->evaluators.push_back(
+		    std::make_pair(get_property_ptr(expr.first), expression));
 	}
 
-	for (auto c : currentWidget->children)
+	for (auto c : current_widget->children)
 	{
-		BuildExpressionEvaluators(rootWidget, c);
+		build_expression_evaluators(root_widget, c);
 	}
 }

@@ -4,43 +4,43 @@
 
 #include <loguru.hpp>
 
-inline void AdvanceChars(Tokenizer* tokenizer, u32 count)
+inline void advance_chars(Tokenizer* tokenizer, u32 count)
 {
 	tokenizer->column += count;
 	tokenizer->stream += count;
 }
 
-inline bool IsEndOfLine(char c)
+inline bool is_eol(char c)
 {
 	const bool result = (c == '\r') || (c == '\n');
 	return result;
 }
 
-inline bool IsSpacing(char c)
+inline bool is_spacing(char c)
 {
 	const bool result = (c == ' ') || (c == '\t') || (c == '\v') || (c == '\f');
 	return result;
 }
 
-inline bool IsWhitespace(char c)
+inline bool is_whitespace(char c)
 {
-	const bool result = IsEndOfLine(c) || IsSpacing(c);
+	const bool result = is_eol(c) || is_spacing(c);
 	return result;
 }
 
-inline bool IsAlpha(char c)
+inline bool is_alpha(char c)
 {
 	const bool result = (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z');
 	return result;
 }
 
-inline bool IsNumber(char c)
+inline bool is_number(char c)
 {
 	const bool result = (c >= '0' && c <= '9');
 	return result;
 }
 
-inline Token GetToken(Tokenizer* tokenizer)
+inline Token get_token(Tokenizer* tokenizer)
 {
 	Token token = {
 	    .filename = tokenizer->filename,
@@ -50,7 +50,7 @@ inline Token GetToken(Tokenizer* tokenizer)
 
 	const char* start = tokenizer->stream;
 	const char  c     = tokenizer->stream[0];
-	AdvanceChars(tokenizer, 1);
+	advance_chars(tokenizer, 1);
 
 	switch (c)
 	{
@@ -107,11 +107,11 @@ inline Token GetToken(Tokenizer* tokenizer)
 				// \" should not stop the string
 				if (tokenizer->stream[0] == '\\' && tokenizer->stream[1])
 				{
-					AdvanceChars(tokenizer, 1);
+					advance_chars(tokenizer, 1);
 				}
-				AdvanceChars(tokenizer, 1);
+				advance_chars(tokenizer, 1);
 			}
-			AdvanceChars(tokenizer, 1);
+			advance_chars(tokenizer, 1);
 		}
 		break;
 
@@ -124,11 +124,11 @@ inline Token GetToken(Tokenizer* tokenizer)
 				// \' should not stop the string
 				if (tokenizer->stream[0] == '\\' && tokenizer->stream[1])
 				{
-					AdvanceChars(tokenizer, 1);
+					advance_chars(tokenizer, 1);
 				}
-				AdvanceChars(tokenizer, 1);
+				advance_chars(tokenizer, 1);
 			}
-			AdvanceChars(tokenizer, 1);
+			advance_chars(tokenizer, 1);
 		}
 		break;
 
@@ -138,10 +138,9 @@ inline Token GetToken(Tokenizer* tokenizer)
 			{
 				token.type = TokenType::Comment;
 
-				while (tokenizer->stream[0] &&
-				       !IsEndOfLine(tokenizer->stream[0]))
+				while (tokenizer->stream[0] && !is_eol(tokenizer->stream[0]))
 				{
-					AdvanceChars(tokenizer, 1);
+					advance_chars(tokenizer, 1);
 				}
 			}
 			else if (tokenizer->stream[0] == '*')
@@ -157,20 +156,20 @@ inline Token GetToken(Tokenizer* tokenizer)
 					    (tokenizer->stream[0] == '\n' &&
 					     tokenizer->stream[1] == '\r'))
 					{
-						AdvanceChars(tokenizer, 1);
+						advance_chars(tokenizer, 1);
 					}
 
-					if (IsEndOfLine(tokenizer->stream[0]))
+					if (is_eol(tokenizer->stream[0]))
 					{
 						++tokenizer->line;
 					}
 
-					AdvanceChars(tokenizer, 1);
+					advance_chars(tokenizer, 1);
 				}
 
 				if (tokenizer->stream[0] == '*')
 				{
-					AdvanceChars(tokenizer, 2);
+					advance_chars(tokenizer, 2);
 				}
 			}
 			else
@@ -182,64 +181,64 @@ inline Token GetToken(Tokenizer* tokenizer)
 
 		default:
 		{
-			if (IsEndOfLine(c))
+			if (is_eol(c))
 			{
 				token.type = TokenType::EndOfLine;
 
 				if ((c == '\r' && tokenizer->stream[0] == '\n') ||
 				    (c == '\n' && tokenizer->stream[0] == '\r'))
 				{
-					AdvanceChars(tokenizer, 1);
+					advance_chars(tokenizer, 1);
 				}
 
 				tokenizer->column = 0;
 				tokenizer->line += 1;
 			}
-			else if (IsSpacing(c))
+			else if (is_spacing(c))
 			{
 				token.type = TokenType::Spacing;
-				while (tokenizer->stream[0] && IsSpacing(tokenizer->stream[0]))
+				while (tokenizer->stream[0] && is_spacing(tokenizer->stream[0]))
 				{
-					AdvanceChars(tokenizer, 1);
+					advance_chars(tokenizer, 1);
 				}
 			}
-			else if (IsAlpha(c))
+			else if (is_alpha(c))
 			{
 				token.type = TokenType::Identifier;
 
 				while (tokenizer->stream[0] &&
-				       (IsAlpha(tokenizer->stream[0]) ||
-				        IsNumber(tokenizer->stream[0]) ||
+				       (is_alpha(tokenizer->stream[0]) ||
+				        is_number(tokenizer->stream[0]) ||
 				        tokenizer->stream[0] == '_'))
 				{
-					AdvanceChars(tokenizer, 1);
+					advance_chars(tokenizer, 1);
 				}
 			}
-			else if (IsNumber(c))
+			else if (is_number(c))
 			{
 				token.type = TokenType::Number;
 
 				f32 value = (f32)(c - '0');
 
-				while (IsNumber(tokenizer->stream[0]))
+				while (is_number(tokenizer->stream[0]))
 				{
 					f32 digit = (f32)(tokenizer->stream[0] - '0');
 					value     = 10.0f * value + digit;
-					AdvanceChars(tokenizer, 1);
+					advance_chars(tokenizer, 1);
 				}
 
 				if (tokenizer->stream[0] == '.')
 				{
-					AdvanceChars(tokenizer, 1);
+					advance_chars(tokenizer, 1);
 
 					f32 mult = 0.1f;
 
-					while (IsNumber(tokenizer->stream[0]))
+					while (is_number(tokenizer->stream[0]))
 					{
 						f32 digit = (f32)(tokenizer->stream[0] - '0');
 						value     = value + mult * digit;
 						mult *= 0.1f;
-						AdvanceChars(tokenizer, 1);
+						advance_chars(tokenizer, 1);
 					}
 				}
 
@@ -247,7 +246,7 @@ inline Token GetToken(Tokenizer* tokenizer)
 
 				if (tokenizer->stream[0] == 'f')
 				{
-					AdvanceChars(tokenizer, 1);
+					advance_chars(tokenizer, 1);
 				}
 			}
 		}
@@ -266,7 +265,7 @@ inline Token GetToken(Tokenizer* tokenizer)
 	return token;
 }
 
-std::vector<Token> Tokenize(const char* buffer)
+std::vector<Token> tokenize(const char* buffer)
 {
 	std::vector<Token> tokens;
 
@@ -279,7 +278,7 @@ std::vector<Token> Tokenize(const char* buffer)
 
 	for (;;)
 	{
-		Token token = GetToken(&tokenizer);
+		Token token = get_token(&tokenizer);
 
 		tokens.push_back(token);
 

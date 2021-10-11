@@ -16,11 +16,11 @@ struct GluonWidget
 	NONMOVEABLE(GluonWidget);
 	NONCOPYABLE(GluonWidget);
 
-	virtual void Deserialize(Parser::Node::Ptr node) final;
-	virtual void BuildRenderInfos(std::vector<RectangleInfo>* result) final;
+	virtual void deserialize(Parser::Node::Ptr node) final;
+	virtual void build_render_infos(std::vector<RectangleInfo>* result) final;
 
-	virtual bool WindowResized(i32 newWidth, i32 newHeight);
-	virtual void Touch() final;
+	virtual bool window_resized(i32 newWidth, i32 newHeight);
+	virtual void touch() final;
 
 	std::vector<GluonWidget*> children;
 	GluonWidget*              parent = nullptr;
@@ -30,8 +30,8 @@ struct GluonWidget
 	glm::vec2 pos  = glm::vec2(0.0f);
 	glm::vec2 size = glm::vec2(0.0f);
 
-	std::unordered_set<std::string>             dependencyIds;
-	std::unordered_map<u32, std::vector<Token>> geometryExpressions;
+	std::unordered_set<std::string>             dependency_ids;
+	std::unordered_map<u32, std::vector<Token>> geometry_expressions;
 
 	std::vector<GluonWidget*> dependencies;
 	std::vector<GluonWidget*> dependants;
@@ -39,28 +39,30 @@ struct GluonWidget
 
 	std::vector<std::pair<f32*, ShuntingYard::Expression>> evaluators;
 
-	static void Evaluate();
+	static void evaluate();
 
 protected:
-	static std::vector<GluonWidget*> widgetMap;
+	static std::vector<GluonWidget*> s_widget_map;
 
-	virtual void EvaluateInternal();
+	virtual void evaluate_internal();
 
 private:
-	virtual void ParseProperty(Parser::Node::Ptr node) final;
-	virtual void ParsePropertyInternal(Parser::Node::Ptr node,
-	                                   u32               nodeHash) = 0;
+	virtual void parse_property(Parser::Node::Ptr node) final;
+	virtual void parse_property_internal(Parser::Node::Ptr node,
+	                                     u32               node_hash) = 0;
 
-	virtual void BuildRenderInfosInternal(
+	virtual void build_render_infos_internal(
 	    std::vector<RectangleInfo>* result) = 0;
 
-	virtual void PreEvaluate() { }
-	virtual void PostEvaluate() { }
+	virtual void pre_evaluate() { }
+	virtual void post_evaluate() { }
 };
 
 using WidgetFactory = GluonWidget*();
 
-GluonWidget* GetWidgetById(GluonWidget* rootWidget, const std::string& name);
-void BuildDependencyGraph(GluonWidget* rootWidget, GluonWidget* currentWidget);
-void BuildExpressionEvaluators(GluonWidget* rootWidget,
-                               GluonWidget* currentWidget);
+GluonWidget* get_widget_by_id(GluonWidget*       root_widget,
+                              const std::string& name);
+void         build_dependency_graph(GluonWidget* root_widget,
+                                    GluonWidget* current_widget);
+void         build_expression_evaluators(GluonWidget* root_widget,
+                                         GluonWidget* current_widget);

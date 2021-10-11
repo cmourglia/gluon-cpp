@@ -16,7 +16,7 @@ struct ParsedApplication
 
 struct GluonWidget;
 
-GluonWidget* ParseGluonBuffer(const char* buffer);
+GluonWidget* parse_gluon_buffer(const char* buffer);
 
 namespace Parser
 {
@@ -41,7 +41,7 @@ struct Node
 	NodeType    type;
 	std::string name;
 
-	std::vector<Token> associatedTokens;
+	std::vector<Token> associated_tokens;
 
 	Node*                  parent;
 	std::vector<Node::Ptr> children;

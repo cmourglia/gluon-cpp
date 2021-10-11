@@ -15,18 +15,18 @@ Heap::Heap(Interpreter* interpreter)
 {
 }
 
-void* Heap::AllocateCell(usize size)
+void* Heap::allocate_cell(usize size)
 {
 	for (auto&& block : m_blocks)
 	{
 		// This block's cell size is not compatible
-		if (size > block->GetCellSize())
+		if (size > block->cell_size())
 		{
 			continue;
 		}
 
 		// This block has compatible cell size, try to allocate memory
-		if (Cell* cell = block->Allocate(); cell != nullptr)
+		if (Cell* cell = block->allocate(); cell != nullptr)
 		{
 			return cell;
 		}
@@ -35,131 +35,131 @@ void* Heap::AllocateCell(usize size)
 	// We did not find a compatible heap block, make a new one
 	auto* memory = malloc(HeapBlock::BLOCK_SIZE);
 	auto* block  = new (memory) HeapBlock{size};
-	void* cell   = block->Allocate();
-	m_blocks.Add(std::unique_ptr<HeapBlock>(block));
+	void* cell   = block->allocate();
+	m_blocks.add(std::unique_ptr<HeapBlock>(block));
 
 	return cell;
 }
 
-inline void ClearObjects(const DynArray<std::unique_ptr<HeapBlock>>& blocks)
+inline void clear_objects(const Array<std::unique_ptr<HeapBlock>>& blocks)
 {
 	// TODO: We could keep a "used cells" list somewhere to avoid
 	// having to iterate over all the memory
 	for (auto&& block : blocks)
 	{
-		for (usize i = 0; i < block->NumCells(); ++i)
+		for (usize i = 0; i < block->num_cells(); ++i)
 		{
-			if (auto* cell = block->GetCell(i); cell->used)
+			if (auto* cell = block->cell(i); cell->used)
 			{
 				LOG_F(INFO,
 				      "Clearing cell (%s) %p mark flag",
-				      cell->GetTypename(),
+				      cell->to_string(),
 				      cell);
-				block->GetCell(i)->marked = false;
+				block->cell(i)->marked = false;
 			}
 		}
 	}
 }
 
-inline DynArray<Cell*> CollectRoots(Interpreter* interpreter)
+inline Array<Cell*> collect_roots(Interpreter* interpreter)
 {
-	DynArray<Cell*> roots;
+	Array<Cell*> roots;
 
-	if (auto* go = interpreter->GetGlobalObject(); go != nullptr)
+	if (auto* go = interpreter->global_object(); go != nullptr)
 	{
-		roots.Add(go);
+		roots.add(go);
 	}
 
 	return roots;
 }
 
-inline void MarkObjects(const DynArray<Cell*>& roots)
+inline void mark_objects(const Array<Cell*>& roots)
 {
 	auto MarkObject = [](Cell* visited)
 	{
 		visited->marked = true;
 		LOG_F(INFO,
 		      "Marking cell (%s) %p as visited",
-		      visited->GetTypename(),
+		      visited->to_string(),
 		      visited);
 	};
 
 	for (auto&& root : roots)
 	{
-		root->VisitGraph(MarkObject);
+		root->visit_graph(MarkObject);
 	}
 }
 
-inline void SweepObjects(const DynArray<std::unique_ptr<HeapBlock>>& blocks)
+inline void sweep_objects(const Array<std::unique_ptr<HeapBlock>>& blocks)
 {
 	// TODO: We could keep a "used cells" list somewhere to avoid
 	// having to iterate over all the memory
 	for (auto&& block : blocks)
 	{
-		for (usize i = 0; i < block->NumCells(); ++i)
+		for (usize i = 0; i < block->num_cells(); ++i)
 		{
-			if (auto* cell = block->GetCell(i); cell->used && !cell->marked)
+			if (auto* cell = block->cell(i); cell->used && !cell->marked)
 			{
 				LOG_F(INFO,
 				      "Deallocating  cell (%s) %p",
-				      cell->GetTypename(),
+				      cell->to_string(),
 				      cell);
-				block->Deallocate(cell);
+				block->deallocate(cell);
 			}
 		}
 	}
 }
 
-void Heap::Garbage()
+void Heap::garbage()
 {
 	LOG_SCOPE_F(INFO, "Garbage started");
 	Timer timer;
 
 	// First, we mark all cells as "not marked".
-	ClearObjects(m_blocks);
+	clear_objects(m_blocks);
 
 	// Collect all the root cells.
-	auto roots = CollectRoots(m_interpreter);
+	auto roots = collect_roots(m_interpreter);
 
 	// Then, we visit all the "root nodes" (the interpreter's GO for now)
 	// and recursively tag all the objects we visit as used.
-	MarkObjects(roots);
+	mark_objects(roots);
 
 	// Finally, we iterate over the (used) cells, and deallocate them if they
 	// are not marked.
-	SweepObjects(m_blocks);
+	sweep_objects(m_blocks);
 
-	timer.Tick();
+	timer.tick();
 	LOG_F(INFO,
 	      "Garbage done in %lfs (%lldμs)",
-	      timer.GetDeltaTime(),
-	      timer.GetDeltaTimeInMicroseconds());
+	      timer.delta_time(),
+	      timer.delta_time_us());
 }
 
 HeapBlock::HeapBlock(usize cellSize)
 {
 	// Make sure we are always allocating at least the size of a
 	// FreeListItem, to avoid problems.
-	m_cellSize = Max(cellSize, sizeof(FreeListItem));
+	m_cell_size = max(cellSize, sizeof(FreeListItem));
 
-	for (usize i = 0; i < NumCells(); ++i)
+	for (usize i = 0; i < num_cells(); ++i)
 	{
-		auto* entry = static_cast<FreeListItem*>(GetCell(i));
+		auto* entry = static_cast<FreeListItem*>(cell(i));
 		entry->used = false;
-		if (i == NumCells() - 1)
+		if (i == num_cells() - 1)
 		{
 			entry->next = nullptr;
 		}
 		else
 		{
-			entry->next = static_cast<FreeListItem*>(GetCell(i + 1));
+			entry->next = static_cast<FreeListItem*>(cell(i + 1));
 		}
 	}
 
-	m_freelist = static_cast<FreeListItem*>(GetCell(0));
+	m_freelist = static_cast<FreeListItem*>(cell(0));
 }
 
-Cell* HeapBlock::Allocate()
+Cell* HeapBlock::allocate()
 {
 	if (m_freelist == nullptr)
 	{
@@ -173,9 +173,10 @@ Cell* HeapBlock::Allocate()
 	return cell;
 }
 
-void HeapBlock::Deallocate(Cell* cell)
+void HeapBlock::deallocate(Cell* cell)
 {
 	// Claim back memory (ok, just push the item back into the free list)
+	cell->~Cell();
 	auto* item = static_cast<FreeListItem*>(cell);
 	item->next = m_freelist;
 	item->used = false;

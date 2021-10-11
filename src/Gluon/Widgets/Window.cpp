@@ -6,77 +6,80 @@
 
 namespace Utils
 {
-glm::vec4 ExtractColor(const std::vector<Token>& tokens);
+glm::vec4 extract_color(const std::vector<Token>& tokens);
 }
 
-GluonWindow::GluonWindow() { size = GluonApp::Get()->GetWindowSize(); }
+GluonWindow::GluonWindow() { size = GluonApp::Get()->get_window_size(); }
 
-void GluonWindow::ParsePropertyInternal(Parser::Node::Ptr node, u32 nodeHash)
+void GluonWindow::parse_property_internal(Parser::Node::Ptr node, u32 node_hash)
 {
-	switch (nodeHash)
+	UNUSED(node);
+
+	switch (node_hash)
 	{
 		case NodeHash::Title:
 		{
-			GluonApp::Get()->SetTitle(node->children[0]->name.c_str());
+			GluonApp::Get()->set_title(node->children[0]->name.c_str());
 		}
 		break;
 
 		case NodeHash::WindowWidth:
 		{
-			size.x = node->children[0]->associatedTokens[0].number;
+			size.x = node->children[0]->associated_tokens[0].number;
 		}
 		break;
 
 		case NodeHash::WindowHeight:
 		{
-			size.y = node->children[0]->associatedTokens[0].number;
+			size.y = node->children[0]->associated_tokens[0].number;
 		}
 		break;
 
 		case NodeHash::Color:
 		{
-			glm::vec4 color = Utils::ExtractColor(
-			    node->children[0]->associatedTokens);
-			GluonApp::Get()->SetBackgroundColor(color);
+			glm::vec4 color = Utils::extract_color(
+			    node->children[0]->associated_tokens);
+			GluonApp::Get()->set_background_color(color);
 		}
 		break;
 
 		default:
-			AssertUnreachable();
+			ASSERT_UNREACHABLE();
 			break;
 	}
 }
 
-void GluonWindow::PreEvaluate()
+void GluonWindow::pre_evaluate()
 {
-	geometryExpressions.clear();
+	geometry_expressions.clear();
 	evaluators.clear();
 }
 
-void GluonWindow::PostEvaluate()
+void GluonWindow::post_evaluate()
 {
-	GluonApp::Get()->SetWindowSize(static_cast<i32>(size.x),
-	                               static_cast<i32>(size.y));
+	GluonApp::Get()->set_window_size(static_cast<i32>(size.x),
+	                                 static_cast<i32>(size.y));
 	// GluonApp::Get()->SetWindowPos((i32)pos.x, (i32)pos.y);
 }
 
-bool GluonWindow::WindowResized(i32 w, i32 h)
+bool GluonWindow::window_resized(i32 w, i32 h)
 {
 	bool resized = false;
 	if (static_cast<i32>(size.x) != w || static_cast<i32>(size.y) != h)
 	{
 		size.x = static_cast<f32>(w);
 		size.y = static_cast<f32>(h);
-		Touch();
+		touch();
 		resized = true;
 	}
 
-	resized |= GluonWidget::WindowResized(w, h);
+	resized |= GluonWidget::window_resized(w, h);
 
 	return resized;
 }
 
-void GluonWindow::BuildRenderInfosInternal(std::vector<RectangleInfo>* result)
+void GluonWindow::build_render_infos_internal(
+    std::vector<RectangleInfo>* result)
 {
 	UNUSED(result);
 	// Passthrough

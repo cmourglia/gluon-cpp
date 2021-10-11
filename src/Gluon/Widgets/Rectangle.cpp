@@ -4,26 +4,26 @@
 
 namespace Utils
 {
-glm::vec4 ExtractColor(const std::vector<Token>& tokens);
+glm::vec4 extract_color(const std::vector<Token>& tokens);
 }
 
-void GluonRectangle::ParsePropertyInternal(Parser::Node::Ptr node,
-                                           const u32         nodeHash)
+void GluonRectangle::parse_property_internal(Parser::Node::Ptr node,
+                                             const u32         node_hash)
 {
-	if (nodeHash == NodeHash::Color)
+	if (node_hash == NodeHash::Color)
 	{
-		Assert(!node->children.empty(), "No children is bad for a property");
-		fillColor = Utils::ExtractColor(node->children[0]->associatedTokens);
+		ASSERT(!node->children.empty(), "No children is bad for a property");
+		fill_color = Utils::extract_color(node->children[0]->associated_tokens);
 	}
 }
 
-void GluonRectangle::BuildRenderInfosInternal(
+void GluonRectangle::build_render_infos_internal(
     std::vector<RectangleInfo>* result)
 {
 	RectangleInfo rect = {
-	    .position  = pos,
-	    .size      = size,
-	    .fillColor = fillColor,
+	    .position   = pos,
+	    .size       = size,
+	    .fill_color = fill_color,
 	};
 
 	result->push_back(rect);

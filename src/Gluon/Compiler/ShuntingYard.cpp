@@ -10,22 +10,22 @@
 namespace ShuntingYard
 {
 
-f32 Expression::Evaluate() const
+f32 Expression::evaluate() const
 {
-	std::stack<f32> valueStack;
+	Array<f32> value_stack;
 
-	auto workingQueue = evaluationQueue;
+	auto working_queue = evaluation_queue;
 
-	while (!workingQueue.empty())
+	while (!working_queue.is_empty())
 	{
-		auto* node = workingQueue.front().get();
-		workingQueue.pop();
+		auto* node = working_queue.first().get();
+		working_queue.pop();
 
 		switch (node->type)
 		{
 			case NodeType::Constant:
 			{
-				valueStack.push(
+				value_stack.add(
 				    reinterpret_cast<ConstantNode*>(node)->constant);
 			}
 			break;
@@ -34,32 +34,32 @@ f32 Expression::Evaluate() const
 			{
 				// TODO: Unary operators
 
-				f32 right = valueStack.top();
-				valueStack.pop();
+				f32 right = value_stack.last();
+				value_stack.pop();
 
-				f32 left = valueStack.top();
-				valueStack.pop();
+				f32 left = value_stack.last();
+				value_stack.pop();
 
-				valueStack.push(
-				    EvaluateOperator(reinterpret_cast<OperatorNode*>(node),
-				                     left,
-				                     right));
+				value_stack.add(
+				    evaluate_operator(reinterpret_cast<OperatorNode*>(node),
+				                      left,
+				                      right));
 			}
 			break;
 
 			case NodeType::Function:
 			{
-				valueStack.push(
-				    EvaluateFunction(reinterpret_cast<FunctionNode*>(node)));
+				value_stack.add(
+				    evaluate_function(reinterpret_cast<FunctionNode*>(node)));
 			}
 			break;
 		}
 	}
 
-	return valueStack.top();
+	return value_stack.last();
 }
 
-f32 Expression::EvaluateOperator(OperatorNode* op, f32 left, f32 right)
+f32 Expression::evaluate_operator(OperatorNode* op, f32 left, f32 right)
 {
 	switch (op->op)
 	{
@@ -75,7 +75,7 @@ f32 Expression::EvaluateOperator(OperatorNode* op, f32 left, f32 right)
 		case Operator::OpenParen:
 		case Operator::CloseParen:
 			// We should never have those in the evaluation queue
-			AssertUnreachable();
+			ASSERT_UNREACHABLE();
 			break;
 	}
 
@@ -109,7 +109,7 @@ inline Operator GetOperator(TokenType token)
 		case TokenType::Asterisk: return Operator::Multiply;
 		case TokenType::Slash: return Operator::Divide;
 		default:
-			AssertUnreachable();
+			ASSERT_UNREACHABLE();
 			break;
 	}
 	// clang-format on
@@ -127,7 +127,7 @@ inline i32 GetPrecedence(Operator op)
 		case Operator::Multiply:  return 3;
 		case Operator::Divide:    return 3;
 		default:
-			AssertUnreachable();
+			ASSERT_UNREACHABLE();
 			break;
 	}
 	// clang-format on
@@ -135,7 +135,7 @@ inline i32 GetPrecedence(Operator op)
 	return 0;
 }
 
-Expression Expression::Build(const std::vector<Token>& tokens,
+Expression Expression::build(const std::vector<Token>& tokens,
                              GluonWidget*              rootWidget,
                              GluonWidget*              currentWidget)
 {
@@ -151,7 +151,7 @@ Expression Expression::Build(const std::vector<Token>& tokens,
 		{
 			case TokenType::Number:
 			{
-				result.evaluationQueue.push(
+				result.evaluation_queue.add(
 				    std::make_shared<ConstantNode>(token.number));
 			}
 			break;
@@ -166,7 +166,7 @@ Expression Expression::Build(const std::vector<Token>& tokens,
 			{
 				while (operatorStack.top() != Operator::OpenParen)
 				{
-					result.evaluationQueue.push(
+					result.evaluation_queue.add(
 					    std::make_shared<OperatorNode>(operatorStack.top(),
 					                                   false));
 					operatorStack.pop();
@@ -195,7 +195,7 @@ Expression Expression::Build(const std::vector<Token>& tokens,
 				if (isUnary && nextIsNumber)
 				{
 					f32 mult = token.type == TokenType::Minus ? -1.0f : 1.0f;
-					result.evaluationQueue.push(std::make_shared<ConstantNode>(
+					result.evaluation_queue.add(std::make_shared<ConstantNode>(
 					    mult * tokens[++i].number));
 
 					continue;
@@ -215,7 +215,7 @@ Expression Expression::Build(const std::vector<Token>& tokens,
 					if (GetPrecedence(op) <= GetPrecedence(other))
 					{
 						operatorStack.pop();
-						result.evaluationQueue.push(
+						result.evaluation_queue.add(
 						    std::make_shared<OperatorNode>(other, false));
 					}
 				}
@@ -246,7 +246,7 @@ Expression Expression::Build(const std::vector<Token>& tokens,
 					}
 					else
 					{
-						widget = GetWidgetById(rootWidget, widgetId);
+						widget = get_widget_by_id(rootWidget, widgetId);
 					}
 
 					binding = tokens[i + 2].text;
@@ -260,24 +260,46 @@ Expression Expression::Build(const std::vector<Token>& tokens,
 
 				Function fn;
 
-				// clang-format off
-				     if (binding == "width")  fn = Function::Width;
-				else if (binding == "height") fn = Function::Height;
-				else if (binding == "x")      fn = Function::X;
-				else if (binding == "y")      fn = Function::Y;
-				else if (binding == "bottom") fn = Function::Bottom;
-				else if (binding == "top")    fn = Function::Top;
-				else if (binding == "left")   fn = Function::Left;
-				else if (binding == "right")  fn = Function::Right;
-				// clang-format on
+				if (binding == "width")
+				{
+					fn = Function::Width;
+				}
+				else if (binding == "height")
+				{
+					fn = Function::Height;
+				}
+				else if (binding == "x")
+				{
+					fn = Function::X;
+				}
+				else if (binding == "y")
+				{
+					fn = Function::Y;
+				}
+				else if (binding == "bottom")
+				{
+					fn = Function::Bottom;
+				}
+				else if (binding == "top")
+				{
+					fn = Function::Top;
+				}
+				else if (binding == "left")
+				{
+					fn = Function::Left;
+				}
+				else if (binding == "right")
+				{
+					fn = Function::Right;
+				}
 
-				result.evaluationQueue.push(
+				result.evaluation_queue.add(
 				    std::make_shared<FunctionNode>(fn, widget));
 			}
 			break;
 
 			default:
-				AssertUnreachable();
+				ASSERT_UNREACHABLE();
 				break;
 		}
 	}
@@ -291,7 +313,7 @@ Expression Expression::Build(const std::vector<Token>& tokens,
 		}
 		else
 		{
-			result.evaluationQueue.push(
+			result.evaluation_queue.add(
 			    std::make_shared<OperatorNode>(operatorStack.top(), false));
 		}
 		operatorStack.pop();
@@ -300,7 +322,7 @@ Expression Expression::Build(const std::vector<Token>& tokens,
 	return result;
 }
 
-f32 Expression::EvaluateFunction(FunctionNode* fn)
+f32 Expression::evaluate_function(FunctionNode* fn)
 {
 	// clang-format off
 	switch (fn->fn)

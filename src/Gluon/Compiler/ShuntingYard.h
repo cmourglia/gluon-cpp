@@ -1,8 +1,8 @@
 #pragma once
 
 #include <Gluon/Compiler/Tokenizer.h>
+#include <Gluon/Core/Containers/DynArray.h>
 
-#include <queue>
 #include <memory>
 
 struct GluonWidget;
@@ -87,23 +87,23 @@ struct FunctionNode : public Node
 
 struct Expression
 {
-	std::queue<std::shared_ptr<Node>> evaluationQueue;
+	Array<std::shared_ptr<Node>> evaluation_queue;
 
-	static Expression Build(const std::vector<Token>& tokens,
+	static Expression build(const std::vector<Token>& tokens,
 	                        GluonWidget*              rootWidget,
 	                        GluonWidget*              currentWidget);
 
 	static Expression Zero()
 	{
 		Expression result;
-		result.evaluationQueue.push(std::make_shared<ConstantNode>(0.0f));
+		result.evaluation_queue.add(std::make_shared<ConstantNode>(0.0f));
 		return result;
 	}
 
-	f32 Evaluate() const;
+	f32 evaluate() const;
 
 private:
-	static f32 EvaluateOperator(OperatorNode* op, f32 left, f32 right);
-	static f32 EvaluateFunction(FunctionNode* fn);
+	static f32 evaluate_operator(OperatorNode* op, f32 left, f32 right);
+	static f32 evaluate_function(FunctionNode* fn);
 };
 }

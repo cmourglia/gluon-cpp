@@ -10,81 +10,81 @@
 namespace VM
 {
 
-Value ScopeNode::Execute(Interpreter* interpreter)
+Value ScopeNode::execute(Interpreter* interpreter)
 {
-	return interpreter->Run(this);
+	return interpreter->run(this);
 }
 
-Value FunctionDeclaration::Execute(Interpreter* interpreter)
+Value FunctionDeclaration::execute(Interpreter* interpreter)
 {
-	auto* function = interpreter->GetHeap()->Allocate<Function>(m_name,
-	                                                            m_body.get());
-	interpreter->GetGlobalObject()->Add(m_name, Value{function});
+	auto* function = interpreter->heap()->allocate<Function>(m_name,
+	                                                         m_body.get());
+	interpreter->global_object()->add(m_name, Value{function});
 	return Value{function};
 }
 
-Value ExpressionStatement::Execute(Interpreter* interpreter)
+Value ExpressionStatement::execute(Interpreter* interpreter)
 {
-	return m_expression->Execute(interpreter);
+	return m_expression->execute(interpreter);
 }
 
-Value ReturnStatement::Execute(Interpreter* interpreter)
+Value ReturnStatement::execute(Interpreter* interpreter)
 {
 	// TODO: Is there specific stuff to do ?
 	//       Should we tell the interpreter something returned ?
-	return m_argument->Execute(interpreter);
+	return m_argument->execute(interpreter);
 }
 
-Value CallExpression::Execute(Interpreter* interpreter)
+Value CallExpression::execute(Interpreter* interpreter)
 {
-	Value functionValue = interpreter->GetGlobalObject()->Get(m_callee);
-	auto* object        = functionValue.AsObject();
+	Value functionValue = interpreter->global_object()->get(m_callee);
+	auto* object        = functionValue.as_object();
 
-	Assert(object->IsFunction(), "Could this happen in real life ?");
-	if (object->IsFunction())
+	ASSERT(object->is_function(), "Could this happen in real life ?");
+	if (object->is_function())
 	{
 		auto* function = static_cast<Function*>(object);
 
-		return interpreter->Run(function->GetBody());
+		return interpreter->run(function->body());
 	}
 	return Value::Undefined;
 }
 
-inline Value Add(Value lhs, Value rhs)
+inline Value add(Value lhs, Value rhs)
 {
-	Assert(lhs.IsNumber(), "TODO");
-	Assert(rhs.IsNumber(), "TODO");
+	ASSERT(lhs.is_number(), "TODO");
+	ASSERT(rhs.is_number(), "TODO");
 
-	return Value{lhs.AsNumber() + rhs.AsNumber()};
+	return Value{lhs.as_number() + rhs.as_number()};
 }
 
 inline Value Sub(Value lhs, Value rhs)
 {
-	Assert(lhs.IsNumber(), "TODO");
-	Assert(rhs.IsNumber(), "TODO");
+	ASSERT(lhs.is_number(), "TODO");
+	ASSERT(rhs.is_number(), "TODO");
 
-	return Value{lhs.AsNumber() - rhs.AsNumber()};
+	return Value{lhs.as_number() - rhs.as_number()};
 }
 
-Value BinaryExpression::Execute(Interpreter* interpreter)
+Value BinaryExpression::execute(Interpreter* interpreter)
 {
-	Value lhs = m_left->Execute(interpreter);
-	Value rhs = m_right->Execute(interpreter);
+	Value lhs = m_left->execute(interpreter);
+	Value rhs = m_right->execute(interpreter);
 
 	switch (m_op)
 	{
 		case BinaryOp::Addition:
-			return Add(lhs, rhs);
+			return add(lhs, rhs);
 
 		case BinaryOp::Substraction:
 			return Sub(lhs, rhs);
 	}
 
-	AssertUnreachable();
+	ASSERT_UNREACHABLE();
 	return Value::Undefined;
 }
 
-Value Literal::Execute(Interpreter* interpreter)
+Value Literal::execute(Interpreter* interpreter)
 {
 	UNUSED(interpreter);
 	return m_value;
@@ -93,7 +93,7 @@ Value Literal::Execute(Interpreter* interpreter)
 // ----------------------------------------------------------------------------
 // DUMP
 // ----------------------------------------------------------------------------
-void ASTNode::Dump(i32 indent) const
+void ASTNode::dump(i32 indent) const
 {
 	for (i32 i = 0; i < indent * 2; ++i)
 	{
@@ -101,74 +101,74 @@ void ASTNode::Dump(i32 indent) const
 	}
 }
 
-void ScopeNode::Dump(i32 indent) const
+void ScopeNode::dump(i32 indent) const
 {
-	ASTNode::Dump(indent);
+	ASTNode::dump(indent);
 
-	printf("%s\n", GetTypename());
+	printf("%s\n", "(ScopeNode)");
 
-	if (!m_body.IsEmpty())
+	if (!m_body.is_empty())
 	{
 		indent += 1;
-		ASTNode::Dump(indent);
+		ASTNode::dump(indent);
 
 		printf("body:\n");
 
-		for (auto&& bodyElt : m_body)
+		for (auto&& elt : m_body)
 		{
-			bodyElt->Dump(indent + 1);
+			elt->dump(indent + 1);
 		}
 	}
 }
 
-void Identifier::Dump(i32 indent) const
+void Identifier::dump(i32 indent) const
 {
-	ASTNode::Dump(indent);
+	ASTNode::dump(indent);
 
 	printf("Identifier <%s>\n", m_name.c_str());
 }
 
-void FunctionDeclaration::Dump(i32 indent) const
+void FunctionDeclaration::dump(i32 indent) const
 {
-	ASTNode::Dump(indent);
+	ASTNode::dump(indent);
 
 	printf("Function\n");
 	indent += 1;
 
-	ASTNode::Dump(indent);
+	ASTNode::dump(indent);
 	printf("name: %s\n", m_name.c_str());
-	ASTNode::Dump(indent);
+	ASTNode::dump(indent);
 	printf("body:\n");
-	m_body->Dump(indent + 1);
+	m_body->dump(indent + 1);
 }
 
-void ExpressionStatement::Dump(i32 indent) const
+void ExpressionStatement::dump(i32 indent) const
 {
-	ASTNode::Dump(indent);
+	ASTNode::dump(indent);
 	printf("ExpressionStatement\n");
-	m_expression->Dump(indent + 1);
+	m_expression->dump(indent + 1);
 }
 
-void ReturnStatement::Dump(i32 indent) const
+void ReturnStatement::dump(i32 indent) const
 {
-	ASTNode::Dump(indent);
+	ASTNode::dump(indent);
 	printf("ReturnStatement\n");
-	m_argument->Dump(indent + 1);
+	m_argument->dump(indent + 1);
 }
 
-void CallExpression::Dump(i32 indent) const
+void CallExpression::dump(i32 indent) const
 {
-	ASTNode::Dump(indent);
+	ASTNode::dump(indent);
 	printf("CallExpression: %s()\n", m_callee.c_str());
 }
 
-void BinaryExpression::Dump(i32 indent) const
+void BinaryExpression::dump(i32 indent) const
 {
-	ASTNode::Dump(indent);
+	ASTNode::dump(indent);
 	printf("BinaryExpression\n");
 
 	indent += 1;
-	ASTNode::Dump(indent);
+	ASTNode::dump(indent);
 	printf("Operator: ");
 
 	switch (m_op)
@@ -183,21 +183,19 @@ void BinaryExpression::Dump(i32 indent) const
 	}
 	printf("\n");
 
-	ASTNode::Dump(indent);
+	ASTNode::dump(indent);
 	printf("Left:\n");
-	m_left->Dump(indent + 1);
-	ASTNode::Dump(indent);
+	m_left->dump(indent + 1);
+	ASTNode::dump(indent);
 	printf("Right:\n");
-	m_right->Dump(indent + 1);
+	m_right->dump(indent + 1);
 }
 
-void Literal::Dump(i32 indent) const
+void Literal::dump(i32 indent) const
 {
-	ASTNode::Dump(indent);
+	ASTNode::dump(indent);
 
-	m_value.Dump();
-
-	printf("\n");
+	printf("%s\n", m_value.to_string().c_str());
 }
 
 }

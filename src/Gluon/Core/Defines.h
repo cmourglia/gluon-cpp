@@ -92,7 +92,7 @@ inline constexpr usize operator"" _GiB(usize size) { return size * GiB; }
 #define NOOP(...)
 
 #ifdef _DEBUG
-#	define Assert(x, msg, ...)                                                \
+#	define ASSERT(x, msg, ...)                                                \
 		__pragma(warning(push));                                               \
 		__pragma(warning(disable : 4002));                                     \
 		if (!(x))                                                              \
@@ -107,38 +107,38 @@ inline constexpr usize operator"" _GiB(usize size) { return size * GiB; }
 		}                                                                      \
 		__pragma(warning(pop))
 
-#	define AssertUnreachable() Assert(false, "Unreachable path")
+#	define ASSERT_UNREACHABLE() ASSERT(false, "Unreachable path")
 #else
-#	define Assert(x) NOOP(x)
-#	define AssertUnreachable() NOOP()
+#	define ASSERT(x) NOOP(x)
+#	define ASSERT_UNREACHABLE() NOOP()
 #endif
 
 template <typename T>
-inline constexpr T Min(T a, T b)
+inline constexpr T min(T a, T b)
 {
 	return a < b ? a : b;
 }
 
 template <typename T>
-inline constexpr T Max(T a, T b)
+inline constexpr T max(T a, T b)
 {
 	return a > b ? a : b;
 }
 
 template <typename T>
-inline constexpr T Clamp(T x, T a, T b)
+inline constexpr T clamp(T x, T a, T b)
 {
-	return Min(b, Max(x, a));
+	return min(b, max(x, a));
 }
 
 template <typename T>
 inline constexpr T Saturate(T x)
 {
-	return Clamp(x, T(0), T(1));
+	return clamp(x, T(0), T(1));
 }
 
 template <typename T>
-inline constexpr T Abs(T x)
+inline constexpr T abs(T x)
 {
 	return x < 0 ? -x : x;
 }

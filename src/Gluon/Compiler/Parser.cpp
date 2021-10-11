@@ -8,12 +8,13 @@
 #include <Gluon/Widgets/Image.h>
 #include <Gluon/Widgets/Text.h>
 
+#include <Gluon/Core/Containers/HashMap.h>
+
 #include <loguru.hpp>
 
 #include <fstream>
 #include <memory>
 #include <functional>
-#include <unordered_map>
 #include <unordered_set>
 #include <stack>
 #include <queue>
@@ -36,20 +37,20 @@ enum class GeometryPolicy
 	Anchor,
 };
 
-std::unordered_map<std::string, WidgetFactory*> widgetFactories;
+StringHashMap<WidgetFactory*> s_widget_factories;
 
-GluonWidget* ParseGluonBuffer(const char* buffer)
+GluonWidget* parse_gluon_buffer(const char* buffer)
 {
-	if (widgetFactories.empty())
+	if (s_widget_factories.is_empty())
 	{
 		// FIXME: How / when do we wanna build this map ?
-		widgetFactories["Window"]    = &GluonWindow::Create;
-		widgetFactories["Rectangle"] = &GluonRectangle::Create;
-		widgetFactories["Image"]     = &GluonImage::Create;
-		widgetFactories["Text"]      = &GluonText::Create;
+		s_widget_factories["Window"]    = &GluonWindow::create;
+		s_widget_factories["Rectangle"] = &GluonRectangle::create;
+		s_widget_factories["Image"]     = &GluonImage::create;
+		s_widget_factories["Text"]      = &GluonText::create;
 	}
 
-	auto tokens = Tokenize(buffer);
+	auto tokens = tokenize(buffer);
 
 	Node::Ptr root;
 	Node*     currentNode = nullptr;
@@ -88,10 +89,10 @@ GluonWidget* ParseGluonBuffer(const char* buffer)
 				++token;
 			}
 
-			auto node              = std::make_shared<ValueNode>();
-			node->name             = name;
-			node->parent           = currentNode;
-			node->associatedTokens = valueTokens;
+			auto node               = std::make_shared<ValueNode>();
+			node->name              = name;
+			node->parent            = currentNode;
+			node->associated_tokens = valueTokens;
 			currentNode->children.push_back(node);
 
 			currentNode = currentNode->parent;
@@ -114,7 +115,7 @@ GluonWidget* ParseGluonBuffer(const char* buffer)
 						auto node    = std::make_shared<StructureNode>();
 						node->name   = token->text;
 						node->parent = nullptr;
-						node->associatedTokens.push_back(*token);
+						node->associated_tokens.push_back(*token);
 
 						root        = node;
 						currentNode = root.get();
@@ -159,7 +160,7 @@ GluonWidget* ParseGluonBuffer(const char* buffer)
 							{
 								if (token[i].type == TokenType::Identifier)
 								{
-									node->associatedTokens.push_back(token[i]);
+									node->associated_tokens.push_back(token[i]);
 								}
 							}
 
@@ -195,20 +196,20 @@ GluonWidget* ParseGluonBuffer(const char* buffer)
 
 	std::vector<RectangleInfo> result;
 
-	GluonWidget* rootWidget = nullptr;
+	GluonWidget* root_widget = nullptr;
 
 	if (root)
 	{
-		rootWidget = (*widgetFactories[root->name])();
-		rootWidget->Deserialize(root);
+		root_widget = (*s_widget_factories[root->name])();
+		root_widget->deserialize(root);
 
-		BuildDependencyGraph(rootWidget, rootWidget);
-		BuildExpressionEvaluators(rootWidget, rootWidget);
+		build_dependency_graph(root_widget, root_widget);
+		build_expression_evaluators(root_widget, root_widget);
 	}
 	else
 	{
 		LOG_F(ERROR, "Something wrong happened");
 	}
 
-	return rootWidget;
+	return root_widget;
 }

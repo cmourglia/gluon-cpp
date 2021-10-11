@@ -9,7 +9,7 @@
 #include <memory>
 
 template <typename T, typename... Args>
-std::shared_ptr<T> Make(Args&&... args)
+std::shared_ptr<T> make(Args&&... args)
 {
 	return std::make_shared<T>(std::forward<Args>(args)...);
 }
@@ -26,9 +26,9 @@ struct ASTNode
 
 	virtual ~ASTNode() = default;
 
-	virtual void Dump(i32 indent) const;
+	virtual void dump(i32 indent) const;
 
-	virtual Value Execute(Interpreter* interpreter)
+	virtual Value execute(Interpreter* interpreter)
 	{
 		UNUSED(interpreter);
 		return Value::Undefined;
@@ -38,7 +38,6 @@ protected:
 	ASTNode() = default;
 
 private:
-	virtual const char* GetTypename() const = 0;
 };
 
 using ASTNodePtr = std::shared_ptr<ASTNode>;
@@ -46,26 +45,24 @@ using ASTNodePtr = std::shared_ptr<ASTNode>;
 // Node with a body and other stuff at some point
 struct ScopeNode : public ASTNode
 {
-	void Dump(i32 indent) const override;
+	void dump(i32 indent) const override;
 
 	template <typename T, typename... Args>
-	T* Push(Args&&... args)
+	T* add(Args&&... args)
 	{
-		m_body.Emplace(std::make_unique<T>(std::forward<Args>(args)...));
-		return (T*)m_body.Last().get();
+		m_body.emplace(std::make_unique<T>(std::forward<Args>(args)...));
+		return (T*)m_body.last().get();
 	}
 
-	const DynArray<ASTNodePtr>& GetChildren() const { return m_body; }
+	const Array<ASTNodePtr>& children() const { return m_body; }
 
-	Value Execute(Interpreter* interpreter) override;
+	Value execute(Interpreter* interpreter) override;
 
 protected:
 	ScopeNode() = default;
 
 private:
-	const char* GetTypename() const override = 0;
-
-	DynArray<ASTNodePtr> m_body;
+	Array<ASTNodePtr> m_body;
 };
 
 using ScopeNodePtr = std::shared_ptr<ScopeNode>;
@@ -73,7 +70,6 @@ using ScopeNodePtr = std::shared_ptr<ScopeNode>;
 struct Program : public ScopeNode
 {
 private:
-	const char* GetTypename() const override { return "Program"; }
 };
 
 struct FunctionDeclaration : public ASTNode
@@ -83,20 +79,18 @@ struct FunctionDeclaration : public ASTNode
 	{
 	}
 
-	void Dump(i32 indent) const override;
+	void dump(i32 indent) const override;
 
 	template <typename T, typename... Args>
-	T* MakeBody(Args&&... args)
+	T* make_body(Args&&... args)
 	{
 		m_body = std::make_unique<T>(std::forward<Args>(args)...);
 		return (T*)m_body.get();
 	}
 
-	Value Execute(Interpreter* interpreter) override;
+	Value execute(Interpreter* interpreter) override;
 
 private:
-	const char* GetTypename() const override { return "FunctionDeclaration"; }
-
 	std::string  m_name;
 	ScopeNodePtr m_body = nullptr;
 };
@@ -104,13 +98,11 @@ private:
 struct BlockStatement : public ScopeNode
 {
 private:
-	const char* GetTypename() const override { return "BlockStatement"; }
 };
 
 struct Expression : public ASTNode
 {
 private:
-	const char* GetTypename() const override = 0;
 };
 
 using ExpressionPtr = std::shared_ptr<Expression>;
@@ -122,13 +114,11 @@ struct ExpressionStatement : public ASTNode
 	{
 	}
 
-	Value Execute(Interpreter* interpreter) override;
+	Value execute(Interpreter* interpreter) override;
 
-	void Dump(i32 indent) const override;
+	void dump(i32 indent) const override;
 
 private:
-	const char* GetTypename() const override { return "ExpressionStatement"; }
-
 	ExpressionPtr m_expression;
 };
 
@@ -139,13 +129,11 @@ struct ReturnStatement : public ASTNode
 	{
 	}
 
-	Value Execute(Interpreter* interpreter) override;
+	Value execute(Interpreter* interpreter) override;
 
-	void Dump(i32 indent) const override;
+	void dump(i32 indent) const override;
 
 private:
-	const char* GetTypename() const override { return "ReturnStatement"; }
-
 	ExpressionPtr m_argument = nullptr;
 };
 
@@ -176,13 +164,11 @@ struct BinaryExpression : public Expression
 	{
 	}
 
-	Value Execute(Interpreter* interpreter);
+	Value execute(Interpreter* interpreter) override;
 
-	void Dump(i32 indent) const override;
+	void dump(i32 indent) const override;
 
 private:
-	const char* GetTypename() const override { return "BinaryExpression"; }
-
 	BinaryOp      m_op    = BinaryOp::Addition;
 	ExpressionPtr m_left  = nullptr;
 	ExpressionPtr m_right = nullptr;
@@ -195,13 +181,11 @@ struct CallExpression : public Expression
 	{
 	}
 
-	Value Execute(Interpreter* interpreter) override;
+	Value execute(Interpreter* interpreter) override;
 
-	void Dump(i32 indent) const override;
+	void dump(i32 indent) const override;
 
 private:
-	const char* GetTypename() const override { return "CallExpression\n"; }
-
 	std::string m_callee;
 };
 
@@ -212,13 +196,11 @@ struct Identifier : public Expression
 	{
 	}
 
-	const std::string& GetName() const { return m_name; }
+	const std::string& name() const { return m_name; }
 
-	void Dump(i32 indent) const override;
+	void dump(i32 indent) const override;
 
 private:
-	const char* GetTypename() const override { return "Identifier"; }
-
 	std::string m_name;
 };
 
@@ -229,13 +211,11 @@ struct Literal : public Expression
 	{
 	}
 
-	void Dump(i32 indent) const override;
+	void dump(i32 indent) const override;
 
-	Value Execute(Interpreter* Interpreter) override;
+	Value execute(Interpreter* Interpreter) override;
 
 private:
-	const char* GetTypename() const override { return "Literal"; }
-
 	Value m_value;
 };
 }
