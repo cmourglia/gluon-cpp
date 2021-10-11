@@ -4,14 +4,14 @@
 
 struct GluonRectangle : public GluonWidget
 {
-	static GluonWidget* Create() { return new GluonRectangle{}; }
+	static GluonWidget* create() { return new GluonRectangle{}; }
 
-	glm::vec4 fillColor;
-	glm::vec4 borderColor;
+	glm::vec4 fill_color;
+	glm::vec4 border_color;
 
 private:
-	virtual void ParsePropertyInternal(Parser::Node::Ptr node,
-	                                   const u32         nodeHash) override;
-	virtual void BuildRenderInfosInternal(
+	virtual void parse_property_internal(Parser::Node::Ptr node,
+	                                     const u32         node_hash) override;
+	virtual void build_render_infos_internal(
 	    std::vector<RectangleInfo>* result) override;
 };

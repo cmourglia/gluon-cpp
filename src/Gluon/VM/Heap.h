@@ -23,20 +23,20 @@ struct HeapBlock
 	explicit HeapBlock(usize cellSize);
 	~HeapBlock() = default;
 
-	usize NumCells() const
+	usize num_cells() const
 	{
-		return (BLOCK_SIZE - sizeof(HeapBlock)) / m_cellSize;
+		return (BLOCK_SIZE - sizeof(HeapBlock)) / m_cell_size;
 	}
 
-	Cell* GetCell(usize index)
+	Cell* cell(usize index)
 	{
-		return reinterpret_cast<Cell*>(&m_storage[index * m_cellSize]);
+		return reinterpret_cast<Cell*>(&m_storage[index * m_cell_size]);
 	}
 
-	usize GetCellSize() const { return m_cellSize; }
+	usize cell_size() const { return m_cell_size; }
 
-	Cell* Allocate();
-	void  Deallocate(Cell* cell);
+	Cell* allocate();
+	void  deallocate(Cell* cell);
 
 private:
 	struct FreeListItem : public Cell
@@ -44,7 +44,7 @@ private:
 		FreeListItem* next = nullptr;
 	};
 
-	usize m_cellSize = 0;
+	usize m_cell_size = 0;
 
 	// This stuff works because we initialize the `next` pointer when we
 	// initialize the HeapBlock and when we deallocate the cell.
@@ -67,21 +67,21 @@ public:
 	~Heap() = default;
 
 	template <typename T, typename... Args>
-	T* Allocate(Args&&... args)
+	T* allocate(Args&&... args)
 	{
-		void* memory = AllocateCell(sizeof(T));
+		void* memory = allocate_cell(sizeof(T));
 		new (memory) T(std::forward<Args>(args)...);
 		return reinterpret_cast<T*>(memory);
 	}
 
-	void Garbage();
+	void garbage();
 
 private:
-	void* AllocateCell(usize size);
+	void* allocate_cell(usize size);
 
 	Interpreter* m_interpreter;
 
-	DynArray<std::unique_ptr<HeapBlock>> m_blocks;
+	Array<std::unique_ptr<HeapBlock>> m_blocks;
 };
 
 }

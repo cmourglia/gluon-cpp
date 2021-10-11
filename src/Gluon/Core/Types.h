@@ -9,27 +9,27 @@ END_EXTERNAL_INCLUDE
 #include <string_view>
 #include <unordered_map>
 
-namespace MuColor
+namespace GluonColor
 {
-inline glm::vec4 FromRgba(i32 r, i32 g, i32 b, f32 a = 1.0f)
+inline glm::vec4 from_rgba(i32 r, i32 g, i32 b, f32 a = 1.0f)
 {
-	const f32 fr = Clamp(static_cast<f32>(r), 0.0f, 255.0f) / 255.0f;
-	const f32 fg = Clamp(static_cast<f32>(g), 0.0f, 255.0f) / 255.0f;
-	const f32 fb = Clamp(static_cast<f32>(b), 0.0f, 255.0f) / 255.0f;
-	const f32 fa = Clamp(a, 0.0f, 1.0f);
+	const f32 fr = clamp(static_cast<f32>(r), 0.0f, 255.0f) / 255.0f;
+	const f32 fg = clamp(static_cast<f32>(g), 0.0f, 255.0f) / 255.0f;
+	const f32 fb = clamp(static_cast<f32>(b), 0.0f, 255.0f) / 255.0f;
+	const f32 fa = clamp(a, 0.0f, 1.0f);
 
 	return {fr, fg, fb, fa};
 }
 
-inline glm::vec4 FromHsla(i32 h, i32 s, i32 l, f32 a = 1.0f)
+inline glm::vec4 from_hsla(i32 h, i32 s, i32 l, f32 a = 1.0f)
 {
-	const f32 fh = Clamp(static_cast<f32>(h), 0.0f, 360.0f);
-	const f32 fs = Clamp(static_cast<f32>(s), 0.0f, 100.0f) / 100.0f;
-	const f32 fl = Clamp(static_cast<f32>(l), 0.0f, 100.0f) / 100.0f;
-	const f32 fa = Clamp(a, 0.0f, 1.0f);
+	const f32 fh = clamp(static_cast<f32>(h), 0.0f, 360.0f);
+	const f32 fs = clamp(static_cast<f32>(s), 0.0f, 100.0f) / 100.0f;
+	const f32 fl = clamp(static_cast<f32>(l), 0.0f, 100.0f) / 100.0f;
+	const f32 fa = clamp(a, 0.0f, 1.0f);
 
-	const f32 c = (1.0f - Abs(2.0f * fl - 1.0f)) * fs;
-	const f32 x = c * (1.0f - Abs(fmodf(fh / 60.0f, 2.0f) - 1.0f));
+	const f32 c = (1.0f - abs(2.0f * fl - 1.0f)) * fs;
+	const f32 x = c * (1.0f - abs(fmodf(fh / 60.0f, 2.0f) - 1.0f));
 	const f32 m = fl - c * 0.5f;
 
 	const glm::vec3 cprime = h < 60    ? glm::vec3{c, x, 0.0f}
@@ -42,7 +42,7 @@ inline glm::vec4 FromHsla(i32 h, i32 s, i32 l, f32 a = 1.0f)
 	return {cprime.r + m, cprime.g + m, cprime.b + m, fa};
 }
 
-inline glm::vec4 FromString(const std::string& str)
+inline glm::vec4 from_string(const std::string& str)
 {
 	std::string value      = str;
 	auto        HexToFloat = [](char* v)
@@ -258,7 +258,7 @@ extern const glm::vec4 WhiteSmoke;
 extern const glm::vec4 Yellow;
 extern const glm::vec4 YellowGreen;
 
-extern const std::unordered_map<std::string, glm::vec4> ColorsByName;
+extern const std::unordered_map<std::string, glm::vec4> s_colors_by_name;
 }
 
 struct NSVGimage;
@@ -267,10 +267,10 @@ struct Texture;
 
 struct RasterImage
 {
-	i32 width   = 0;
-	i32 height  = 0;
-	f32 offsetX = 0.0f;
-	f32 offsetY = 0.0f;
+	i32 width    = 0;
+	i32 height   = 0;
+	f32 offset_x = 0.0f;
+	f32 offset_y = 0.0f;
 
 	Image*   image   = nullptr;
 	Texture* texture = nullptr;
@@ -278,23 +278,23 @@ struct RasterImage
 
 struct ImageInfo
 {
-	bool         isVectorial = false;
-	NSVGimage*   svgImage    = nullptr;
-	RasterImage* rasterImage = nullptr;
+	bool         is_vectorial = false;
+	NSVGimage*   svg_image    = nullptr;
+	RasterImage* raster_image = nullptr;
 };
 
 struct RectangleInfo
 {
-	glm::vec2 position    = {0.0f, 0.0f};
-	glm::vec2 size        = {0.0f, 0.0f};
-	glm::vec4 fillColor   = {0.0f, 0.0f, 0.0f, 1.0f};
-	f32       radius      = 0.0f;
-	glm::vec4 borderColor = {0.0f, 0.0f, 0.0f, 1.0f};
-	f32       borderWidth = 0.0f;
+	glm::vec2 position     = {0.0f, 0.0f};
+	glm::vec2 size         = {0.0f, 0.0f};
+	glm::vec4 fill_color   = {0.0f, 0.0f, 0.0f, 1.0f};
+	f32       radius       = 0.0f;
+	glm::vec4 border_color = {0.0f, 0.0f, 0.0f, 1.0f};
+	f32       border_width = 0.0f;
 
-	ImageInfo* imageInfo;
+	ImageInfo* image_info;
 
-	bool isImage = false;
+	bool is_image = false;
 	// glm::vec2 dropShadowOffset   = {0.0f, 0.0f};
 	// glm::vec4 dropShadowColor    = {0.3f, 0.3f, 0.3f, 1.0f};
 	// f32       dropShadowScale    = 0.0f;

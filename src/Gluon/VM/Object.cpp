@@ -3,25 +3,25 @@
 namespace VM
 {
 
-Value Object::Get(const std::string& name) const
+Value Object::get(const std::string& name) const
 {
-	return m_values.GetValueOr(name, Value::Undefined);
+	return m_values.get_value_or(name, Value::Undefined);
 }
 
-void Object::Add(const std::string& propertyName, Value value)
+void Object::add(const std::string& propertyName, Value value)
 {
 	m_values[propertyName] = value;
 }
 
-void Object::VisitGraph(VisitorCallback callback) // NOLINT
+void Object::visit_graph(VisitorCallback callback) // NOLINT
 {
-	Cell::VisitGraph(callback);
+	Cell::visit_graph(callback);
 
 	for (auto&& value : m_values)
 	{
-		if (value.second.IsObject())
+		if (value.second.is_object())
 		{
-			value.second.AsObject()->VisitGraph(callback);
+			value.second.as_object()->visit_graph(callback);
 		}
 	}
 }

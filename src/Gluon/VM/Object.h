@@ -13,14 +13,14 @@ namespace VM
 class Object : public Cell
 {
 public:
-	Value Get(const std::string& name) const;
-	void  Add(const std::string& propertyName, Value value);
+	Value get(const std::string& name) const;
+	void  add(const std::string& propertyName, Value value);
 
-	const char* GetTypename() const override { return "Object"; }
+	const char* to_string() const override { return "Object"; }
 
-	virtual bool IsFunction() const { return false; }
+	virtual bool is_function() const { return false; }
 
-	void VisitGraph(VisitorCallback callback) override;
+	void visit_graph(VisitorCallback callback) override;
 
 private:
 	StringHashMap<Value> m_values;

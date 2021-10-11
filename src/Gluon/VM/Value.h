@@ -2,6 +2,8 @@
 
 #include <Gluon/Core/Defines.h>
 
+#include <string>
+
 namespace VM
 {
 
@@ -29,64 +31,64 @@ public:
 	Value() = default;
 
 	explicit Value(f64 value)
-	    : m_valueType{ValueType::Number}
+	    : m_value_type{ValueType::Number}
 	    , m_data{}
 	{
-		m_data.asNumber = value;
+		m_data.as_number = value;
 	}
 
 	explicit Value(i32 value)
-	    : m_valueType{ValueType::Number}
+	    : m_value_type{ValueType::Number}
 	    , m_data{}
 	{
-		m_data.asNumber = value;
+		m_data.as_number = value;
 	}
 
 	explicit Value(bool value)
-	    : m_valueType{ValueType::Boolean}
+	    : m_value_type{ValueType::Boolean}
 	    , m_data{}
 	{
-		m_data.asBoolean = value;
+		m_data.as_boolean = value;
 	}
 
 	explicit Value(Object* object)
-	    : m_valueType(ValueType ::Object)
+	    : m_value_type(ValueType ::Object)
 	    , m_data{}
 	{
-		m_data.asObject = object;
+		m_data.as_object = object;
 	}
 
 	// clang-format off
-	bool IsUndefined() const { return m_valueType == ValueType::Undefined; }
-	bool IsNull()      const { return m_valueType == ValueType::Null; }
-	bool IsBoolean()   const { return m_valueType == ValueType::Boolean; }
-	bool IsNumber()    const { return m_valueType == ValueType::Number; }
-	bool IsString()    const { return m_valueType == ValueType::String; }
-	bool IsObject()    const { return m_valueType == ValueType::Object; }
+	bool is_undefined() const { return m_value_type == ValueType::Undefined; }
+	bool is_null()      const { return m_value_type == ValueType::Null; }
+	bool is_boolean()   const { return m_value_type == ValueType::Boolean; }
+	bool is_number()    const { return m_value_type == ValueType::Number; }
+	bool is_string()    const { return m_value_type == ValueType::String; }
+	bool is_object()    const { return m_value_type == ValueType::Object; }
 	// clang-format on
 
 	// clang-format off
-	bool AsBoolean() const { return m_data.asBoolean; }
-	f64 AsNumber() const { return m_data.asNumber; }
-	String AsString() const { return m_data.asString; }
-	Object* AsObject() const { return m_data.asObject; }
+	bool as_boolean() const { return m_data.as_boolean; }
+	f64 as_number() const { return m_data.as_number; }
+	String as_string() const { return m_data.as_string; }
+	Object* as_object() const { return m_data.as_object; }
 	// clang-format on
 
-	ValueType GetType() const { return m_valueType; }
+	ValueType type() const { return m_value_type; }
 
-	void Dump() const;
+	std::string to_string() const;
 
 	static const Value Undefined;
 
 private:
-	ValueType m_valueType = ValueType::Undefined;
+	ValueType m_value_type = ValueType::Undefined;
 
 	union
 	{
-		bool    asBoolean;
-		f64     asNumber;
-		String  asString;
-		Object* asObject;
+		bool    as_boolean;
+		f64     as_number;
+		String  as_string;
+		Object* as_object;
 	} m_data;
 };
 

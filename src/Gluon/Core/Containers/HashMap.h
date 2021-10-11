@@ -19,33 +19,33 @@ public:
 	using ConstIterator = typename std::unordered_map<Key,
 	                                                  Value>::const_iterator;
 
-	Iterator      begin() { return m_hashMap.begin(); }
-	ConstIterator begin() const { return m_hashMap.begin(); }
-	ConstIterator cbegin() const { return m_hashMap.cbegin(); }
-	Iterator      end() { return m_hashMap.end(); }
-	ConstIterator end() const { return m_hashMap.end(); }
-	ConstIterator cend() const { return m_hashMap.cend(); }
+	Iterator      begin() { return m_hash_map.begin(); }
+	ConstIterator begin() const { return m_hash_map.begin(); }
+	ConstIterator cbegin() const { return m_hash_map.cbegin(); }
+	Iterator      end() { return m_hash_map.end(); }
+	ConstIterator end() const { return m_hash_map.end(); }
+	ConstIterator cend() const { return m_hash_map.cend(); }
 
-	bool IsEmpty() const { return m_hashMap.empty(); }
+	bool is_empty() const { return m_hash_map.empty(); }
 
-	i32 GetNumElements() const { return (i32)m_hashMap.size(); }
+	i32 num_elements() const { return (i32)m_hash_map.size(); }
 
-	void Clear() { m_hashMap.clear(); }
+	void clear() { m_hash_map.clear(); }
 
-	void Add(const Key& key, const Value& value) { m_hashMap[key] = value; }
+	void add(const Key& key, const Value& value) { m_hash_map[key] = value; }
 
-	void Add(Key&& key, Value&& value)
+	void add(Key&& key, Value&& value)
 	{
-		m_hashMap[std::move(key)] = std::move(value);
+		m_hash_map[std::move(key)] = std::move(value);
 	}
 
-	Iterator Remove(const Key& key) { return m_hashMap.erase(key); }
+	Iterator remove(const Key& key) { return m_hash_map.erase(key); }
 
-	Iterator Remove(Key&& key) { return m_hashMap.erase(key); }
+	Iterator remove(Key&& key) { return m_hash_map.erase(key); }
 
-	const Value& GetValueOr(const Key& key, const Value& other) const
+	const Value& get_value_or(const Key& key, const Value& other) const
 	{
-		if (auto found = m_hashMap.find(key); found != m_hashMap.end())
+		if (auto found = m_hash_map.find(key); found != m_hash_map.end())
 		{
 			return found->second;
 		}
@@ -53,9 +53,9 @@ public:
 		return other;
 	};
 
-	Value& GetValueOr(const Key& key, Value& other)
+	Value& get_value_or(const Key& key, Value& other)
 	{
-		if (auto found = m_hashMap.find(key); found != m_hashMap.end())
+		if (auto found = m_hash_map.find(key); found != m_hash_map.end())
 		{
 			return found->second;
 		}
@@ -63,12 +63,12 @@ public:
 		return other;
 	}
 
-	Value& operator[](const Key& key) { return m_hashMap[key]; }
+	Value& operator[](const Key& key) { return m_hash_map[key]; }
 
-	Value& operator[](const Key&& key) { return m_hashMap[key]; }
+	Value& operator[](const Key&& key) { return m_hash_map[key]; }
 
 private:
-	std::unordered_map<Key, Value> m_hashMap;
+	std::unordered_map<Key, Value> m_hash_map;
 };
 
 template <typename Value>

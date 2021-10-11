@@ -4,19 +4,21 @@
 
 struct GluonWindow : public GluonWidget
 {
-	static GluonWidget* Create() { return new GluonWindow{}; }
+	static GluonWidget* create() { return new GluonWindow{}; }
 
 	GluonWindow();
 
-	bool WindowResized(i32 w, i32 h) override;
+	bool window_resized(i32 w, i32 h) override;
 
-	std::string title           = "Gluon";
-	glm::vec4   backgroundColor = MuColor::Chocolate;
+	std::string title            = "Gluon";
+	glm::vec4   background_color = GluonColor::Chocolate;
 
 private:
-	void ParsePropertyInternal(Parser::Node::Ptr node, u32 nodeHash) override;
-	void BuildRenderInfosInternal(std::vector<RectangleInfo>* result) override;
+	void parse_property_internal(Parser::Node::Ptr node,
+	                             u32               node_hash) override;
+	void build_render_infos_internal(
+	    std::vector<RectangleInfo>* result) override;
 
-	void PreEvaluate() override;
-	void PostEvaluate() override;
+	void pre_evaluate() override;
+	void post_evaluate() override;
 };

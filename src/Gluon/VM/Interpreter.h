@@ -28,20 +28,20 @@ public:
 	NONCOPYABLE(Interpreter);
 	NONMOVEABLE(Interpreter);
 
-	Value Run(ScopeNode* node);
+	Value run(ScopeNode* node);
 
-	Object* GetGlobalObject() const { return m_globalObject; }
+	Object* global_object() const { return m_global_object; }
 
-	Heap* GetHeap() const { return m_heap.get(); }
+	Heap* heap() const { return m_heap.get(); }
 
 private:
-	void PushScope(ScopeNode* node);
-	void PopScope(ScopeNode* node);
+	void push_scope(ScopeNode* node);
+	void pop_scope(ScopeNode* node);
 
-	DynArray<ScopeFrame> m_stack;
+	Array<ScopeFrame> m_stack;
 
-	std::unique_ptr<Heap> m_heap         = nullptr;
-	Object*               m_globalObject = nullptr;
+	std::unique_ptr<Heap> m_heap          = nullptr;
+	Object*               m_global_object = nullptr;
 };
 
 }

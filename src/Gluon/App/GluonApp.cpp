@@ -15,13 +15,13 @@ GluonApp* GluonApp::s_instance = nullptr;
 GluonApp* GluonApp::Get() { return s_instance; }
 
 GluonApp::GluonApp(int argc, char** argv)
-    : backgroundColor{0.8f, 0.8f, 0.8f, 1.0f}
+    : background_color{0.8f, 0.8f, 0.8f, 1.0f}
 {
 	// TODO: Do stuff with argc, argv;
 	UNUSED(argc);
 	UNUSED(argv);
 
-	Assert(s_instance == nullptr, "Multiple initializations");
+	ASSERT(s_instance == nullptr, "Multiple initializations");
 
 	if (s_instance == nullptr)
 	{
@@ -39,9 +39,9 @@ GluonApp::~GluonApp() { CloseWindow(); }
 
 int GluonApp::Run()
 {
-	i64 lastWriteTime = 0;
+	i64 last_write_time = 0;
 
-	auto GetColor = [](const glm::vec4& color) -> Color
+	auto convert_color = [](const glm::vec4& color) -> Color
 	{
 		return Color{static_cast<u8>(color.r * 255),
 		             static_cast<u8>(color.g * 255),
@@ -51,36 +51,36 @@ int GluonApp::Run()
 
 	SetTargetFPS(120);
 
-	GluonWidget* rootWidget = nullptr;
+	GluonWidget* root_widget = nullptr;
 
 	while (!WindowShouldClose())
 	{
 		// Check if gluon file update is needed
-		i64 writeTime = -1;
+		i64 write_time = -1;
 
-		std::string fileContent;
+		std::string file_content;
 
-		bool drawNeedsUpdate = false;
+		bool draw_needs_update = false;
 
 		if (FileUtils::ReadFileIfNewer("test.gluon",
-		                               lastWriteTime,
-		                               &writeTime,
-		                               &fileContent))
+		                               last_write_time,
+		                               &write_time,
+		                               &file_content))
 		{
-			delete rootWidget;
-			rootWidget      = ParseGluonBuffer(fileContent.c_str());
-			drawNeedsUpdate = true;
+			delete root_widget;
+			root_widget       = parse_gluon_buffer(file_content.c_str());
+			draw_needs_update = true;
 
-			lastWriteTime = writeTime;
+			last_write_time = write_time;
 		}
 
-		if (rootWidget != nullptr)
+		if (root_widget != nullptr)
 		{
 			if (IsWindowResized())
 			{
 				i32 w = GetScreenWidth();
 				i32 h = GetScreenHeight();
-				drawNeedsUpdate |= rootWidget->WindowResized(w, h);
+				draw_needs_update |= root_widget->window_resized(w, h);
 			}
 
 			Vector2 mouseDelta = GetMouseDelta();
@@ -88,36 +88,37 @@ int GluonApp::Run()
 			{
 				Vector2 mousePos = GetMousePosition();
 
-				// drawNeedsUpdate |= rootWidget->MouseMoved({mousePos.x,
+				// draw_needs_update |= root_widget->MouseMoved({mousePos.x,
 				// mousePos.y});
 			}
 
-			if (drawNeedsUpdate)
+			if (draw_needs_update)
 			{
 				rectangles.clear();
-				GluonWidget::Evaluate();
-				rootWidget->BuildRenderInfos(&rectangles);
+				GluonWidget::evaluate();
+				root_widget->build_render_infos(&rectangles);
 			}
 		}
 
-		ClearBackground(GetColor(backgroundColor));
+		ClearBackground(convert_color(background_color));
 
 		BeginDrawing();
 		{
 			for (const auto& rect : rectangles)
 			{
-				Rectangle r         = {rect.position.x,
-                               rect.position.y,
-                               rect.size.x,
-                               rect.size.y};
-				f32       smallSide = Min(r.width, r.height);
-				f32       roundness = Min(rect.radius, smallSide) / smallSide;
+				Rectangle r = {rect.position.x,
+				               rect.position.y,
+				               rect.size.x,
+				               rect.size.y};
 
-				if (rect.isImage)
+				f32 small_side = min(r.width, r.height);
+				f32 roundness  = min(rect.radius, small_side) / small_side;
+
+				if (rect.is_image)
 				{
-					if (rect.imageInfo->isVectorial)
+					if (rect.image_info->is_vectorial)
 					{
-						NSVGshape* shape = rect.imageInfo->svgImage->shapes;
+						NSVGshape* shape = rect.image_info->svg_image->shapes;
 						while (shape != nullptr)
 						{
 							if ((shape->flags & NSVG_FLAGS_VISIBLE) == 0)
@@ -154,14 +155,14 @@ int GluonApp::Run()
 					}
 					else
 					{
-						Texture2D* texture = rect.imageInfo->rasterImage
+						Texture2D* texture = rect.image_info->raster_image
 						                         ->texture;
 						DrawTexture(*texture,
-						            (int)(r.x +
-						                  rect.imageInfo->rasterImage->offsetX),
-						            (int)(r.y +
-						                  rect.imageInfo->rasterImage->offsetY),
-						            GetColor(rect.fillColor));
+						            (int)(r.x + rect.image_info->raster_image
+						                            ->offset_x),
+						            (int)(r.y + rect.image_info->raster_image
+						                            ->offset_y),
+						            convert_color(rect.fill_color));
 						DrawRectangleRoundedLines(r, 0, 1, 5, BLACK);
 					}
 				}
@@ -170,15 +171,16 @@ int GluonApp::Run()
 					DrawRectangleRounded(r,
 					                     roundness,
 					                     32,
-					                     GetColor(rect.fillColor));
+					                     convert_color(rect.fill_color));
 
-					if (rect.borderWidth > 0.0f)
+					if (rect.border_width > 0.0f)
 					{
 						DrawRectangleRoundedLines(r,
 						                          roundness,
 						                          32,
-						                          rect.borderWidth,
-						                          GetColor(rect.borderColor));
+						                          rect.border_width,
+						                          convert_color(
+						                              rect.border_color));
 					}
 				}
 			}
@@ -191,9 +193,9 @@ int GluonApp::Run()
 	return 0;
 }
 
-void GluonApp::SetTitle(const char* title) { SetWindowTitle(title); }
+void GluonApp::set_title(const char* title) { SetWindowTitle(title); }
 
-void GluonApp::SetWindowSize(i32 w, i32 h)
+void GluonApp::set_window_size(i32 w, i32 h)
 {
 	::SetWindowSize(w, h);
 	width  = w;

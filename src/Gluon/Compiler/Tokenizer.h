@@ -54,4 +54,4 @@ struct Tokenizer
 	const char* stream;
 };
 
-std::vector<Token> Tokenize(const char* buffer);
+std::vector<Token> tokenize(const char* buffer);

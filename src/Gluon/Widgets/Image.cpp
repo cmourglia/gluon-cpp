@@ -12,66 +12,66 @@
 
 namespace Utils
 {
-glm::vec4 ExtractColor(const std::vector<Token>& tokens);
+glm::vec4 extract_color(const std::vector<Token>& tokens);
 }
 
 GluonImage::~GluonImage()
 {
-	if (imageInfo.svgImage != nullptr)
+	if (image_info.svg_image != nullptr)
 	{
-		nsvgDelete(imageInfo.svgImage);
+		nsvgDelete(image_info.svg_image);
 	}
 
-	if (imageInfo.rasterImage != nullptr)
+	if (image_info.raster_image != nullptr)
 	{
 #if 0
-		stbi_image_free(rasterImage->data);
+		stbi_image_free(raster_image->data);
 #else
-		UnloadTexture(*imageInfo.rasterImage->texture);
-		delete imageInfo.rasterImage->texture;
+		UnloadTexture(*image_info.raster_image->texture);
+		delete image_info.raster_image->texture;
 
-		UnloadImage(*imageInfo.rasterImage->image);
-		delete (imageInfo.rasterImage->image);
+		UnloadImage(*image_info.raster_image->image);
+		delete (image_info.raster_image->image);
 #endif
-		delete imageInfo.rasterImage;
+		delete image_info.raster_image;
 	}
 }
 
-void GluonImage::ParsePropertyInternal(Parser::Node::Ptr node,
-                                       const u32         nodeHash)
+void GluonImage::parse_property_internal(Parser::Node::Ptr node,
+                                         const u32         node_hash)
 {
-	switch (nodeHash)
+	switch (node_hash)
 	{
 		case NodeHash::Url:
 		{
-			Assert(!node->children.empty(), "No children is bad");
+			ASSERT(!node->children.empty(), "No children is bad");
 
 			imageUrl = node->children[0]->name;
 			std::filesystem::path fp(imageUrl);
 
 			if (fp.extension().string() == ".svg")
 			{
-				imageInfo.isVectorial = true;
+				image_info.is_vectorial = true;
 			}
 			else
 			{
-				imageInfo.isVectorial = false;
-				imageInfo.rasterImage = new RasterImage;
+				image_info.is_vectorial = false;
+				image_info.raster_image = new RasterImage;
 
 #if 0
 			i32 componentCount = 0;
-			rasterImage->data  = stbi_load(imageUrl.c_str(),
-                                          &rasterImage->width,
-                                          &rasterImage->height,
+			raster_image->data  = stbi_load(imageUrl.c_str(),
+                                          &raster_image->width,
+                                          &raster_image->height,
                                           &componentCount,
                                           4);
 #else
-				Image* image                 = new Image;
-				*image                       = LoadImage(imageUrl.c_str());
-				imageInfo.rasterImage->image = image;
+				Image* image                   = new Image;
+				*image                         = LoadImage(imageUrl.c_str());
+				image_info.raster_image->image = image;
 #endif
 
-				if (imageInfo.rasterImage->image == nullptr)
+				if (image_info.raster_image->image == nullptr)
 				{
 					LOG_F(ERROR,
 					      "Cannot load image %s",
@@ -115,25 +115,25 @@ void GluonImage::ParsePropertyInternal(Parser::Node::Ptr node,
 
 		case NodeHash::Tint:
 		{
-			imageTint = Utils::ExtractColor(
-			    node->children[0]->associatedTokens);
+			imageTint = Utils::extract_color(
+			    node->children[0]->associated_tokens);
 		}
 		break;
 	}
 }
 
-void GluonImage::PostEvaluate()
+void GluonImage::post_evaluate()
 {
-	if (imageInfo.isVectorial)
+	if (image_info.is_vectorial)
 	{
 		// TODO: This should be evaluated
-		imageInfo.svgImage = nsvgParseFromFile(imageUrl.c_str(),
-		                                       "px",
-		                                       Min(size.x, size.y));
+		image_info.svg_image = nsvgParseFromFile(imageUrl.c_str(),
+		                                         "px",
+		                                         min(size.x, size.y));
 	}
 	else
 	{
-		Image* image = imageInfo.rasterImage->image;
+		Image* image = image_info.raster_image->image;
 		UnloadImage(*image);
 		*image = LoadImage(imageUrl.c_str());
 
@@ -166,8 +166,10 @@ void GluonImage::PostEvaluate()
 				ImageResize(image, targetWidth, targetHeight);
 
 				// Compute offsets to center in the target quad
-				imageInfo.rasterImage->offsetX = (size.x - targetWidth) * 0.5f;
-				imageInfo.rasterImage->offsetY = (size.y - targetHeight) * 0.5f;
+				image_info.raster_image->offset_x = (size.x - targetWidth) *
+				                                    0.5f;
+				image_info.raster_image->offset_y = (size.y - targetHeight) *
+				                                    0.5f;
 			}
 			break;
 
@@ -203,17 +205,17 @@ void GluonImage::PostEvaluate()
 		Texture2D* texture = new Texture2D;
 		*texture           = LoadTextureFromImage(*image);
 
-		imageInfo.rasterImage->texture = texture;
+		image_info.raster_image->texture = texture;
 	}
 }
 
-void GluonImage::BuildRenderInfosInternal(std::vector<RectangleInfo>* result)
+void GluonImage::build_render_infos_internal(std::vector<RectangleInfo>* result)
 {
 	RectangleInfo info = {};
 	info.position      = pos;
 	info.size          = size;
-	info.fillColor     = imageTint;
-	info.isImage       = true;
-	info.imageInfo     = &imageInfo;
+	info.fill_color    = imageTint;
+	info.is_image      = true;
+	info.image_info    = &image_info;
 	result->push_back(std::move(info));
 }

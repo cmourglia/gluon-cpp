@@ -19,11 +19,14 @@ public:
 
 	int Run();
 
-	void SetTitle(const char* title);
-	void SetWindowSize(i32 w, i32 h);
-	void SetBackgroundColor(const glm::vec4& color) { backgroundColor = color; }
+	void set_title(const char* title);
+	void set_window_size(i32 w, i32 h);
+	void set_background_color(const glm::vec4& color)
+	{
+		background_color = color;
+	}
 
-	[[nodiscard]] glm::vec2 GetWindowSize() const
+	[[nodiscard]] glm::vec2 get_window_size() const
 	{
 		return glm::vec2{static_cast<f32>(width), static_cast<f32>(height)};
 	}
@@ -34,7 +37,7 @@ private:
 	i32 width  = 1024;
 	i32 height = 768;
 
-	glm::vec4 backgroundColor;
+	glm::vec4 background_color;
 
 	std::vector<RectangleInfo> rectangles;
 };

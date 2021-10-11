@@ -8,112 +8,102 @@
 // added along the road. At some point, the STL will just get dropped.
 
 template <typename T>
-class DynArray
+class Array
 {
 public:
 	using Iterator      = typename std::vector<T>::iterator;
 	using ConstIterator = typename std::vector<T>::const_iterator;
 
-	DynArray() noexcept = default;
+	Array() noexcept = default;
 
-	explicit DynArray(const i32 size, const T& defaultValue = T{}) noexcept
-	    : m_dynArray(size, defaultValue)
+	explicit Array(const i32 size, const T& defaultValue = T{}) noexcept
+	    : m_dyn_array(size, defaultValue)
 	{
 	}
 
-	DynArray(std::initializer_list<T> list)
-	    : m_dynArray(std::move(list))
+	Array(std::initializer_list<T> list)
+	    : m_dyn_array(std::move(list))
 	{
 	}
 
-	~DynArray() noexcept = default;
+	~Array() noexcept = default;
 
-	DEFAULT_CTORS(DynArray);
+	DEFAULT_CTORS(Array);
 
-	void Reserve(const i32 size) { m_dynArray.reserve(size); }
+	void reserve(const i32 size) { m_dyn_array.reserve(size); }
 
-	void Resize(const i32 size) { m_dynArray.resize(size); }
+	void resize(const i32 size) { m_dyn_array.resize(size); }
 
-	void Clear() { m_dynArray.clear(); }
+	void clear() { m_dyn_array.clear(); }
 
-	i32 NumElements() const { return static_cast<i32>(m_dynArray.size()); }
+	i32 num_elements() const { return static_cast<i32>(m_dyn_array.size()); }
 
-	bool IsEmpty() const { return m_dynArray.empty(); }
+	bool is_empty() const { return m_dyn_array.empty(); }
 
-	const T& Get(const i32 index) const { return m_dynArray.at(index); }
+	const T& element(const i32 index) const { return m_dyn_array.at(index); }
 
-	T& Get(const i32 index) { return m_dynArray.at(index); }
+	T& element(const i32 index) { return m_dyn_array.at(index); }
 
-	const T& operator[](const i32 index) const { return m_dynArray[index]; }
+	const T& operator[](const i32 index) const { return m_dyn_array[index]; }
 
-	T& operator[](const i32 index) { return m_dynArray[index]; }
+	T& operator[](const i32 index) { return m_dyn_array[index]; }
 
-	const T* Data() const { return m_dynArray.data(); }
+	const T* data() const { return m_dyn_array.data(); }
 
-	T* Data() { return m_dynArray.data(); }
+	T* data() { return m_dyn_array.data(); }
 
-	Iterator begin() { return m_dynArray.begin(); }
+	Iterator begin() { return m_dyn_array.begin(); }
 
-	ConstIterator begin() const { return m_dynArray.begin(); }
+	ConstIterator begin() const { return m_dyn_array.begin(); }
 
-	ConstIterator cbegin() const { return m_dynArray.cbegin(); }
+	ConstIterator cbegin() const { return m_dyn_array.cbegin(); }
 
-	Iterator end() { return m_dynArray.end(); }
+	Iterator end() { return m_dyn_array.end(); }
 
-	ConstIterator end() const { return m_dynArray.end(); }
+	ConstIterator end() const { return m_dyn_array.end(); }
 
-	ConstIterator cend() const { return m_dynArray.cend(); }
+	ConstIterator cend() const { return m_dyn_array.cend(); }
 
-	Iterator BeginIterator() { return begin(); }
+	void add(const T& value) { m_dyn_array.push_back(value); }
 
-	ConstIterator BeginIterator() const { return begin(); }
-
-	ConstIterator ConstBeginIterator() const { return cbegin(); }
-
-	Iterator EndIterator() { return end(); }
-
-	ConstIterator EndIterator() const { return end(); }
-
-	ConstIterator ConstEndIterator() const { return cend(); }
-
-	void Add(const T& value) { m_dynArray.push_back(value); }
-
-	void Add(T&& value) { m_dynArray.push_back(std::move(value)); }
+	void add(T&& value) { m_dyn_array.push_back(std::move(value)); }
 
 	template <typename... Args>
-	void Emplace(Args... args)
+	void emplace(Args... args)
 	{
-		m_dynArray.emplace_back(std::forward<Args>(args)...);
+		m_dyn_array.emplace_back(std::forward<Args>(args)...);
 	}
 
-	void Insert(const T& elem, i32 index)
+	void insert(const T& elem, i32 index)
 	{
-		m_dynArray.insert(begin() + index, elem);
+		m_dyn_array.insert(begin() + index, elem);
 	}
 
-	void Insert(T&& elem, i32 index)
+	void insert(T&& elem, i32 index)
 	{
-		m_dynArray.insert(begin() + index, elem);
+		m_dyn_array.insert(begin() + index, elem);
 	}
 
-	void Insert(Iterator where, Iterator rangeStart, Iterator rangeEnd)
+	void insert(Iterator where, Iterator rangeStart, Iterator rangeEnd)
 	{
-		m_dynArray.insert(where, rangeStart, rangeEnd);
+		m_dyn_array.insert(where, rangeStart, rangeEnd);
 	}
 
-	void Append(const DynArray<T>& other)
+	void append(const Array<T>& other)
 	{
-		Reserve(NumElements() + other.NumElements());
-		m_dynArray.insert(m_dynArray.end(),
-		                  other.m_dynArray.begin(),
-		                  other.m_dynArray.end());
+		Reserve(num_elements() + other.num_elements());
+		m_dyn_array.insert(m_dyn_array.end(),
+		                   other.m_dyn_array.begin(),
+		                   other.m_dyn_array.end());
 	}
 
-	T& Last() { return m_dynArray.back(); }
+	T&       first() { return m_dyn_array.front(); }
+	const T& first() const { return m_dyn_array.front(); }
 
-	const T& Last() const { return m_dynArray.back(); }
+	T&       last() { return m_dyn_array.back(); }
+	const T& last() const { return m_dyn_array.back(); }
 
-	void Pop() { m_dynArray.pop_back(); }
+	void pop() { m_dyn_array.pop_back(); }
 
 	// ArrayView<T> GetView()
 	// {
@@ -121,5 +111,5 @@ public:
 	// }
 
 private:
-	std::vector<T> m_dynArray;
+	std::vector<T> m_dyn_array;
 };

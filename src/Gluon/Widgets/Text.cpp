@@ -2,17 +2,17 @@
 
 namespace Utils
 {
-glm::vec4 ExtractColor(const std::vector<Token>& tokens);
+glm::vec4 extract_color(const std::vector<Token>& tokens);
 }
 
-void GluonText::ParsePropertyInternal(Parser::Node::Ptr node, u32 nodeHash)
+void GluonText::parse_property_internal(Parser::Node::Ptr node, u32 node_hash)
 {
 	UNUSED(node);
-	UNUSED(nodeHash);
+	UNUSED(node_hash);
 	// TODO
 }
 
-void GluonText::BuildRenderInfosInternal(std::vector<RectangleInfo>* result)
+void GluonText::build_render_infos_internal(std::vector<RectangleInfo>* result)
 {
 	UNUSED(result);
 	// TODO
