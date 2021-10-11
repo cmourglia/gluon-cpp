@@ -3,7 +3,7 @@
 #include <Gluon/VM/Value.h>
 
 #include <Gluon/Core/Defines.h>
-#include <Gluon/Core/Containers/DynArray.h>
+#include <Gluon/Core/Containers/Array.h>
 
 #include <string>
 #include <memory>
