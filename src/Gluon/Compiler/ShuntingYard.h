@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Gluon/Compiler/Tokenizer.h>
-#include <Gluon/Core/Containers/Array.h>
+#include <Beard/Array.h>
 
 #include <memory>
 
@@ -87,7 +87,7 @@ struct FunctionNode : public Node
 
 struct Expression
 {
-	Array<std::shared_ptr<Node>> evaluation_queue;
+	Beard::Array<std::shared_ptr<Node>> evaluation_queue;
 
 	static Expression build(const std::vector<Token>& tokens,
 	                        GluonWidget*              rootWidget,
@@ -96,7 +96,7 @@ struct Expression
 	static Expression Zero()
 	{
 		Expression result;
-		result.evaluation_queue.add(std::make_shared<ConstantNode>(0.0f));
+		result.evaluation_queue.Add(std::make_shared<ConstantNode>(0.0f));
 		return result;
 	}
 

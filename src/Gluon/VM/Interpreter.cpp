@@ -31,28 +31,28 @@ Value Interpreter::run(ScopeNode* node)
 	return last_value;
 }
 
-void Interpreter::push_scope(ScopeNode* node) { m_stack.add({.node = node}); }
+void Interpreter::push_scope(ScopeNode* node) { m_stack.Add({.node = node}); }
 
 void Interpreter::pop_scope(ScopeNode* node)
 {
 	// FIXME: Check this
-	ASSERT(m_stack.last().node == node, "Stack mismatch");
+	ASSERT(m_stack.Last().node == node, "Stack mismatch");
 
-	m_stack.pop();
+	m_stack.PopAndDiscard();
 }
 
 void Interpreter::declare_variable(const char* name)
 {
-	ScopeFrame& frame     = m_stack.last();
+	ScopeFrame& frame     = m_stack.Last();
 	frame.variables[name] = Value::Null;
 }
 
 void Interpreter::set_variable(const char* name, Value value)
 {
-	for (i32 i = m_stack.num_elements() - 1; i >= 0; --i)
+	for (i32 i = m_stack.ElementCount() - 1; i >= 0; --i)
 	{
 		ScopeFrame& frame = m_stack[i];
-		if (auto it = frame.variables.find(name); it != frame.variables.end())
+		if (auto it = frame.variables.Find(name); it != frame.variables.end())
 		{
 			it->second = value;
 			return;
@@ -64,10 +64,10 @@ void Interpreter::set_variable(const char* name, Value value)
 
 Value Interpreter::get_variable(const char* name)
 {
-	for (i32 i = m_stack.num_elements() - 1; i >= 0; --i)
+	for (i32 i = m_stack.ElementCount() - 1; i >= 0; --i)
 	{
 		ScopeFrame& frame = m_stack[i];
-		if (auto it = frame.variables.find(name); it != frame.variables.end())
+		if (auto it = frame.variables.Find(name); it != frame.variables.end())
 		{
 			return it->second;
 		}

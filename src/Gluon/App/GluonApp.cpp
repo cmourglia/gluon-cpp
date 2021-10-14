@@ -1,8 +1,10 @@
 #include <Gluon/App/GluonApp.h>
 
-#include <Gluon/Core/Utils.h>
+// #include <Gluon/Core/Utils.h>
 #include <Gluon/Compiler/Parser.h>
 #include <Gluon/Widgets/Widget.h>
+
+#include <Beard/IO.h>
 
 #include <raylib.h>
 #include <raymath.h>
@@ -58,17 +60,15 @@ int GluonApp::Run()
 		// Check if gluon file update is needed
 		i64 write_time = -1;
 
-		std::string file_content;
-
 		bool draw_needs_update = false;
 
-		if (FileUtils::ReadFileIfNewer("test.gluon",
-		                               last_write_time,
-		                               &write_time,
-		                               &file_content))
+		if (auto file_content = Beard::IO::ReadWholeFileIfNewer("test.gluon",
+		                                                        last_write_time,
+		                                                        &write_time);
+		    file_content.has_value())
 		{
 			delete root_widget;
-			root_widget       = parse_gluon_buffer(file_content.c_str());
+			root_widget       = parse_gluon_buffer(file_content.value().c_str());
 			draw_needs_update = true;
 
 			last_write_time = write_time;
@@ -106,13 +106,10 @@ int GluonApp::Run()
 		{
 			for (const auto& rect : rectangles)
 			{
-				Rectangle r = {rect.position.x,
-				               rect.position.y,
-				               rect.size.x,
-				               rect.size.y};
+				Rectangle r = {rect.position.x, rect.position.y, rect.size.x, rect.size.y};
 
-				f32 small_side = min(r.width, r.height);
-				f32 roundness  = min(rect.radius, small_side) / small_side;
+				f32 small_side = Beard::Min(r.width, r.height);
+				f32 roundness  = Beard::Min(rect.radius, small_side) / small_side;
 
 				if (rect.is_image)
 				{
@@ -135,14 +132,10 @@ int GluonApp::Run()
 								for (int i = 0; i < path->npts - 1; i += 3)
 								{
 									float* p = &path->pts[i * 2];
-									DrawLineBezierCubic(Vector2{p[0] + r.x,
-									                            p[1] + r.y},
-									                    Vector2{p[6] + r.x,
-									                            p[7] + r.y},
-									                    Vector2{p[2] + r.x,
-									                            p[3] + r.y},
-									                    Vector2{p[4] + r.x,
-									                            p[5] + r.y},
+									DrawLineBezierCubic(Vector2{p[0] + r.x, p[1] + r.y},
+									                    Vector2{p[6] + r.x, p[7] + r.y},
+									                    Vector2{p[2] + r.x, p[3] + r.y},
+									                    Vector2{p[4] + r.x, p[5] + r.y},
 									                    shape->strokeWidth,
 									                    color);
 								}
@@ -155,23 +148,17 @@ int GluonApp::Run()
 					}
 					else
 					{
-						Texture2D* texture = rect.image_info->raster_image
-						                         ->texture;
+						Texture2D* texture = rect.image_info->raster_image->texture;
 						DrawTexture(*texture,
-						            (int)(r.x + rect.image_info->raster_image
-						                            ->offset_x),
-						            (int)(r.y + rect.image_info->raster_image
-						                            ->offset_y),
+						            (int)(r.x + rect.image_info->raster_image->offset_x),
+						            (int)(r.y + rect.image_info->raster_image->offset_y),
 						            convert_color(rect.fill_color));
 						DrawRectangleRoundedLines(r, 0, 1, 5, BLACK);
 					}
 				}
 				else
 				{
-					DrawRectangleRounded(r,
-					                     roundness,
-					                     32,
-					                     convert_color(rect.fill_color));
+					DrawRectangleRounded(r, roundness, 32, convert_color(rect.fill_color));
 
 					if (rect.border_width > 0.0f)
 					{
@@ -179,8 +166,7 @@ int GluonApp::Run()
 						                          roundness,
 						                          32,
 						                          rect.border_width,
-						                          convert_color(
-						                              rect.border_color));
+						                          convert_color(rect.border_color));
 					}
 				}
 			}

@@ -12,21 +12,20 @@ namespace ShuntingYard
 
 f32 Expression::evaluate() const
 {
-	Array<f32> value_stack;
+	Beard::Array<f32> value_stack;
 
 	auto working_queue = evaluation_queue;
 
-	while (!working_queue.is_empty())
+	while (!working_queue.IsEmpty())
 	{
-		auto* node = working_queue.first().get();
-		working_queue.pop();
+		auto* node = working_queue.First().get();
+		working_queue.PopAndDiscard();
 
 		switch (node->type)
 		{
 			case NodeType::Constant:
 			{
-				value_stack.add(
-				    reinterpret_cast<ConstantNode*>(node)->constant);
+				value_stack.Add(reinterpret_cast<ConstantNode*>(node)->constant);
 			}
 			break;
 
@@ -34,43 +33,32 @@ f32 Expression::evaluate() const
 			{
 				// TODO: Unary operators
 
-				f32 right = value_stack.last();
-				value_stack.pop();
+				f32 right = value_stack.Pop();
+				f32 left  = value_stack.Pop();
 
-				f32 left = value_stack.last();
-				value_stack.pop();
-
-				value_stack.add(
-				    evaluate_operator(reinterpret_cast<OperatorNode*>(node),
-				                      left,
-				                      right));
+				value_stack.Add(evaluate_operator(reinterpret_cast<OperatorNode*>(node), left, right));
 			}
 			break;
 
 			case NodeType::Function:
 			{
-				value_stack.add(
-				    evaluate_function(reinterpret_cast<FunctionNode*>(node)));
+				value_stack.Add(evaluate_function(reinterpret_cast<FunctionNode*>(node)));
 			}
 			break;
 		}
 	}
 
-	return value_stack.last();
+	return value_stack.Last();
 }
 
 f32 Expression::evaluate_operator(OperatorNode* op, f32 left, f32 right)
 {
 	switch (op->op)
 	{
-		case Operator::Add:
-			return op->unary ? left : left + right;
-		case Operator::Substract:
-			return op->unary ? -left : left - right;
-		case Operator::Multiply:
-			return left * right;
-		case Operator::Divide:
-			return left / right;
+		case Operator::Add: return op->unary ? left : left + right;
+		case Operator::Substract: return op->unary ? -left : left - right;
+		case Operator::Multiply: return left * right;
+		case Operator::Divide: return left / right;
 
 		case Operator::OpenParen:
 		case Operator::CloseParen:
@@ -89,11 +77,9 @@ inline bool IsOperator(TokenType token)
 		case TokenType::Plus:
 		case TokenType::Minus:
 		case TokenType::Asterisk:
-		case TokenType::Slash:
-			return true;
+		case TokenType::Slash: return true;
 
-		default:
-			break;
+		default: break;
 	}
 
 	return false;
@@ -135,9 +121,7 @@ inline i32 GetPrecedence(Operator op)
 	return 0;
 }
 
-Expression Expression::build(const std::vector<Token>& tokens,
-                             GluonWidget*              rootWidget,
-                             GluonWidget*              currentWidget)
+Expression Expression::build(const std::vector<Token>& tokens, GluonWidget* rootWidget, GluonWidget* currentWidget)
 {
 	Expression result;
 
@@ -151,8 +135,7 @@ Expression Expression::build(const std::vector<Token>& tokens,
 		{
 			case TokenType::Number:
 			{
-				result.evaluation_queue.add(
-				    std::make_shared<ConstantNode>(token.number));
+				result.evaluation_queue.Add(std::make_shared<ConstantNode>(token.number));
 			}
 			break;
 
@@ -166,9 +149,7 @@ Expression Expression::build(const std::vector<Token>& tokens,
 			{
 				while (operatorStack.top() != Operator::OpenParen)
 				{
-					result.evaluation_queue.add(
-					    std::make_shared<OperatorNode>(operatorStack.top(),
-					                                   false));
+					result.evaluation_queue.Add(std::make_shared<OperatorNode>(operatorStack.top(), false));
 					operatorStack.pop();
 				}
 
@@ -180,23 +161,18 @@ Expression Expression::build(const std::vector<Token>& tokens,
 			case TokenType::Plus:
 			{
 				bool isFirstElement      = (i == 0);
-				bool previousIsOpenParen = (i > 0) && tokens[i - 1].type ==
-				                                          TokenType::OpenParen;
-				bool previousIsOperator = (i > 0) &&
-				                          IsOperator(tokens[i - 1].type);
-				bool isUnary = isFirstElement || previousIsOpenParen ||
-				               previousIsOperator;
+				bool previousIsOpenParen = (i > 0) && tokens[i - 1].type == TokenType::OpenParen;
+				bool previousIsOperator  = (i > 0) && IsOperator(tokens[i - 1].type);
+				bool isUnary             = isFirstElement || previousIsOpenParen || previousIsOperator;
 
 				bool isNotLast    = (i + 1) < tokens.size();
-				bool nextIsNumber = isNotLast &&
-				                    (tokens[i + 1].type == TokenType::Number);
+				bool nextIsNumber = isNotLast && (tokens[i + 1].type == TokenType::Number);
 
 				// Special case for unary plus / minus
 				if (isUnary && nextIsNumber)
 				{
 					f32 mult = token.type == TokenType::Minus ? -1.0f : 1.0f;
-					result.evaluation_queue.add(std::make_shared<ConstantNode>(
-					    mult * tokens[++i].number));
+					result.evaluation_queue.Add(std::make_shared<ConstantNode>(mult * tokens[++i].number));
 
 					continue;
 				}
@@ -215,8 +191,7 @@ Expression Expression::build(const std::vector<Token>& tokens,
 					if (GetPrecedence(op) <= GetPrecedence(other))
 					{
 						operatorStack.pop();
-						result.evaluation_queue.add(
-						    std::make_shared<OperatorNode>(other, false));
+						result.evaluation_queue.Add(std::make_shared<OperatorNode>(other, false));
 					}
 				}
 
@@ -227,11 +202,8 @@ Expression Expression::build(const std::vector<Token>& tokens,
 			case TokenType::Identifier:
 			{
 				bool hasTwoNextValues = (i + 2) < tokens.size();
-				bool nextIsDot        = hasTwoNextValues &&
-				                 (tokens[i + 1].type == TokenType::Dot);
-				bool nextIsProperty = hasTwoNextValues &&
-				                      (tokens[i + 2].type ==
-				                       TokenType::Identifier);
+				bool nextIsDot        = hasTwoNextValues && (tokens[i + 1].type == TokenType::Dot);
+				bool nextIsProperty   = hasTwoNextValues && (tokens[i + 2].type == TokenType::Identifier);
 
 				GluonWidget* widget = nullptr;
 
@@ -240,10 +212,7 @@ Expression Expression::build(const std::vector<Token>& tokens,
 				if (hasTwoNextValues && nextIsDot && nextIsProperty)
 				{
 					auto widgetId = token.text;
-					if (widgetId == "parent")
-					{
-						widget = currentWidget->parent;
-					}
+					if (widgetId == "parent") { widget = currentWidget->parent; }
 					else
 					{
 						widget = get_widget_by_id(rootWidget, widgetId);
@@ -260,10 +229,7 @@ Expression Expression::build(const std::vector<Token>& tokens,
 
 				Function fn;
 
-				if (binding == "width")
-				{
-					fn = Function::Width;
-				}
+				if (binding == "width") { fn = Function::Width; }
 				else if (binding == "height")
 				{
 					fn = Function::Height;
@@ -293,28 +259,23 @@ Expression Expression::build(const std::vector<Token>& tokens,
 					fn = Function::Right;
 				}
 
-				result.evaluation_queue.add(
-				    std::make_shared<FunctionNode>(fn, widget));
+				result.evaluation_queue.Add(std::make_shared<FunctionNode>(fn, widget));
 			}
 			break;
 
-			default:
-				ASSERT_UNREACHABLE();
-				break;
+			default: ASSERT_UNREACHABLE(); break;
 		}
 	}
 
 	while (!operatorStack.empty())
 	{
-		if (operatorStack.top() == Operator::OpenParen ||
-		    operatorStack.top() == Operator::CloseParen)
+		if (operatorStack.top() == Operator::OpenParen || operatorStack.top() == Operator::CloseParen)
 		{
 			LOG_F(ERROR, "Imbalanced expression");
 		}
 		else
 		{
-			result.evaluation_queue.add(
-			    std::make_shared<OperatorNode>(operatorStack.top(), false));
+			result.evaluation_queue.Add(std::make_shared<OperatorNode>(operatorStack.top(), false));
 		}
 		operatorStack.pop();
 	}

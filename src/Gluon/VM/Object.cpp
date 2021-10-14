@@ -2,13 +2,10 @@
 
 Value Object::get(const std::string& name) const
 {
-	return m_values.get_value_or(name, Value::Undefined);
+	return m_values.GetValueOr(name, Value::Undefined);
 }
 
-void Object::add(const std::string& propertyName, Value value)
-{
-	m_values[propertyName] = value;
-}
+void Object::add(const std::string& propertyName, Value value) { m_values[propertyName] = value; }
 
 void Object::visit_graph(VisitorCallback callback) // NOLINT
 {

@@ -2,8 +2,8 @@
 
 #include <Gluon/VM/Cell.h>
 
-#include <Gluon/Core/Defines.h>
-#include <Gluon/Core/Containers/Array.h>
+#include <Beard/Macros.h>
+#include <Beard/Array.h>
 
 #include <memory>
 
@@ -20,15 +20,9 @@ struct HeapBlock
 	explicit HeapBlock(usize cellSize);
 	~HeapBlock() = default;
 
-	usize num_cells() const
-	{
-		return (BLOCK_SIZE - sizeof(HeapBlock)) / m_cell_size;
-	}
+	usize num_cells() const { return (BLOCK_SIZE - sizeof(HeapBlock)) / m_cell_size; }
 
-	Cell* cell(usize index)
-	{
-		return reinterpret_cast<Cell*>(&m_storage[index * m_cell_size]);
-	}
+	Cell* cell(usize index) { return reinterpret_cast<Cell*>(&m_storage[index * m_cell_size]); }
 
 	usize cell_size() const { return m_cell_size; }
 
@@ -78,5 +72,5 @@ private:
 
 	Interpreter* m_interpreter;
 
-	Array<std::unique_ptr<HeapBlock>> m_blocks;
+	Beard::Array<std::unique_ptr<HeapBlock>> m_blocks;
 };

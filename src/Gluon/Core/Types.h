@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Gluon/Core/Defines.h>
+#include <Beard/Macros.h>
 
 START_EXTERNAL_INCLUDE
 #include <glm/glm.hpp>
@@ -13,20 +13,20 @@ namespace GluonColor
 {
 inline glm::vec4 from_rgba(i32 r, i32 g, i32 b, f32 a = 1.0f)
 {
-	const f32 fr = clamp(static_cast<f32>(r), 0.0f, 255.0f) / 255.0f;
-	const f32 fg = clamp(static_cast<f32>(g), 0.0f, 255.0f) / 255.0f;
-	const f32 fb = clamp(static_cast<f32>(b), 0.0f, 255.0f) / 255.0f;
-	const f32 fa = clamp(a, 0.0f, 1.0f);
+	const f32 fr = Beard::Clamp(static_cast<f32>(r), 0.0f, 255.0f) / 255.0f;
+	const f32 fg = Beard::Clamp(static_cast<f32>(g), 0.0f, 255.0f) / 255.0f;
+	const f32 fb = Beard::Clamp(static_cast<f32>(b), 0.0f, 255.0f) / 255.0f;
+	const f32 fa = Beard::Clamp(a, 0.0f, 1.0f);
 
 	return {fr, fg, fb, fa};
 }
 
 inline glm::vec4 from_hsla(i32 h, i32 s, i32 l, f32 a = 1.0f)
 {
-	const f32 fh = clamp(static_cast<f32>(h), 0.0f, 360.0f);
-	const f32 fs = clamp(static_cast<f32>(s), 0.0f, 100.0f) / 100.0f;
-	const f32 fl = clamp(static_cast<f32>(l), 0.0f, 100.0f) / 100.0f;
-	const f32 fa = clamp(a, 0.0f, 1.0f);
+	const f32 fh = Beard::Clamp(static_cast<f32>(h), 0.0f, 360.0f);
+	const f32 fs = Beard::Clamp(static_cast<f32>(s), 0.0f, 100.0f) / 100.0f;
+	const f32 fl = Beard::Clamp(static_cast<f32>(l), 0.0f, 100.0f) / 100.0f;
+	const f32 fa = Beard::Clamp(a, 0.0f, 1.0f);
 
 	const f32 c = (1.0f - abs(2.0f * fl - 1.0f)) * fs;
 	const f32 x = c * (1.0f - abs(fmodf(fh / 60.0f, 2.0f) - 1.0f));
@@ -44,9 +44,8 @@ inline glm::vec4 from_hsla(i32 h, i32 s, i32 l, f32 a = 1.0f)
 
 inline glm::vec4 from_string(const std::string& str)
 {
-	std::string value      = str;
-	auto        HexToFloat = [](char* v)
-	{ return static_cast<f32>(strtol(v, nullptr, 16)) / 255.0f; };
+	std::string value = str;
+	auto HexToFloat   = [](char* v) { return static_cast<f32>(strtol(v, nullptr, 16)) / 255.0f; };
 
 	char s[3] = {};
 

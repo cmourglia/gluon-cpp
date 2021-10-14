@@ -8,17 +8,8 @@ add_subdirectory(thirdparty)
 
 
 set(CORE_SRC
-    src/Gluon/Core/Timer.cpp
     src/Gluon/Core/Types.cpp
-    src/Gluon/Core/Utils.cpp
-
-    src/Gluon/Core/Defines.h
-    src/Gluon/Core/Timer.h
     src/Gluon/Core/Types.h
-    src/Gluon/Core/Utils.h
-
-    src/Gluon/Core/Containers/HashMap.h
-    src/Gluon/Core/Containers/Array.h
 )
 
 set(COMPILER_SRC
@@ -77,7 +68,7 @@ add_executable(gluon src/main.cpp
     ${APP_SRC}
 )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE loguru::loguru glm::glm raylib stb nanovg)
+target_link_libraries(${PROJECT_NAME} PRIVATE loguru::loguru glm::glm raylib nanovg stb_truetype BeardLibrary)
 target_include_directories(${PROJECT_NAME} PRIVATE src)
 target_compile_definitions(${PROJECT_NAME} PRIVATE $<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>)
 target_compile_options(${PROJECT_NAME} PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/W4> $<$<CXX_COMPILER_ID:MSVC>:/WX>)

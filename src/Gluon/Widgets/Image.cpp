@@ -17,10 +17,7 @@ glm::vec4 extract_color(const std::vector<Token>& tokens);
 
 GluonImage::~GluonImage()
 {
-	if (image_info.svg_image != nullptr)
-	{
-		nsvgDelete(image_info.svg_image);
-	}
+	if (image_info.svg_image != nullptr) { nsvgDelete(image_info.svg_image); }
 
 	if (image_info.raster_image != nullptr)
 	{
@@ -37,8 +34,7 @@ GluonImage::~GluonImage()
 	}
 }
 
-void GluonImage::parse_property_internal(Parser::Node::Ptr node,
-                                         const u32         node_hash)
+void GluonImage::parse_property_internal(Parser::Node::Ptr node, const u32 node_hash)
 {
 	switch (node_hash)
 	{
@@ -49,10 +45,7 @@ void GluonImage::parse_property_internal(Parser::Node::Ptr node,
 			imageUrl = node->children[0]->name;
 			std::filesystem::path fp(imageUrl);
 
-			if (fp.extension().string() == ".svg")
-			{
-				image_info.is_vectorial = true;
-			}
+			if (fp.extension().string() == ".svg") { image_info.is_vectorial = true; }
 			else
 			{
 				image_info.is_vectorial = false;
@@ -73,8 +66,7 @@ void GluonImage::parse_property_internal(Parser::Node::Ptr node,
 
 				if (image_info.raster_image->image == nullptr)
 				{
-					LOG_F(ERROR,
-					      "Cannot load image %s",
+					LOG_F(ERROR, "Cannot load image %s",
 					      imageUrl.c_str()); // stbi_failure_reason());
 				}
 				imageSize = {image->width, image->height};
@@ -88,13 +80,9 @@ void GluonImage::parse_property_internal(Parser::Node::Ptr node,
 			std::transform(fit.begin(),
 			               fit.end(),
 			               fit.begin(),
-			               [](char c)
-			               { return static_cast<char>(std::tolower(c)); });
+			               [](char c) { return static_cast<char>(std::tolower(c)); });
 
-			if (strcmp(fit.c_str(), "stretch") == 0)
-			{
-				fitMode = FitMode::Stretch;
-			}
+			if (strcmp(fit.c_str(), "stretch") == 0) { fitMode = FitMode::Stretch; }
 			else if (strcmp(fit.c_str(), "fit") == 0)
 			{
 				fitMode = FitMode::Fit;
@@ -115,8 +103,7 @@ void GluonImage::parse_property_internal(Parser::Node::Ptr node,
 
 		case NodeHash::Tint:
 		{
-			imageTint = Utils::extract_color(
-			    node->children[0]->associated_tokens);
+			imageTint = Utils::extract_color(node->children[0]->associated_tokens);
 		}
 		break;
 	}
@@ -127,9 +114,7 @@ void GluonImage::post_evaluate()
 	if (image_info.is_vectorial)
 	{
 		// TODO: This should be evaluated
-		image_info.svg_image = nsvgParseFromFile(imageUrl.c_str(),
-		                                         "px",
-		                                         min(size.x, size.y));
+		image_info.svg_image = nsvgParseFromFile(imageUrl.c_str(), "px", Beard::Min(size.x, size.y));
 	}
 	else
 	{
@@ -150,8 +135,7 @@ void GluonImage::post_evaluate()
 				i32 targetWidth  = 0;
 				i32 targetHeight = 0;
 
-				f32 imageRatio = static_cast<f32>(image->width) /
-				                 static_cast<f32>(image->height);
+				f32 imageRatio = static_cast<f32>(image->width) / static_cast<f32>(image->height);
 				if (size.x < size.y)
 				{
 					targetWidth  = static_cast<i32>(size.x);
@@ -166,10 +150,8 @@ void GluonImage::post_evaluate()
 				ImageResize(image, targetWidth, targetHeight);
 
 				// Compute offsets to center in the target quad
-				image_info.raster_image->offset_x = (size.x - targetWidth) *
-				                                    0.5f;
-				image_info.raster_image->offset_y = (size.y - targetHeight) *
-				                                    0.5f;
+				image_info.raster_image->offset_x = (size.x - targetWidth) * 0.5f;
+				image_info.raster_image->offset_y = (size.y - targetHeight) * 0.5f;
 			}
 			break;
 
@@ -178,8 +160,7 @@ void GluonImage::post_evaluate()
 				i32 targetWidth  = 0;
 				i32 targetHeight = 0;
 
-				f32 imageRatio = static_cast<f32>(image->width) /
-				                 static_cast<f32>(image->height);
+				f32 imageRatio = static_cast<f32>(image->width) / static_cast<f32>(image->height);
 				if (size.x > size.y)
 				{
 					targetWidth  = static_cast<i32>(size.x);
@@ -193,10 +174,7 @@ void GluonImage::post_evaluate()
 
 				ImageResize(image, targetWidth, targetHeight);
 
-				Rectangle r = {(targetWidth - size.x) * 0.5f,
-				               (targetHeight - size.y) * 0.5f,
-				               size.x,
-				               size.y};
+				Rectangle r = {(targetWidth - size.x) * 0.5f, (targetHeight - size.y) * 0.5f, size.x, size.y};
 				ImageCrop(image, r);
 			}
 			break;

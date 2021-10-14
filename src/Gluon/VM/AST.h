@@ -2,8 +2,8 @@
 
 #include <Gluon/VM/Value.h>
 
-#include <Gluon/Core/Defines.h>
-#include <Gluon/Core/Containers/Array.h>
+#include <Beard/Macros.h>
+#include <Beard/Array.h>
 
 #include <string>
 #include <memory>
@@ -47,11 +47,11 @@ struct ScopeNode : public ASTNode
 	template <typename T, typename... Args>
 	T* add(Args&&... args)
 	{
-		m_body.emplace(std::make_unique<T>(std::forward<Args>(args)...));
-		return (T*)m_body.last().get();
+		m_body.Emplace(std::make_unique<T>(std::forward<Args>(args)...));
+		return (T*)m_body.Last().get();
 	}
 
-	const Array<ASTNodePtr>& children() const { return m_body; }
+	const Beard::Array<ASTNodePtr>& children() const { return m_body; }
 
 	Value execute(Interpreter* interpreter) override;
 
@@ -59,7 +59,7 @@ protected:
 	ScopeNode() = default;
 
 private:
-	Array<ASTNodePtr> m_body;
+	Beard::Array<ASTNodePtr> m_body;
 };
 
 using ScopeNodePtr = std::unique_ptr<ScopeNode>;

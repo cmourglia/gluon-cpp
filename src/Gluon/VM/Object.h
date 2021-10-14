@@ -3,7 +3,7 @@
 #include <Gluon/VM/Cell.h>
 #include <Gluon/VM/Value.h>
 
-#include <Gluon/Core/Containers/HashMap.h>
+#include <Beard/HashMap.h>
 
 #include <string>
 
@@ -20,5 +20,5 @@ public:
 	void visit_graph(VisitorCallback callback) override;
 
 private:
-	StringHashMap<Value> m_values;
+	Beard::StringHashMap<Value> m_values;
 };
