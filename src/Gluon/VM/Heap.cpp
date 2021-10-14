@@ -3,7 +3,7 @@
 #include <Gluon/VM/Interpreter.h>
 #include <Gluon/VM/Object.h>
 
-#include <Gluon/Core/Timer.h>
+#include <Beard/Timer.h>
 
 #include <loguru.hpp>
 
@@ -33,12 +33,12 @@ void* Heap::allocate_cell(usize size)
 	auto* memory = malloc(HeapBlock::BLOCK_SIZE);
 	auto* block  = new (memory) HeapBlock{size};
 	void* cell   = block->allocate();
-	m_blocks.add(std::unique_ptr<HeapBlock>(block));
+	m_blocks.Add(std::unique_ptr<HeapBlock>(block));
 
 	return cell;
 }
 
-inline void clear_objects(const Array<std::unique_ptr<HeapBlock>>& blocks)
+inline void clear_objects(const Beard::Array<std::unique_ptr<HeapBlock>>& blocks)
 {
 	// TODO: We could keep a "used cells" list somewhere to avoid
 	// having to iterate over all the memory
@@ -48,37 +48,31 @@ inline void clear_objects(const Array<std::unique_ptr<HeapBlock>>& blocks)
 		{
 			if (auto* cell = block->cell(i); cell->used)
 			{
-				LOG_F(INFO,
-				      "Clearing cell (%s) %p mark flag",
-				      cell->to_string(),
-				      cell);
+				LOG_F(INFO, "Clearing cell (%s) %p mark flag", cell->to_string(), cell);
 				block->cell(i)->marked = false;
 			}
 		}
 	}
 }
 
-inline Array<Cell*> collect_roots(Interpreter* interpreter)
+inline Beard::Array<Cell*> collect_roots(Interpreter* interpreter)
 {
-	Array<Cell*> roots;
+	Beard::Array<Cell*> roots;
 
 	if (auto* go = interpreter->global_object(); go != nullptr)
 	{
-		roots.add(go);
+		roots.Add(go);
 	}
 
 	return roots;
 }
 
-inline void mark_objects(const Array<Cell*>& roots)
+inline void mark_objects(const Beard::Array<Cell*>& roots)
 {
 	auto MarkObject = [](Cell* visited)
 	{
 		visited->marked = true;
-		LOG_F(INFO,
-		      "Marking cell (%s) %p as visited",
-		      visited->to_string(),
-		      visited);
+		LOG_F(INFO, "Marking cell (%s) %p as visited", visited->to_string(), visited);
 	};
 
 	for (auto&& root : roots)
@@ -87,7 +81,7 @@ inline void mark_objects(const Array<Cell*>& roots)
 	}
 }
 
-inline void sweep_objects(const Array<std::unique_ptr<HeapBlock>>& blocks)
+inline void sweep_objects(const Beard::Array<std::unique_ptr<HeapBlock>>& blocks)
 {
 	// TODO: We could keep a "used cells" list somewhere to avoid
 	// having to iterate over all the memory
@@ -97,10 +91,7 @@ inline void sweep_objects(const Array<std::unique_ptr<HeapBlock>>& blocks)
 		{
 			if (auto* cell = block->cell(i); cell->used && !cell->marked)
 			{
-				LOG_F(INFO,
-				      "Deallocating  cell (%s) %p",
-				      cell->to_string(),
-				      cell);
+				LOG_F(INFO, "Deallocating  cell (%s) %p", cell->to_string(), cell);
 				block->deallocate(cell);
 			}
 		}
@@ -110,7 +101,7 @@ inline void sweep_objects(const Array<std::unique_ptr<HeapBlock>>& blocks)
 void Heap::garbage()
 {
 	LOG_SCOPE_F(INFO, "Garbage started");
-	Timer timer;
+	Beard::Timer timer;
 
 	// First, we mark all cells as "not marked".
 	clear_objects(m_blocks);
@@ -126,18 +117,15 @@ void Heap::garbage()
 	// are not marked.
 	sweep_objects(m_blocks);
 
-	timer.tick();
-	LOG_F(INFO,
-	      "Garbage done in %lfs (%lldμs)",
-	      timer.delta_time(),
-	      timer.delta_time_us());
+	timer.Tick();
+	LOG_F(INFO, "Garbage done in %lfs (%lldμs)", timer.DeltaTime(), timer.DeltaTimeMicroseconds());
 }
 
 HeapBlock::HeapBlock(usize cellSize)
 {
 	// Make sure we are always allocating at least the size of a
 	// FreeListItem, to avoid problems.
-	m_cell_size = max(cellSize, sizeof(FreeListItem));
+	m_cell_size = Beard::ClampBot(cellSize, sizeof(FreeListItem));
 
 	for (usize i = 0; i < num_cells(); ++i)
 	{

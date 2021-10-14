@@ -2,22 +2,22 @@
 
 #include <Gluon/Compiler/Tokenizer.h>
 
+#include <Gluon/Widgets/Image.h>
+#include <Gluon/Widgets/Rectangle.h>
+#include <Gluon/Widgets/Text.h>
 #include <Gluon/Widgets/Widget.h>
 #include <Gluon/Widgets/Window.h>
-#include <Gluon/Widgets/Rectangle.h>
-#include <Gluon/Widgets/Image.h>
-#include <Gluon/Widgets/Text.h>
 
-#include <Gluon/Core/Containers/HashMap.h>
+#include <Beard/HashMap.h>
 
 #include <loguru.hpp>
 
 #include <fstream>
-#include <memory>
 #include <functional>
-#include <unordered_set>
-#include <stack>
+#include <memory>
 #include <queue>
+#include <stack>
+#include <unordered_set>
 
 using namespace Parser;
 
@@ -37,11 +37,11 @@ enum class GeometryPolicy
 	Anchor,
 };
 
-StringHashMap<WidgetFactory*> s_widget_factories;
+Beard::StringHashMap<WidgetFactory*> s_widget_factories;
 
 GluonWidget* parse_gluon_buffer(const char* buffer)
 {
-	if (s_widget_factories.is_empty())
+	if (s_widget_factories.IsEmpty())
 	{
 		// FIXME: How / when do we wanna build this map ?
 		s_widget_factories["Window"]    = &GluonWindow::create;
@@ -57,9 +57,7 @@ GluonWidget* parse_gluon_buffer(const char* buffer)
 
 	auto remove_it = std::remove_if(tokens.begin(),
 	                                tokens.end(),
-	                                [](const Token& token) {
-		                                return token.type == TokenType::Spacing;
-	                                });
+	                                [](const Token& token) { return token.type == TokenType::Spacing; });
 	tokens.erase(remove_it, tokens.end());
 
 	Token* token = tokens.data();
@@ -75,13 +73,9 @@ GluonWidget* parse_gluon_buffer(const char* buffer)
 
 			std::string name;
 
-			if (token->type == TokenType::Colon)
-			{
-				++token;
-			}
+			if (token->type == TokenType::Colon) { ++token; }
 
-			while (!(token->type == TokenType::EndOfLine ||
-			         token->type == TokenType::Semicolon))
+			while (!(token->type == TokenType::EndOfLine || token->type == TokenType::Semicolon))
 			{
 				valueTokens.push_back(*token);
 				name += token->text;
@@ -102,9 +96,7 @@ GluonWidget* parse_gluon_buffer(const char* buffer)
 		{
 			switch (token->type)
 			{
-				case TokenType::EndOfStream:
-					done = true;
-					break;
+				case TokenType::EndOfStream: done = true; break;
 
 				case TokenType::Identifier:
 				{
@@ -155,8 +147,7 @@ GluonWidget* parse_gluon_buffer(const char* buffer)
 							node->parent = currentNode;
 
 							// FIXME(Charly): This loop is not safe
-							for (int i = 2; token[i].type != TokenType::Colon;
-							     ++i)
+							for (int i = 2; token[i].type != TokenType::Colon; ++i)
 							{
 								if (token[i].type == TokenType::Identifier)
 								{
@@ -186,8 +177,7 @@ GluonWidget* parse_gluon_buffer(const char* buffer)
 					currentNode = currentNode->parent;
 				}
 
-				default:
-					break;
+				default: break;
 			}
 		}
 

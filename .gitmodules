@@ -4,15 +4,12 @@
 [submodule "thirdparty/json"]
 	path = thirdparty/json
 	url = https://github.com/nlohmann/json.git
-[submodule "thirdparty/glm"]
-	path = thirdparty/glm
-	url = https://github.com/g-truc/glm.git
 [submodule "thirdparty/raylib"]
 	path = thirdparty/raylib
 	url = https://github.com/raysan5/raylib
-[submodule "thirdparty/stb"]
-	path = thirdparty/stb
-	url = https://github.com/nothings/stb.git
 [submodule "thirdparty/nanovg"]
 	path = thirdparty/nanovg
 	url = https://github.com/inniyah/nanovg.git
+[submodule "thirdparty/BeardLibrary"]
+	path = thirdparty/BeardLibrary
+	url = https://github.com/cmourglia/BeardLibrary.git

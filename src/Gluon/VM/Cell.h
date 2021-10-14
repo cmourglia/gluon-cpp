@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Gluon/Core/Defines.h>
+#include <Beard/Macros.h>
 
 struct Cell
 {

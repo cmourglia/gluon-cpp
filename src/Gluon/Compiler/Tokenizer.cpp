@@ -1,7 +1,5 @@
 #include <Gluon/Compiler/Tokenizer.h>
 
-#include <Gluon/Core/Utils.h>
-
 #include <loguru.hpp>
 
 inline void advance_chars(Tokenizer* tokenizer, u32 count)
@@ -148,13 +146,10 @@ inline Token get_token(Tokenizer* tokenizer)
 				token.type = TokenType::Comment;
 
 				while ((tokenizer->stream[0] && tokenizer->stream[1]) &&
-				       !(tokenizer->stream[0] == '*' &&
-				         tokenizer->stream[1] == '/'))
+				       !(tokenizer->stream[0] == '*' && tokenizer->stream[1] == '/'))
 				{
-					if ((tokenizer->stream[0] == '\r' &&
-					     tokenizer->stream[1] == '\n') ||
-					    (tokenizer->stream[0] == '\n' &&
-					     tokenizer->stream[1] == '\r'))
+					if ((tokenizer->stream[0] == '\r' && tokenizer->stream[1] == '\n') ||
+					    (tokenizer->stream[0] == '\n' && tokenizer->stream[1] == '\r'))
 					{
 						advance_chars(tokenizer, 1);
 					}
@@ -207,8 +202,7 @@ inline Token get_token(Tokenizer* tokenizer)
 				token.type = TokenType::Identifier;
 
 				while (tokenizer->stream[0] &&
-				       (is_alpha(tokenizer->stream[0]) ||
-				        is_number(tokenizer->stream[0]) ||
+				       (is_alpha(tokenizer->stream[0]) || is_number(tokenizer->stream[0]) ||
 				        tokenizer->stream[0] == '_'))
 				{
 					advance_chars(tokenizer, 1);

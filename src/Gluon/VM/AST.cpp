@@ -177,7 +177,7 @@ void ScopeNode::dump(i32 indent) const
 
 	printf("%s\n", "(ScopeNode)");
 
-	if (!m_body.is_empty())
+	if (!m_body.IsEmpty())
 	{
 		indent += 1;
 		print_indent(indent);
