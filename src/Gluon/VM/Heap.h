@@ -7,9 +7,6 @@
 
 #include <memory>
 
-namespace VM
-{
-
 class Interpreter;
 struct Cell;
 
@@ -83,5 +80,3 @@ private:
 
 	Array<std::unique_ptr<HeapBlock>> m_blocks;
 };
-
-}

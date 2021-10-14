@@ -2,9 +2,6 @@
 
 #include <Gluon/Core/Defines.h>
 
-namespace VM
-{
-
 struct Cell
 {
 	NONCOPYABLE(Cell);
@@ -21,4 +18,3 @@ struct Cell
 	bool marked = false;
 	bool used   = true;
 };
-}

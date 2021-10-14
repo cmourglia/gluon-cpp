@@ -6,19 +6,13 @@
 #include <Gluon/VM/Function.h>
 
 #include <stdio.h>
+#include <limits>
 
-namespace VM
-{
-
-Value ScopeNode::execute(Interpreter* interpreter)
-{
-	return interpreter->run(this);
-}
+Value ScopeNode::execute(Interpreter* interpreter) { return interpreter->run(this); }
 
 Value FunctionDeclaration::execute(Interpreter* interpreter)
 {
-	auto* function = interpreter->heap()->allocate<Function>(m_name,
-	                                                         m_body.get());
+	auto* function = interpreter->heap()->allocate<Function>(m_name, m_body.get());
 	interpreter->global_object()->add(m_name, Value{function});
 	return Value{function};
 }
@@ -52,18 +46,54 @@ Value CallExpression::execute(Interpreter* interpreter)
 
 inline Value add(Value lhs, Value rhs)
 {
-	ASSERT(lhs.is_number(), "TODO");
-	ASSERT(rhs.is_number(), "TODO");
+	if ((lhs.is_number() && rhs.is_undefined()) || (lhs.is_undefined() && rhs.is_number()))
+	{
+		return Value{std::numeric_limits<f64>::quiet_NaN()};
+	}
 
-	return Value{lhs.as_number() + rhs.as_number()};
+	if (lhs.is_number() && rhs.is_null())
+	{
+		return Value{lhs.as_number()};
+	}
+
+	if (lhs.is_null() && rhs.is_number())
+	{
+		return Value{rhs.as_number()};
+	}
+
+	if (lhs.is_number() && rhs.is_number())
+	{
+		return Value{lhs.as_number() + rhs.as_number()};
+	}
+
+	ASSERT_UNREACHABLE();
+	return Value::Undefined;
 }
 
 inline Value Sub(Value lhs, Value rhs)
 {
-	ASSERT(lhs.is_number(), "TODO");
-	ASSERT(rhs.is_number(), "TODO");
+	if ((lhs.is_number() && rhs.is_undefined()) || (lhs.is_undefined() && rhs.is_number()))
+	{
+		return Value{std::numeric_limits<f64>::quiet_NaN()};
+	}
 
-	return Value{lhs.as_number() - rhs.as_number()};
+	if (lhs.is_number() && rhs.is_null())
+	{
+		return Value{lhs.as_number()};
+	}
+
+	if (lhs.is_null() && rhs.is_number())
+	{
+		return Value{-rhs.as_number()};
+	}
+
+	if (lhs.is_number() && rhs.is_number())
+	{
+		return Value{lhs.as_number() - rhs.as_number()};
+	}
+
+	ASSERT_UNREACHABLE();
+	return Value::Undefined;
 }
 
 Value BinaryExpression::execute(Interpreter* interpreter)
@@ -84,16 +114,54 @@ Value BinaryExpression::execute(Interpreter* interpreter)
 	return Value::Undefined;
 }
 
+Value Identifier::execute(Interpreter* interpreter)
+{
+	return interpreter->get_variable(m_name.c_str());
+}
+
 Value Literal::execute(Interpreter* interpreter)
 {
 	UNUSED(interpreter);
 	return m_value;
 }
 
+Value AssignmentExpression::execute(Interpreter* interpreter)
+{
+	switch (m_op)
+	{
+		case AssignmentOperator::Assign:
+		{
+			interpreter->set_variable(m_left->name().c_str(), m_right->execute(interpreter));
+		}
+		break;
+
+		default:
+			ASSERT_UNREACHABLE();
+			break;
+	}
+	return Value::Undefined;
+}
+
+Value VariableDeclaration::execute(Interpreter* interpreter)
+{
+	interpreter->declare_variable(m_identifier->name().c_str());
+
+	Value result = Value::Null;
+
+	if (m_initializer != nullptr)
+	{
+		result = m_initializer->execute(interpreter);
+		interpreter->set_variable(m_identifier->name().c_str(), result);
+	}
+
+	return result;
+}
+
 // ----------------------------------------------------------------------------
 // DUMP
 // ----------------------------------------------------------------------------
-void ASTNode::dump(i32 indent) const
+
+inline void print_indent(i32 indent)
 {
 	for (i32 i = 0; i < indent * 2; ++i)
 	{
@@ -101,16 +169,18 @@ void ASTNode::dump(i32 indent) const
 	}
 }
 
+void ASTNode::dump(i32 indent) const { UNUSED(indent); }
+
 void ScopeNode::dump(i32 indent) const
 {
-	ASTNode::dump(indent);
+	print_indent(indent);
 
 	printf("%s\n", "(ScopeNode)");
 
 	if (!m_body.is_empty())
 	{
 		indent += 1;
-		ASTNode::dump(indent);
+		print_indent(indent);
 
 		printf("body:\n");
 
@@ -123,52 +193,52 @@ void ScopeNode::dump(i32 indent) const
 
 void Identifier::dump(i32 indent) const
 {
-	ASTNode::dump(indent);
+	print_indent(indent);
 
 	printf("Identifier <%s>\n", m_name.c_str());
 }
 
 void FunctionDeclaration::dump(i32 indent) const
 {
-	ASTNode::dump(indent);
+	print_indent(indent);
 
 	printf("Function\n");
 	indent += 1;
 
-	ASTNode::dump(indent);
+	print_indent(indent);
 	printf("name: %s\n", m_name.c_str());
-	ASTNode::dump(indent);
+	print_indent(indent);
 	printf("body:\n");
 	m_body->dump(indent + 1);
 }
 
 void ExpressionStatement::dump(i32 indent) const
 {
-	ASTNode::dump(indent);
+	print_indent(indent);
 	printf("ExpressionStatement\n");
 	m_expression->dump(indent + 1);
 }
 
 void ReturnStatement::dump(i32 indent) const
 {
-	ASTNode::dump(indent);
+	print_indent(indent);
 	printf("ReturnStatement\n");
 	m_argument->dump(indent + 1);
 }
 
 void CallExpression::dump(i32 indent) const
 {
-	ASTNode::dump(indent);
+	print_indent(indent);
 	printf("CallExpression: %s()\n", m_callee.c_str());
 }
 
 void BinaryExpression::dump(i32 indent) const
 {
-	ASTNode::dump(indent);
+	print_indent(indent);
 	printf("BinaryExpression\n");
 
 	indent += 1;
-	ASTNode::dump(indent);
+	print_indent(indent);
 	printf("Operator: ");
 
 	switch (m_op)
@@ -183,19 +253,60 @@ void BinaryExpression::dump(i32 indent) const
 	}
 	printf("\n");
 
-	ASTNode::dump(indent);
+	print_indent(indent);
 	printf("Left:\n");
 	m_left->dump(indent + 1);
-	ASTNode::dump(indent);
+	print_indent(indent);
 	printf("Right:\n");
 	m_right->dump(indent + 1);
 }
 
 void Literal::dump(i32 indent) const
 {
-	ASTNode::dump(indent);
+	print_indent(indent);
 
 	printf("%s\n", m_value.to_string().c_str());
 }
 
+void AssignmentExpression::dump(i32 indent) const
+{
+	print_indent(indent);
+	printf("operator: ");
+	switch (m_op)
+	{
+		case AssignmentOperator::Assign:
+			printf("=");
+			break;
+		default:
+			ASSERT_UNREACHABLE();
+			break;
+	}
+	printf("\n");
+
+	print_indent(indent);
+	printf("left:\n");
+	m_left->dump(indent + 1);
+
+	print_indent(indent);
+	printf("right:\n");
+	m_right->dump(indent + 1);
+}
+
+void VariableDeclaration::dump(i32 indent) const
+{
+	print_indent(indent);
+	printf("Variable declaration\n");
+	print_indent(indent + 1);
+	printf("name:\n");
+	m_identifier->dump(indent + 2);
+	printf("init:\n");
+	if (m_initializer.get() != nullptr)
+	{
+		m_initializer->dump(indent + 2);
+	}
+	else
+	{
+		print_indent(indent + 2);
+		printf("<null>");
+	}
 }

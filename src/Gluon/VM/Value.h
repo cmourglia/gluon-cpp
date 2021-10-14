@@ -4,9 +4,6 @@
 
 #include <string>
 
-namespace VM
-{
-
 class Object;
 
 enum class ValueType
@@ -29,6 +26,12 @@ class Value
 {
 public:
 	Value() = default;
+
+	explicit Value(std::nullptr_t)
+	    : m_value_type{ValueType::Null}
+	    , m_data{}
+	{
+	}
 
 	explicit Value(f64 value)
 	    : m_value_type{ValueType::Number}
@@ -70,15 +73,20 @@ public:
 	// clang-format off
 	bool as_boolean() const { return m_data.as_boolean; }
 	f64 as_number() const { return m_data.as_number; }
-	String as_string() const { return m_data.as_string; }
 	Object* as_object() const { return m_data.as_object; }
 	// clang-format on
+	std::string as_string() const
+	{
+		return std::string{m_data.as_string.string,
+		                   m_data.as_string.string + m_data.as_string.length};
+	}
 
 	ValueType type() const { return m_value_type; }
 
 	std::string to_string() const;
 
 	static const Value Undefined;
+	static const Value Null;
 
 private:
 	ValueType m_value_type = ValueType::Undefined;
@@ -92,4 +100,5 @@ private:
 	} m_data;
 };
 
-}
+bool operator==(const Value& lhs, const Value& rhs);
+bool operator!=(const Value& lhs, const Value& rhs);
