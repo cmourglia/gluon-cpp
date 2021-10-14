@@ -7,9 +7,6 @@
 
 #include <loguru.hpp>
 
-namespace VM
-{
-
 Heap::Heap(Interpreter* interpreter)
     : m_interpreter(interpreter)
 {
@@ -181,6 +178,4 @@ void HeapBlock::deallocate(Cell* cell)
 	item->next = m_freelist;
 	item->used = false;
 	m_freelist = item;
-}
-
 }

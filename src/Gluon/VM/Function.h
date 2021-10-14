@@ -2,9 +2,6 @@
 
 #include <Gluon/VM/Object.h>
 
-namespace VM
-{
-
 struct ScopeNode;
 
 class Function : public Object
@@ -28,5 +25,3 @@ private:
 	std::string m_name;
 	ScopeNode*  m_body;
 };
-
-}

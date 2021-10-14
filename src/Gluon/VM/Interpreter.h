@@ -6,9 +6,7 @@
 #include <Gluon/Core/Containers/Array.h>
 
 #include <memory>
-
-namespace VM
-{
+#include <Gluon/Core/Containers/HashMap.h>
 
 struct ASTNode;
 struct ScopeNode;
@@ -17,6 +15,8 @@ class Object;
 struct ScopeFrame
 {
 	ScopeNode* node;
+
+	StringHashMap<Value> variables;
 };
 
 class Interpreter
@@ -34,6 +34,10 @@ public:
 
 	Heap* heap() const { return m_heap.get(); }
 
+	void declare_variable(const char* name);
+	void set_variable(const char* name, Value value);
+	Value get_variable(const char* name);
+
 private:
 	void push_scope(ScopeNode* node);
 	void pop_scope(ScopeNode* node);
@@ -43,5 +47,3 @@ private:
 	std::unique_ptr<Heap> m_heap          = nullptr;
 	Object*               m_global_object = nullptr;
 };
-
-}

@@ -16,8 +16,7 @@ public:
 	~HashMap() = default;
 
 	using Iterator      = typename std::unordered_map<Key, Value>::iterator;
-	using ConstIterator = typename std::unordered_map<Key,
-	                                                  Value>::const_iterator;
+	using ConstIterator = typename std::unordered_map<Key, Value>::const_iterator;
 
 	Iterator      begin() { return m_hash_map.begin(); }
 	ConstIterator begin() const { return m_hash_map.begin(); }
@@ -34,10 +33,7 @@ public:
 
 	void add(const Key& key, const Value& value) { m_hash_map[key] = value; }
 
-	void add(Key&& key, Value&& value)
-	{
-		m_hash_map[std::move(key)] = std::move(value);
-	}
+	void add(Key&& key, Value&& value) { m_hash_map[std::move(key)] = std::move(value); }
 
 	Iterator remove(const Key& key) { return m_hash_map.erase(key); }
 
@@ -65,7 +61,12 @@ public:
 
 	Value& operator[](const Key& key) { return m_hash_map[key]; }
 
-	Value& operator[](const Key&& key) { return m_hash_map[key]; }
+	Value& operator[](Key&& key) { return m_hash_map[key]; }
+
+	Iterator      find(const Key& key) { return m_hash_map.find(key); }
+	Iterator      find(Key&& key) { return m_hash_map.find(key); }
+	ConstIterator find(const Key& key) const { return m_hash_map.find(key); }
+	ConstIterator find(Key&& key) const { return m_hash_map.find(key); }
 
 private:
 	std::unordered_map<Key, Value> m_hash_map;
