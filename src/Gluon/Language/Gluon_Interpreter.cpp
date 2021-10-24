@@ -1,7 +1,7 @@
-#include <Gluon/VM/Gluon_Interpreter.h>
+#include <Gluon/Language/Gluon_Interpreter.h>
 
-#include <Gluon/VM/Gluon_AST.h>
-#include <Gluon/VM/Gluon_Object.h>
+#include <Gluon/Language/Gluon_AST.h>
+#include <Gluon/Language/Gluon_Object.h>
 
 ZInterpreter::ZInterpreter()
 {

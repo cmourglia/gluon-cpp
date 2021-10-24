@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Gluon/VM/Gluon_Object.h>
+#include <Gluon/Language/Gluon_Object.h>
 
 struct ZScopeNode;
 

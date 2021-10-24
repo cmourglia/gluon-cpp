@@ -1,7 +1,7 @@
 #pragma once
 
-#include <Gluon/VM/Gluon_Heap.h>
-#include <Gluon/VM/Gluon_Value.h>
+#include <Gluon/Language/Gluon_Heap.h>
+#include <Gluon/Language/Gluon_Value.h>
 
 #include <Beard/Array.h>
 

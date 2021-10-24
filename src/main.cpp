@@ -1,4 +1,4 @@
-#if 1
+#if 0
 #	include <Gluon/App/Gluon_App.h>
 
 int main(int argc, char** argv)
@@ -6,11 +6,11 @@ int main(int argc, char** argv)
 	GluonApp app(argc, argv);
 	return app.Run();
 }
-#else
+#elif 0
 
-#	include <Gluon/VM/Gluon_AST.h>
-#	include <Gluon/VM/Gluon_Interpreter.h>
-#	include <Gluon/VM/Gluon_Object.h>
+#	include <Gluon/Language/Gluon_AST.h>
+#	include <Gluon/Language/Gluon_Interpreter.h>
+#	include <Gluon/Language/Gluon_Object.h>
 
 void test1(ZProgram* program);
 void test2(ZProgram* program);
@@ -72,4 +72,32 @@ void test2(ZProgram* program)
 
 	program->add<ExpressionStatement>(Make<ZCallExpression>("bar"));
 }
+#elif 1
+
+#	include <Gluon/Language/Gluon_Lexer.h>
+
+int main()
+{
+	auto Tokens = ZLexer::Lex("gluon/TestLexer.gluon");
+
+	for (auto Token : Tokens)
+	{
+		if (Token.Type == ETokenType::Number)
+		{
+			printf("%s: %f\n", ToString(Token.Type).c_str(), Token.Number);
+		}
+		else if (Token.Type == ETokenType::EndOfLine || Token.Type == ETokenType::Spacing ||
+		         Token.Type == ETokenType::EndOfStream)
+		{
+			// printf("%s\n", ToString(Token.Type).c_str());
+		}
+		else
+		{
+			printf("%s: %s\n", ToString(Token.Type).c_str(), Token.Text.c_str());
+		}
+	}
+
+	return 0;
+}
+
 #endif

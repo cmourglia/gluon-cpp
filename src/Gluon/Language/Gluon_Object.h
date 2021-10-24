@@ -1,7 +1,7 @@
 #pragma once
 
-#include <Gluon/VM/Gluon_Cell.h>
-#include <Gluon/VM/Gluon_Value.h>
+#include <Gluon/Language/Gluon_Cell.h>
+#include <Gluon/Language/Gluon_Value.h>
 
 #include <Beard/HashMap.h>
 

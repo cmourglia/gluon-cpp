@@ -1,7 +1,7 @@
-#include <Gluon/VM/Gluon_Heap.h>
+#include <Gluon/Language/Gluon_Heap.h>
 
-#include <Gluon/VM/Gluon_Interpreter.h>
-#include <Gluon/VM/Gluon_Object.h>
+#include <Gluon/Language/Gluon_Interpreter.h>
+#include <Gluon/Language/Gluon_Object.h>
 
 #include <Beard/Math.h>
 #include <Beard/Timer.h>

@@ -1,4 +1,4 @@
-#include <Gluon/VM/Gluon_Object.h>
+#include <Gluon/Language/Gluon_Object.h>
 
 ZValue ZObject::Get(const std::string& Name) const
 {

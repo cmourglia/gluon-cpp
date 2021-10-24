@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Gluon/VM/Gluon_Cell.h>
+#include <Gluon/Language/Gluon_Cell.h>
 
 #include <Beard/Array.h>
 #include <Beard/Macros.h>

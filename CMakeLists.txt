@@ -22,26 +22,26 @@ set(COMPILER_SRC
     src/Gluon/Compiler/Gluon_Tokenizer.h
 )
 
-set(VM_SRC
-    src/Gluon/VM/Gluon_AST.cpp
-    src/Gluon/VM/Gluon_Cell.cpp
-    src/Gluon/VM/Gluon_Function.cpp
-    src/Gluon/VM/Gluon_Heap.cpp
-    src/Gluon/VM/Gluon_Interpreter.cpp
-    src/Gluon/VM/Gluon_Object.cpp
-    src/Gluon/VM/Gluon_Value.cpp
-    src/Gluon/VM/Gluon_Lexer.cpp
-    src/Gluon/VM/Gluon_Parser.cpp
+set(LANGUAGE_SRC
+    src/Gluon/Language/Gluon_AST.cpp
+    src/Gluon/Language/Gluon_Cell.cpp
+    src/Gluon/Language/Gluon_Function.cpp
+    src/Gluon/Language/Gluon_Heap.cpp
+    src/Gluon/Language/Gluon_Interpreter.cpp
+    src/Gluon/Language/Gluon_Object.cpp
+    src/Gluon/Language/Gluon_Value.cpp
+    src/Gluon/Language/Gluon_Lexer.cpp
+    src/Gluon/Language/Gluon_Parser.cpp
 
-    src/Gluon/VM/Gluon_AST.h
-    src/Gluon/VM/Gluon_Cell.h
-    src/Gluon/VM/Gluon_Function.h
-    src/Gluon/VM/Gluon_Heap.h
-    src/Gluon/VM/Gluon_Interpreter.h
-    src/Gluon/VM/Gluon_Object.h
-    src/Gluon/VM/Gluon_Value.h
-    src/Gluon/VM/Gluon_Lexer.h
-    src/Gluon/VM/Gluon_Lexer.cpp
+    src/Gluon/Language/Gluon_AST.h
+    src/Gluon/Language/Gluon_Cell.h
+    src/Gluon/Language/Gluon_Function.h
+    src/Gluon/Language/Gluon_Heap.h
+    src/Gluon/Language/Gluon_Interpreter.h
+    src/Gluon/Language/Gluon_Object.h
+    src/Gluon/Language/Gluon_Value.h
+    src/Gluon/Language/Gluon_Lexer.h
+    src/Gluon/Language/Gluon_Lexer.cpp
 )
 
 set(WIDGETS_SRC
@@ -67,7 +67,7 @@ set(APP_SRC
 add_executable(gluon src/main.cpp
     ${CORE_SRC}
     ${COMPILER_SRC}
-    ${VM_SRC}
+    ${LANGUAGE_SRC}
     ${WIDGETS_SRC}
     ${APP_SRC}
 )
