@@ -1,0 +1,11 @@
+// Comment
+
+/*
+ * Multi line comment
+ */
+
+console.log("Hello");
+
+let a = 42;
+let b = 0.25f;
+let c = 22;
