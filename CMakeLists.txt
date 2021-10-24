@@ -8,56 +8,60 @@ add_subdirectory(thirdparty)
 
 
 set(CORE_SRC
-    src/Gluon/Core/Types.cpp
-    src/Gluon/Core/Types.h
+    src/Gluon/Core/Gluon_Types.cpp
+    src/Gluon/Core/Gluon_Types.h
 )
 
 set(COMPILER_SRC
-    src/Gluon/Compiler/Parser.cpp
-    src/Gluon/Compiler/ShuntingYard.cpp
-    src/Gluon/Compiler/Tokenizer.cpp
+    src/Gluon/Compiler/Gluon_Parser.cpp
+    src/Gluon/Compiler/Gluon_ShuntingYard.cpp
+    src/Gluon/Compiler/Gluon_Tokenizer.cpp
 
-    src/Gluon/Compiler/Parser.h
-    src/Gluon/Compiler/ShuntingYard.h
-    src/Gluon/Compiler/Tokenizer.h
+    src/Gluon/Compiler/Gluon_Parser.h
+    src/Gluon/Compiler/Gluon_ShuntingYard.h
+    src/Gluon/Compiler/Gluon_Tokenizer.h
 )
 
 set(VM_SRC
-    src/Gluon/VM/AST.cpp
-    src/Gluon/VM/Cell.cpp
-    src/Gluon/VM/Function.cpp
-    src/Gluon/VM/Heap.cpp
-    src/Gluon/VM/Interpreter.cpp
-    src/Gluon/VM/Object.cpp
-    src/Gluon/VM/Value.cpp
+    src/Gluon/VM/Gluon_AST.cpp
+    src/Gluon/VM/Gluon_Cell.cpp
+    src/Gluon/VM/Gluon_Function.cpp
+    src/Gluon/VM/Gluon_Heap.cpp
+    src/Gluon/VM/Gluon_Interpreter.cpp
+    src/Gluon/VM/Gluon_Object.cpp
+    src/Gluon/VM/Gluon_Value.cpp
+    src/Gluon/VM/Gluon_Lexer.cpp
+    src/Gluon/VM/Gluon_Parser.cpp
 
-    src/Gluon/VM/AST.h
-    src/Gluon/VM/Cell.h
-    src/Gluon/VM/Function.h
-    src/Gluon/VM/Heap.h
-    src/Gluon/VM/Interpreter.h
-    src/Gluon/VM/Object.h
-    src/Gluon/VM/Value.h
+    src/Gluon/VM/Gluon_AST.h
+    src/Gluon/VM/Gluon_Cell.h
+    src/Gluon/VM/Gluon_Function.h
+    src/Gluon/VM/Gluon_Heap.h
+    src/Gluon/VM/Gluon_Interpreter.h
+    src/Gluon/VM/Gluon_Object.h
+    src/Gluon/VM/Gluon_Value.h
+    src/Gluon/VM/Gluon_Lexer.h
+    src/Gluon/VM/Gluon_Lexer.cpp
 )
 
 set(WIDGETS_SRC
-    src/Gluon/Widgets/Image.cpp
-    src/Gluon/Widgets/Rectangle.cpp
-    src/Gluon/Widgets/Text.cpp
-    src/Gluon/Widgets/Widget.cpp
-    src/Gluon/Widgets/Window.cpp
+    src/Gluon/Widgets/Gluon_Image.cpp
+    src/Gluon/Widgets/Gluon_Rectangle.cpp
+    src/Gluon/Widgets/Gluon_Text.cpp
+    src/Gluon/Widgets/Gluon_Widget.cpp
+    src/Gluon/Widgets/Gluon_Window.cpp
 
-    src/Gluon/Widgets/Image.h
-    src/Gluon/Widgets/Rectangle.h
-    src/Gluon/Widgets/Text.h
-    src/Gluon/Widgets/Widget.h
-    src/Gluon/Widgets/Window.h
+    src/Gluon/Widgets/Gluon_Image.h
+    src/Gluon/Widgets/Gluon_Rectangle.h
+    src/Gluon/Widgets/Gluon_Text.h
+    src/Gluon/Widgets/Gluon_Widget.h
+    src/Gluon/Widgets/Gluon_Window.h
 )
 
 set(APP_SRC
-    src/Gluon/App/GluonApp.cpp
+    src/Gluon/App/Gluon_App.cpp
 
-    src/Gluon/App/GluonApp.h
+    src/Gluon/App/Gluon_App.h
 )
 
 add_executable(gluon src/main.cpp
