@@ -8,60 +8,64 @@ add_subdirectory(thirdparty)
 
 
 set(CORE_SRC
-    src/Gluon/Core/Gluon_Types.cpp
-    src/Gluon/Core/Gluon_Types.h
+        src/gluon/core/types.cpp
+        src/gluon/core/types.h
 )
 
 set(COMPILER_SRC
-    src/Gluon/Compiler/Gluon_Parser.cpp
-    src/Gluon/Compiler/Gluon_ShuntingYard.cpp
-    src/Gluon/Compiler/Gluon_Tokenizer.cpp
+        src/gluon/compiler/parser.cpp
+        src/gluon/compiler/shunting_yard.cpp
+        src/gluon/compiler/tokenizer.cpp
 
-    src/Gluon/Compiler/Gluon_Parser.h
-    src/Gluon/Compiler/Gluon_ShuntingYard.h
-    src/Gluon/Compiler/Gluon_Tokenizer.h
+        src/gluon/compiler/parser.h
+        src/gluon/compiler/shunting_yard.h
+        src/gluon/compiler/tokenizer.h
 )
 
 set(LANGUAGE_SRC
-    src/Gluon/Language/Gluon_AST.cpp
-    src/Gluon/Language/Gluon_Cell.cpp
-    src/Gluon/Language/Gluon_Function.cpp
-    src/Gluon/Language/Gluon_Heap.cpp
-    src/Gluon/Language/Gluon_Interpreter.cpp
-    src/Gluon/Language/Gluon_Object.cpp
-    src/Gluon/Language/Gluon_Value.cpp
-    src/Gluon/Language/Gluon_Lexer.cpp
-    src/Gluon/Language/Gluon_Parser.cpp
+        src/gluon/lang/ast.cpp
+        src/gluon/lang/ast_printer.cpp
+        src/gluon/lang/cell.cpp
+        src/gluon/lang/function.cpp
+        src/gluon/lang/heap.cpp
+        src/gluon/lang/interpreter.cpp
+        src/gluon/lang/object.cpp
+        src/gluon/lang/value.cpp
+        src/gluon/lang/lexer.cpp
+        src/gluon/lang/parser.cpp
 
-    src/Gluon/Language/Gluon_AST.h
-    src/Gluon/Language/Gluon_Cell.h
-    src/Gluon/Language/Gluon_Function.h
-    src/Gluon/Language/Gluon_Heap.h
-    src/Gluon/Language/Gluon_Interpreter.h
-    src/Gluon/Language/Gluon_Object.h
-    src/Gluon/Language/Gluon_Value.h
-    src/Gluon/Language/Gluon_Lexer.h
-    src/Gluon/Language/Gluon_Lexer.cpp
+        src/gluon/lang/ast.h
+        src/gluon/lang/ast_printer.h
+        src/gluon/lang/grammar.h
+        src/gluon/lang/token.h
+        src/gluon/lang/cell.h
+        src/gluon/lang/function.h
+        src/gluon/lang/heap.h
+        src/gluon/lang/interpreter.h
+        src/gluon/lang/object.h
+        src/gluon/lang/value.h
+        src/gluon/lang/lexer.h
+        src/gluon/lang/lexer.cpp
 )
 
 set(WIDGETS_SRC
-    src/Gluon/Widgets/Gluon_Image.cpp
-    src/Gluon/Widgets/Gluon_Rectangle.cpp
-    src/Gluon/Widgets/Gluon_Text.cpp
-    src/Gluon/Widgets/Gluon_Widget.cpp
-    src/Gluon/Widgets/Gluon_Window.cpp
+        src/gluon/widgets/image.cpp
+        src/gluon/widgets/rectangle.cpp
+        src/gluon/widgets/text.cpp
+        src/gluon/widgets/widget.cpp
+        src/gluon/widgets/window.cpp
 
-    src/Gluon/Widgets/Gluon_Image.h
-    src/Gluon/Widgets/Gluon_Rectangle.h
-    src/Gluon/Widgets/Gluon_Text.h
-    src/Gluon/Widgets/Gluon_Widget.h
-    src/Gluon/Widgets/Gluon_Window.h
+        src/gluon/widgets/image.h
+        src/gluon/widgets/rectangle.h
+        src/gluon/widgets/text.h
+        src/gluon/widgets/widget.h
+        src/gluon/widgets/window.h
 )
 
 set(APP_SRC
-    src/Gluon/App/Gluon_App.cpp
+        src/gluon/app/app.cpp
 
-    src/Gluon/App/Gluon_App.h
+        src/gluon/app/app.h
 )
 
 add_executable(gluon src/main.cpp
@@ -72,7 +76,7 @@ add_executable(gluon src/main.cpp
     ${APP_SRC}
 )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE loguru::loguru glm::glm raylib nanovg stb_truetype BeardLibrary)
+target_link_libraries(${PROJECT_NAME} PRIVATE loguru::loguru glm::glm raylib nanovg stb_truetype beardLibrary)
 target_include_directories(${PROJECT_NAME} PRIVATE src)
 target_compile_definitions(${PROJECT_NAME} PRIVATE $<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>)
 target_compile_options(${PROJECT_NAME} PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/W4> $<$<CXX_COMPILER_ID:MSVC>:/WX>)
