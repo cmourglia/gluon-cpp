@@ -7,79 +7,79 @@
 
 #include <memory>
 
-class ZInterpreter;
-struct ZCell;
+class Interpreter;
+struct Cell;
 
-struct ZHeapBlock
+struct HeapBlock
 {
-	static constexpr usize BLOCK_SIZE = 16_KB;
+    static constexpr usize kBlockSize = 16_KB;
 
-	NONCOPYABLE(ZHeapBlock);
-	NONMOVEABLE(ZHeapBlock);
+    NONCOPYABLE(HeapBlock);
+    NONMOVEABLE(HeapBlock);
 
-	explicit ZHeapBlock(usize cellSize);
-	~ZHeapBlock() = default;
+    explicit HeapBlock(usize cell_size);
+    ~HeapBlock() = default;
 
-	usize CellCount() const
-	{
-		return (BLOCK_SIZE - sizeof(ZHeapBlock)) / m_CellSize;
-	}
+    usize cell_count() const
+    {
+        return (kBlockSize - sizeof(HeapBlock)) / m_cell_size;
+    }
 
-	ZCell* Cell(usize index)
-	{
-		return reinterpret_cast<ZCell*>(&m_Storage[index * m_CellSize]);
-	}
+    Cell* cell(usize index)
+    {
+        return reinterpret_cast<Cell*>(&m_storage[index * m_cell_size]);
+    }
 
-	usize CellSize() const
-	{
-		return m_CellSize;
-	}
+    usize cell_size() const
+    {
+        return m_cell_size;
+    }
 
-	ZCell* Allocate();
-	void   Deallocate(ZCell* cell);
+    Cell* Allocate();
+    void  Deallocate(Cell* cell);
 
 private:
-	struct FreeListItem : public ZCell
-	{
-		FreeListItem* next = nullptr;
-	};
+    struct FreeListItem : public Cell
+    {
+        FreeListItem* next = nullptr;
+    };
 
-	usize m_CellSize = 0;
+    usize m_cell_size = 0;
 
-	// This stuff works because we initialize the `next` pointer when we
-	// initialize the ZHeapBlock and when we Deallocate the cell.
-	// Then, when we return a cell, we call the constructor (placement new)
-	// on the given memory.
-	// Hence, the same memory space contains two different (although related)
-	// items.
-	FreeListItem* m_FreeList = nullptr;
+    // This stuff works because we initialize the `next` pointer when we
+    // initialize the ZHeapBlock and when we Deallocate the cell.
+    // Then, when we return a cell, we call the constructor (placement new)
+    // on the given memory.
+    // Hence, the same memory space contains two different (although related)
+    // items.
+    FreeListItem* m_free_list = nullptr;
 
-	VARIABLE_LENGTH_ARRAY(u8, m_Storage);
+    VARIABLE_LENGTH_ARRAY(u8, m_storage);
 };
 
-class ZHeap
+class Heap
 {
 public:
-	NONCOPYABLE(ZHeap);
-	NONMOVEABLE(ZHeap);
+    NONCOPYABLE(Heap);
+    NONMOVEABLE(Heap);
 
-	explicit ZHeap(ZInterpreter* interpreter);
-	~ZHeap() = default;
+    explicit Heap(Interpreter* interpreter);
+    ~Heap() = default;
 
-	template <typename T, typename... Args>
-	T* Allocate(Args&&... args)
-	{
-		void* memory = AllocateCell(sizeof(T));
-		new (memory) T(std::forward<Args>(args)...);
-		return reinterpret_cast<T*>(memory);
-	}
+    template <typename T, typename... Args>
+    T* Allocate(Args&&... args)
+    {
+        void* memory = AllocateCell(sizeof(T));
+        new (memory) T(std::forward<Args>(args)...);
+        return reinterpret_cast<T*>(memory);
+    }
 
-	void Garbage();
+    void Garbage();
 
 private:
-	void* AllocateCell(usize Size);
+    void* AllocateCell(usize size);
 
-	ZInterpreter* m_Interpreter;
+    Interpreter* interpreter;
 
-	beard::array<std::unique_ptr<ZHeapBlock>> m_Blocks;
+    beard::array<std::unique_ptr<HeapBlock>> m_blocks;
 };

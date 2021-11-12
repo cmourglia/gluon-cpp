@@ -2,19 +2,19 @@
 
 #include <Gluon/Widgets/widget.h>
 
-struct ZText : public ZWidget
+struct ZText : public Widget
 {
-	static ZWidget* create()
-	{
-		return new ZText{};
-	}
+    static Widget* create()
+    {
+        return new ZText{};
+    }
 
-	std::string content;
-	std::string font;
-	u32         pointSize = 16;
-	glm::vec4   textColor = ZColor::Black;
+    std::string content;
+    std::string font;
+    u32         pointSize = 16;
+    glm::vec4   textColor = color::kBlack;
 
 private:
-	void ParserPropertyInternal(Parser::ZNode::Ptr Node, u32 node_hash) override;
-	void BuildRenderInfosInternal(beard::array<RectangleInfo>* Result) override;
+    void ParserPropertyInternal(parser::Node::Ptr Node, u32 node_hash) override;
+    void BuildRenderInfosInternal(beard::array<RectangleInfo>* Result) override;
 };

@@ -6,187 +6,208 @@
 
 #include <beard/io/io.h>
 
+#include <SDL.h>
+#include <SDL_image.h>
 #include <nanosvg.h>
-#include <raylib.h>
-#include <raymath.h>
 
 #include <vector>
 
-GluonApp* GluonApp::s_Instance = nullptr;
+GluonApp* GluonApp::s_instance = nullptr;
 
-GluonApp* GluonApp::Get()
+GluonApp* GluonApp::instance()
 {
-	return s_Instance;
+    return s_instance;
 }
 
 GluonApp::GluonApp(int argc, char** argv)
-    : BackgroundColor{0.8f, 0.8f, 0.8f, 1.0f}
+    : m_background_color{0.8f, 0.8f, 0.8f, 1.0f}
 {
-	// TODO: Do stuff with argc, argv;
-	UNUSED(argc);
-	UNUSED(argv);
+    // TODO: Do stuff with argc, argv;
+    UNUSED(argc);
+    UNUSED(argv);
 
-	ASSERT(s_Instance == nullptr, "Multiple initializations");
+    ASSERT(s_instance == nullptr, "Multiple initializations");
 
-	if (s_Instance == nullptr)
-	{
-		s_Instance = this;
+    if (s_instance == nullptr)
+    {
+        s_instance = this;
 
-		// TODO: Extract window infos if set
-		SetConfigFlags(FLAG_MSAA_4X_HINT | FLAG_WINDOW_RESIZABLE);
-		InitWindow(1024, 768, "gluon Muon Whatever");
+        // TODO: Extract window infos if set
+        // TODO: Error handling
+        SDL_Init(SDL_INIT_VIDEO);
+        IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG | IMG_INIT_WEBP);
 
-		SetTargetFPS(-1);
-	}
+        u32 window_flags = SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE;
+        m_window = SDL_CreateWindow("Hey !", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1024, 768, window_flags);
+        m_surface = SDL_GetWindowSurface(m_window);
+    }
 }
 
 GluonApp::~GluonApp()
 {
-	CloseWindow();
+    SDL_DestroyWindow(m_window);
+
+    m_surface = nullptr;
+    m_window  = nullptr;
+
+    IMG_Quit();
+    SDL_Quit();
 }
 
 int GluonApp::Run()
 {
-	i64 LastWriteTime = 0;
+    i64 last_write_time = 0;
 
-	auto ConvertColor = [](const glm::vec4& InColor) -> Color
-	{
-		return Color{static_cast<u8>(InColor.r * 255),
-		             static_cast<u8>(InColor.g * 255),
-		             static_cast<u8>(InColor.b * 255),
-		             static_cast<u8>(InColor.a * 255)};
-	};
+    // auto ConvertColor = [](const glm::vec4& InColor) -> Color
+    //{
+    //     return Color{static_cast<u8>(InColor.r * 255),
+    //                  static_cast<u8>(InColor.g * 255),
+    //                  static_cast<u8>(InColor.b * 255),
+    //                  static_cast<u8>(InColor.a * 255)};
+    // };
 
-	SetTargetFPS(120);
+    Widget* root_widget = nullptr;
+    bool    should_quit = false;
 
-	ZWidget* RootWidget = nullptr;
+    while (!should_quit)
+    {
+        SDL_Event event;
+        while (SDL_PollEvent(&event))
+        {
+            switch (event.type)
+            {
+                case SDL_QUIT:
+                    should_quit = true;
+                    break;
+            }
+        }
 
-	while (!WindowShouldClose())
-	{
-		// Check if gluon file update is needed
-		i64 write_time = -1;
+        if (should_quit)
+        {
+            continue;
+        }
 
-		bool bDrawNeedsUpdate = false;
+        // Check if gluon file update is needed
+        i64 write_time = -1;
 
-		if (auto file_content = beard::io::read_while_file_if_newer("test.gluon", LastWriteTime, &write_time);
-		    file_content.has_value())
-		{
-			delete RootWidget;
-			RootWidget       = parse_gluon_buffer(file_content.value().c_str());
-			bDrawNeedsUpdate = true;
+        bool draw_needs_update = false;
 
-			LastWriteTime = write_time;
-		}
+        if (auto file_content = beard::io::read_while_file_if_newer("test.gluon", last_write_time, &write_time);
+            file_content.has_value())
+        {
+            delete root_widget;
+            root_widget       = ParseGluonBuffer(file_content.value().c_str());
+            draw_needs_update = true;
 
-		if (RootWidget != nullptr)
-		{
-			if (IsWindowResized())
-			{
-				i32 w = GetScreenWidth();
-				i32 h = GetScreenHeight();
-				bDrawNeedsUpdate |= RootWidget->WindowResized(w, h);
-			}
+            last_write_time = write_time;
+        }
 
-			Vector2 MouseDelta = GetMouseDelta();
-			if (Vector2LengthSqr(MouseDelta) > 0.0f)
-			{
-				Vector2 MousePos = GetMousePosition();
+        if (root_widget != nullptr)
+        {
+            // if (IsWindowResized())
+            //{
+            //     i32 w = GetScreenWidth();
+            //     i32 h = GetScreenHeight();
+            //     bDrawNeedsUpdate |= root_widget->WindowResized(w, h);
+            // }
 
-				// bDrawNeedsUpdate |= RootWidget->MouseMoved({MousePos.x,
-				// MousePos.y});
-			}
+            // Vector2 MouseDelta = GetMouseDelta();
+            // if (Vector2LengthSqr(MouseDelta) > 0.0f)
+            //{
+            //     Vector2 MousePos = GetMousePosition();
 
-			if (bDrawNeedsUpdate)
-			{
-                Rectangles.clear();
-				ZWidget::Evaluate();
-				RootWidget->BuildRenderInfos(&Rectangles);
-			}
-		}
+            //    // bDrawNeedsUpdate |= RootWidget->MouseMoved({MousePos.x,
+            //    // MousePos.y});
+            //}
 
-		ClearBackground(ConvertColor(BackgroundColor));
+            if (draw_needs_update)
+            {
+                m_rectangles.clear();
+                Widget::Evaluate();
+                root_widget->BuildRenderInfos(&m_rectangles);
+            }
+        }
 
-		BeginDrawing();
-		{
-			for (const auto& Rect : Rectangles)
-			{
-				Rectangle R = {Rect.Position.x, Rect.Position.y, Rect.Size.x, Rect.Size.y};
+        // ClearBackground(ConvertColor(m_background_color));
 
-				f32 SmallSide = beard::min(R.width, R.height);
-				f32 Roundness = beard::min(Rect.Radius, SmallSide) / SmallSide;
+        // BeginDrawing();
+        //{
+        //     for (const auto& Rect : m_rectangles)
+        //     {
+        //         Rectangle R = {Rect.Position.x, Rect.Position.y, Rect.Size.x, Rect.Size.y};
 
-				if (Rect.bIsImage)
-				{
-					if (Rect.ImageInfo->bIsVectorial)
-					{
-						NSVGshape* Shape = Rect.ImageInfo->SvgImage->shapes;
-						while (Shape != nullptr)
-						{
-							if ((Shape->flags & NSVG_FLAGS_VISIBLE) == 0)
-							{
-								continue;
-							}
+        //        f32 SmallSide = beard::min(R.width, R.height);
+        //        f32 Roundness = beard::min(Rect.Radius, SmallSide) / SmallSide;
 
-							Color ShapeColor = *(Color*)&Shape->stroke.color;
-							ShapeColor.a     = u8(Shape->opacity * 255);
+        //        if (Rect.bIsImage)
+        //        {
+        //            if (Rect.ImageInfo->bIsVectorial)
+        //            {
+        //                NSVGshape* Shape = Rect.ImageInfo->SvgImage->shapes;
+        //                while (Shape != nullptr)
+        //                {
+        //                    if ((Shape->flags & NSVG_FLAGS_VISIBLE) == 0)
+        //                    {
+        //                        continue;
+        //                    }
 
-							NSVGpath* Path = Shape->paths;
-							while (Path != nullptr)
-							{
-								for (int i = 0; i < Path->npts - 1; i += 3)
-								{
-									float* P = &Path->pts[i * 2];
-									DrawLineBezierCubic(Vector2{P[0] + R.x, P[1] + R.y},
-									                    Vector2{P[6] + R.x, P[7] + R.y},
-									                    Vector2{P[2] + R.x, P[3] + R.y},
-									                    Vector2{P[4] + R.x, P[5] + R.y},
-									                    Shape->strokeWidth,
-									                    ShapeColor);
-								}
+        //                    Color ShapeColor = *(Color*)&Shape->stroke.color;
+        //                    ShapeColor.a     = u8(Shape->opacity * 255);
 
-								Path = Path->next;
-							}
+        //                    NSVGpath* Path = Shape->paths;
+        //                    while (Path != nullptr)
+        //                    {
+        //                        for (int i = 0; i < Path->npts - 1; i += 3)
+        //                        {
+        //                            float* P = &Path->pts[i * 2];
+        //                            DrawLineBezierCubic(Vector2{P[0] + R.x, P[1] + R.y},
+        //                                                Vector2{P[6] + R.x, P[7] + R.y},
+        //                                                Vector2{P[2] + R.x, P[3] + R.y},
+        //                                                Vector2{P[4] + R.x, P[5] + R.y},
+        //                                                Shape->strokeWidth,
+        //                                                ShapeColor);
+        //                        }
 
-							Shape = Shape->next;
-						}
-					}
-					else
-					{
-						Texture2D* Texture = Rect.ImageInfo->RasterImage->Texture;
-						DrawTexture(*Texture,
-						            (int)(R.x + Rect.ImageInfo->RasterImage->OffsetX),
-						            (int)(R.y + Rect.ImageInfo->RasterImage->OffsetY),
-						            ConvertColor(Rect.FillColor));
-						DrawRectangleRoundedLines(R, 0, 1, 5, BLACK);
-					}
-				}
-				else
-				{
-					DrawRectangleRounded(R, Roundness, 32, ConvertColor(Rect.FillColor));
+        //                        Path = Path->next;
+        //                    }
 
-					if (Rect.BorderWidth > 0.0f)
-					{
-						DrawRectangleRoundedLines(R, Roundness, 32, Rect.BorderWidth, ConvertColor(Rect.BorderColor));
-					}
-				}
-			}
+        //                    Shape = Shape->next;
+        //                }
+        //            }
+        //            else
+        //            {
+        //                Texture2D* Texture = Rect.ImageInfo->RasterImage->Texture;
+        //                DrawTexture(*Texture,
+        //                            (int)(R.x + Rect.ImageInfo->RasterImage->OffsetX),
+        //                            (int)(R.y + Rect.ImageInfo->RasterImage->OffsetY),
+        //                            ConvertColor(Rect.FillColor));
+        //                DrawRectangleRoundedLines(R, 0, 1, 5, BLACK);
+        //            }
+        //        }
+        //        else
+        //        {
+        //            DrawRectangleRounded(R, Roundness, 32, ConvertColor(Rect.FillColor));
 
-			DrawFPS(10, 10);
-		}
-		EndDrawing();
-	}
+        //            if (Rect.BorderWidth > 0.0f)
+        //            {
+        //                DrawRectangleRoundedLines(R, Roundness, 32, Rect.BorderWidth, ConvertColor(Rect.BorderColor));
+        //            }
+        //        }
+        //    }
+        //}
+    }
 
-	return 0;
+    return 0;
 }
 
-void GluonApp::SetTitle(const char* Title)
+void GluonApp::SetTitle(const char* title)
 {
-	SetWindowTitle(Title);
+    SDL_SetWindowTitle(m_window, title);
 }
 
 void GluonApp::SetWindowSize(i32 w, i32 h)
 {
-	::SetWindowSize(w, h);
-	Width  = w;
-	Height = h;
+    SDL_SetWindowSize(m_window, w, h);
+    m_width  = w;
+    m_height = h;
 }

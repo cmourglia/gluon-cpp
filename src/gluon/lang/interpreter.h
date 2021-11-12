@@ -8,48 +8,48 @@
 #include <beard/containers/hash_map.h>
 #include <memory>
 
-struct ZASTNode;
-struct ZScopeNode;
-class ZObject;
+struct AstNode;
+struct ScopeNode;
+class Object;
 
-struct ZScopeFrame
+struct ScopeFrame
 {
-	ZScopeNode* Node;
+    ScopeNode* node;
 
-	beard::string_hash_map<ZValue> Variables;
+    beard::string_hash_map<Value> variables;
 };
 
-class ZInterpreter
+class Interpreter
 {
 public:
-	ZInterpreter();
-	~ZInterpreter();
+    Interpreter();
+    ~Interpreter();
 
-	NONCOPYABLE(ZInterpreter);
-	NONMOVEABLE(ZInterpreter);
+    NONCOPYABLE(Interpreter);
+    NONMOVEABLE(Interpreter);
 
-	ZValue Run(ZScopeNode* Node);
+    Value Run(ScopeNode* node);
 
-	ZObject* GlobalObject() const
-	{
-		return m_GlobalObject;
-	}
+    Object* global_object() const
+    {
+        return m_global_object;
+    }
 
-	ZHeap* Heap() const
-	{
-		return m_Heap.get();
-	}
+    Heap* heap() const
+    {
+        return m_heap.get();
+    }
 
-	void   DeclareVariable(const char* Name);
-	void   SetVariable(const char* Name, ZValue value);
-	ZValue GetVariable(const char* Name);
+    void  DeclareVariable(const char* name);
+    void  SetVariable(const char* name, Value value);
+    Value GetVariable(const char* name);
 
 private:
-	void PushScope(ZScopeNode* Node);
-	void PopScope(ZScopeNode* Node);
+    void PushScope(ScopeNode* node);
+    void PopScope(ScopeNode* node);
 
-	beard::array<ZScopeFrame> m_Stack;
+    beard::array<ScopeFrame> m_stack;
 
-	std::unique_ptr<ZHeap> m_Heap         = nullptr;
-	ZObject*               m_GlobalObject = nullptr;
+    std::unique_ptr<Heap> m_heap          = nullptr;
+    Object*               m_global_object = nullptr;
 };

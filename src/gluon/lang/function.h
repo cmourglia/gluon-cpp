@@ -2,38 +2,38 @@
 
 #include <gluon/lang/object.h>
 
-struct ZScopeNode;
+struct ScopeNode;
 
-class ZFunction : public ZObject
+class Function : public Object
 {
 public:
-	ZFunction(std::string Name, ZScopeNode* body)
-	    : m_Name{std::move(Name)}
-	    , m_Body{body}
-	{
-	}
+    Function(std::string name, ScopeNode* body)
+        : m_name{std::move(name)}
+        , m_body{body}
+    {
+    }
 
-	const char* ToString() const override
-	{
-		return "Function";
-	}
+    const char* ToString() const override
+    {
+        return "Function";
+    }
 
-	std::string Name() const
-	{
-		return m_Name;
-	}
+    std::string name() const
+    {
+        return m_name;
+    }
 
-	ZScopeNode* Body() const
-	{
-		return m_Body;
-	}
+    ScopeNode* body() const
+    {
+        return m_body;
+    }
 
-	bool IsFunction() const override
-	{
-		return true;
-	}
+    bool IsFunction() const override
+    {
+        return true;
+    }
 
 private:
-	std::string m_Name;
-	ZScopeNode* m_Body;
+    std::string m_name;
+    ScopeNode*  m_body;
 };

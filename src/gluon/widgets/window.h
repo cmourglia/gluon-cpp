@@ -2,24 +2,24 @@
 
 #include <Gluon/Widgets/widget.h>
 
-struct ZWindow : public ZWidget
+struct Window : public Widget
 {
-	static ZWidget* create()
-	{
-		return new ZWindow{};
-	}
+    static Widget* create()
+    {
+        return new Window{};
+    }
 
-	ZWindow();
+    Window();
 
-	bool WindowResized(i32 w, i32 h) override;
+    bool WindowResized(i32 w, i32 h) override;
 
-	std::string Title           = "gluon";
-	glm::vec4   BackgroundColor = ZColor::Chocolate;
+    std::string title            = "gluon";
+    glm::vec4   background_color = color::kChocolate;
 
 private:
-	void ParserPropertyInternal(Parser::ZNode::Ptr Node, u32 node_hash) override;
-	void BuildRenderInfosInternal(beard::array<RectangleInfo>* Result) override;
+    void ParserPropertyInternal(parser::Node::Ptr node, u32 node_hash) override;
+    void BuildRenderInfosInternal(beard::array<RectangleInfo>* result) override;
 
-	void PreEvaluate() override;
-	void PostEvaluate() override;
+    void PreEvaluate() override;
+    void PostEvaluate() override;
 };

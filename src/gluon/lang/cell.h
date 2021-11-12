@@ -2,22 +2,22 @@
 
 #include <beard/core/macros.h>
 
-struct ZCell
+struct Cell
 {
-	NONCOPYABLE(ZCell);
-	NONMOVEABLE(ZCell);
+    NONCOPYABLE(Cell);
+    NONMOVEABLE(Cell);
 
-	ZCell()          = default;
-	virtual ~ZCell() = default;
+    Cell()          = default;
+    virtual ~Cell() = default;
 
-	virtual const char* ToString() const = 0;
+    virtual const char* ToString() const = 0;
 
-	using FVisitorCallback = void (*)(ZCell*);
-	virtual void VisitGraph(FVisitorCallback callback)
-	{
-		callback(this);
-	}
+    using VisitorCallback = void (*)(Cell*);
+    virtual void VisitGraph(VisitorCallback callback)
+    {
+        callback(this);
+    }
 
-	bool bMarked = false;
-	bool bUsed   = true;
+    bool is_marked = false;
+    bool is_used   = true;
 };

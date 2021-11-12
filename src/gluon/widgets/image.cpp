@@ -2,207 +2,195 @@
 
 #include <Gluon/Widgets/hashes.h>
 
-#include <raylib.h>
-
+#include <SDL.h>
+#include <SDL_image.h>
 #include <nanosvg.h>
 
 #include <loguru.hpp>
 
 #include <filesystem>
 
-namespace Utils
+namespace utils
 {
-glm::vec4 ExtractColor(const beard::array<ZToken>& Tokens);
+glm::vec4 ExtractColor(const beard::array<Token>& tokens);
 }
 
-ZImage::~ZImage()
+Image::~Image()
 {
-	if (ImageInfo.SvgImage != nullptr)
-	{
-		nsvgDelete(ImageInfo.SvgImage);
-	}
+    if (image_info.svg_image != nullptr)
+    {
+        nsvgDelete(image_info.svg_image);
+    }
 
-	if (ImageInfo.RasterImage != nullptr)
-	{
+    if (image_info.raster_image != nullptr)
+    {
 #if 0
 		stbi_image_free(RasterImage->data);
 #else
-		UnloadTexture(*ImageInfo.RasterImage->Texture);
-		delete ImageInfo.RasterImage->Texture;
-
-		UnloadImage(*ImageInfo.RasterImage->BaseImage);
-		delete (ImageInfo.RasterImage->BaseImage);
+        SDL_FreeSurface(image_info.raster_image->image);
 #endif
-		delete ImageInfo.RasterImage;
-	}
+        delete image_info.raster_image;
+    }
 }
 
-void ZImage::ParserPropertyInternal(Parser::ZNode::Ptr Node, const u32 node_hash)
+void Image::ParserPropertyInternal(parser::Node::Ptr node, const u32 node_hash)
 {
-	switch (node_hash)
-	{
-		case static_cast<u32>(ENodeHash::Url):
-		{
-			ASSERT(!Node->Children.is_empty(), "No Children is bad");
+    switch (node_hash)
+    {
+        case static_cast<u32>(NodeHash::kUrl):
+        {
+            ASSERT(!node->children.is_empty(), "No Children is bad");
 
-			ImageURL = Node->Children[0]->Name;
-			std::filesystem::path FilePath(ImageURL);
+            image_url = node->children[0]->name;
+            std::filesystem::path FilePath(image_url);
 
-			if (FilePath.extension().string() == ".svg")
-			{
-				ImageInfo.bIsVectorial = true;
-			}
-			else
-			{
-				ImageInfo.bIsVectorial = false;
-				ImageInfo.RasterImage  = new RasterImage;
+            if (FilePath.extension().string() == ".svg")
+            {
+                image_info.is_vectorial = true;
+            }
+            else
+            {
+                image_info.is_vectorial = false;
+                image_info.raster_image = new RasterImage;
 
+                image_info.raster_image->image = IMG_Load(image_url.c_str());
+
+                if (image_info.raster_image->image == nullptr)
+                {
+                    LOG_F(ERROR, "Cannot load BaseImage %s",
+                          image_url.c_str()); // stbi_failure_reason());
+                }
+
+                image_size = {image_info.raster_image->image->w, image_info.raster_image->image->h};
+            }
+        }
+        break;
+
+        case static_cast<u32>(NodeHash::kFitMode):
+        {
+            std::string fit = node->children[0]->name.c_str();
+            std::transform(fit.begin(),
+                           fit.end(),
+                           fit.begin(),
+                           [](char c) { return static_cast<char>(std::tolower(c)); });
+
+            if (strcmp(fit.c_str(), "stretch") == 0)
+            {
+                fit_mode = FitMode::Stretch;
+            }
+            else if (strcmp(fit.c_str(), "fit") == 0)
+            {
+                fit_mode = FitMode::Fit;
+            }
+            else if (strcmp(fit.c_str(), "crop") == 0)
+            {
+                fit_mode = FitMode::Crop;
+            }
+            else
+            {
+                LOG_F(ERROR,
+                      "%s is not a valid fit mode. Valid modes are Stretch, "
+                      "Fit or Crop",
+                      node->children[0]->name.c_str());
+            }
+        }
+        break;
+
+        case static_cast<u32>(NodeHash::kTint):
+        {
+            image_tint = utils::ExtractColor(node->children[0]->associated_tokens);
+        }
+        break;
+    }
+}
+
+void Image::PostEvaluate()
+{
+    if (image_info.is_vectorial)
+    {
+        // TODO: This should be evaluated
+        image_info.svg_image = nsvgParseFromFile(image_url.c_str(), "px", beard::min(size.x, size.y));
+    }
+    else
+    {
 #if 0
-			i32 componentCount = 0;
-			RasterImage->data  = stbi_load(ImageURL.c_str(),
-                                          &RasterImage->Width,
-                                          &RasterImage->Height,
-                                          &componentCount,
-                                          4);
-#else
-				auto* BaseImage                  = new Image;
-				*BaseImage                       = LoadImage(ImageURL.c_str());
-				ImageInfo.RasterImage->BaseImage = BaseImage;
+        Image* BaseImage = image_info.RasterImage->BaseImage;
+        UnloadImage(*BaseImage);
+        *BaseImage = LoadImage(image_url.c_str());
+
+        switch (fit_mode)
+        {
+            case FitMode::Stretch:
+            {
+                ImageResize(BaseImage, (i32)size.x, (i32)size.y);
+            }
+            break;
+
+            case FitMode::Fit:
+            {
+                i32 TargetWidth  = 0;
+                i32 TargetHeight = 0;
+
+                f32 ImageRatio = static_cast<f32>(BaseImage->width) / static_cast<f32>(BaseImage->height);
+                if (size.x < size.y)
+                {
+                    TargetWidth  = static_cast<i32>(size.x);
+                    TargetHeight = static_cast<i32>(size.x / ImageRatio);
+                }
+                else
+                {
+                    TargetHeight = static_cast<i32>(size.y);
+                    TargetWidth  = static_cast<i32>(size.y * ImageRatio);
+                }
+
+                ImageResize(BaseImage, TargetWidth, TargetHeight);
+
+                // Compute offsets to center in the target quad
+                image_info.raster_image->offset_x = (size.x - TargetWidth) * 0.5f;
+                image_info.raster_image->offset_y = (size.y - TargetHeight) * 0.5f;
+            }
+            break;
+
+            case FitMode::Crop:
+            {
+                i32 TargetWidth  = 0;
+                i32 TargetHeight = 0;
+
+                f32 ImageRatio = static_cast<f32>(BaseImage->width) / static_cast<f32>(BaseImage->height);
+                if (size.x > size.y)
+                {
+                    TargetWidth  = static_cast<i32>(size.x);
+                    TargetHeight = static_cast<i32>(size.x / ImageRatio);
+                }
+                else
+                {
+                    TargetHeight = static_cast<i32>(size.y);
+                    TargetWidth  = static_cast<i32>(size.y * ImageRatio);
+                }
+
+                ImageResize(BaseImage, TargetWidth, TargetHeight);
+
+                Rectangle r = {(TargetWidth - size.x) * 0.5f, (TargetHeight - size.y) * 0.5f, size.x, size.y};
+                ImageCrop(BaseImage, r);
+            }
+            break;
+        }
+
+        Texture2D* Texture = new Texture2D;
+        *Texture           = LoadTextureFromImage(*BaseImage);
+
+        image_info.raster_image->Texture = Texture;
 #endif
-
-				if (ImageInfo.RasterImage->BaseImage == nullptr)
-				{
-					LOG_F(ERROR, "Cannot load BaseImage %s",
-					      ImageURL.c_str()); // stbi_failure_reason());
-				}
-				ImageSize = {BaseImage->width, BaseImage->height};
-			}
-		}
-		break;
-
-		case static_cast<u32>(ENodeHash::FitMode):
-		{
-			std::string fit = Node->Children[0]->Name.c_str();
-			std::transform(fit.begin(),
-			               fit.end(),
-			               fit.begin(),
-			               [](char c) { return static_cast<char>(std::tolower(c)); });
-
-			if (strcmp(fit.c_str(), "stretch") == 0)
-			{
-				fitMode = FitMode::Stretch;
-			}
-			else if (strcmp(fit.c_str(), "fit") == 0)
-			{
-				fitMode = FitMode::Fit;
-			}
-			else if (strcmp(fit.c_str(), "crop") == 0)
-			{
-				fitMode = FitMode::Crop;
-			}
-			else
-			{
-				LOG_F(ERROR,
-				      "%s is not a valid fit mode. Valid modes are Stretch, "
-				      "Fit or Crop",
-				      Node->Children[0]->Name.c_str());
-			}
-		}
-		break;
-
-		case static_cast<u32>(ENodeHash::Tint):
-		{
-			imageTint = Utils::ExtractColor(Node->Children[0]->AssociatedTokens);
-		}
-		break;
-	}
+    }
 }
 
-void ZImage::PostEvaluate()
+void Image::BuildRenderInfosInternal(beard::array<RectangleInfo>* result)
 {
-	if (ImageInfo.bIsVectorial)
-	{
-		// TODO: This should be evaluated
-		ImageInfo.SvgImage = nsvgParseFromFile(ImageURL.c_str(), "px", beard::min(Size.x, Size.y));
-	}
-	else
-	{
-		Image* BaseImage = ImageInfo.RasterImage->BaseImage;
-		UnloadImage(*BaseImage);
-		*BaseImage = LoadImage(ImageURL.c_str());
-
-		switch (fitMode)
-		{
-			case FitMode::Stretch:
-			{
-				ImageResize(BaseImage, (i32)Size.x, (i32)Size.y);
-			}
-			break;
-
-			case FitMode::Fit:
-			{
-				i32 TargetWidth  = 0;
-				i32 TargetHeight = 0;
-
-				f32 ImageRatio = static_cast<f32>(BaseImage->width) / static_cast<f32>(BaseImage->height);
-				if (Size.x < Size.y)
-				{
-					TargetWidth  = static_cast<i32>(Size.x);
-					TargetHeight = static_cast<i32>(Size.x / ImageRatio);
-				}
-				else
-				{
-					TargetHeight = static_cast<i32>(Size.y);
-					TargetWidth  = static_cast<i32>(Size.y * ImageRatio);
-				}
-
-				ImageResize(BaseImage, TargetWidth, TargetHeight);
-
-				// Compute offsets to center in the target quad
-				ImageInfo.RasterImage->OffsetX = (Size.x - TargetWidth) * 0.5f;
-				ImageInfo.RasterImage->OffsetY = (Size.y - TargetHeight) * 0.5f;
-			}
-			break;
-
-			case FitMode::Crop:
-			{
-				i32 TargetWidth  = 0;
-				i32 TargetHeight = 0;
-
-				f32 ImageRatio = static_cast<f32>(BaseImage->width) / static_cast<f32>(BaseImage->height);
-				if (Size.x > Size.y)
-				{
-					TargetWidth  = static_cast<i32>(Size.x);
-					TargetHeight = static_cast<i32>(Size.x / ImageRatio);
-				}
-				else
-				{
-					TargetHeight = static_cast<i32>(Size.y);
-					TargetWidth  = static_cast<i32>(Size.y * ImageRatio);
-				}
-
-				ImageResize(BaseImage, TargetWidth, TargetHeight);
-
-				Rectangle r = {(TargetWidth - Size.x) * 0.5f, (TargetHeight - Size.y) * 0.5f, Size.x, Size.y};
-				ImageCrop(BaseImage, r);
-			}
-			break;
-		}
-
-		Texture2D* Texture = new Texture2D;
-		*Texture           = LoadTextureFromImage(*BaseImage);
-
-		ImageInfo.RasterImage->Texture = Texture;
-	}
-}
-
-void ZImage::BuildRenderInfosInternal(beard::array<RectangleInfo>* Result)
-{
-	RectangleInfo info = {};
-	info.Position      = Pos;
-	info.Size          = Size;
-	info.FillColor     = imageTint;
-	info.bIsImage      = true;
-	info.ImageInfo     = &ImageInfo;
-	Result->add(std::move(info));
+    RectangleInfo info = {};
+    info.position      = pos;
+    info.size          = size;
+    info.fill_color    = image_tint;
+    info.is_image      = true;
+    info.image_info    = &image_info;
+    result->add(std::move(info));
 }

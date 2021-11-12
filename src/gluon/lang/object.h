@@ -7,24 +7,24 @@
 
 #include <string>
 
-class ZObject : public ZCell
+class Object : public Cell
 {
 public:
-	ZValue Get(const std::string& Name) const;
-	void   Add(const std::string& PropertyName, ZValue Value);
+    Value Get(const std::string& name) const;
+    void  Add(const std::string& property_name, Value value);
 
-	virtual const char* ToString() const override
-	{
-		return "Object";
-	}
+    virtual const char* ToString() const override
+    {
+        return "Object";
+    }
 
-	virtual bool IsFunction() const
-	{
-		return false;
-	}
+    virtual bool IsFunction() const
+    {
+        return false;
+    }
 
-	void VisitGraph(FVisitorCallback Callback) override;
+    void VisitGraph(VisitorCallback Callback) override;
 
 private:
-	beard::string_hash_map<ZValue> m_Values;
+    beard::string_hash_map<Value> m_values;
 };

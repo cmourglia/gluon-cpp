@@ -1,26 +1,29 @@
 #include <beard/misc/hash.h>
 
-enum class ENodeHash : u32
+struct NodeHash
 {
-	ID      = beard::crc32::hash("id"),
-	X       = beard::crc32::hash("x"),
-	Y       = beard::crc32::hash("y"),
-	Width   = beard::crc32::hash("width"),
-	Height  = beard::crc32::hash("height"),
-	Anchors = beard::crc32::hash("anchors"),
-	Padding = beard::crc32::hash("padding"),
-	Margins = beard::crc32::hash("margins"),
+    enum Enum : u32
+    {
+        kId      = beard::crc32::hash("id"),
+        kX       = beard::crc32::hash("x"),
+        kY       = beard::crc32::hash("y"),
+        kWidth   = beard::crc32::hash("width"),
+        kHeight  = beard::crc32::hash("height"),
+        kAnchors = beard::crc32::hash("anchors"),
+        kPadding = beard::crc32::hash("padding"),
+        kMargins = beard::crc32::hash("margins"),
 
-	// Window
-	Title        = beard::crc32::hash("title"),
-	WindowWidth  = beard::crc32::hash("windowWidth"),
-	WindowHeight = beard::crc32::hash("windowHeight"),
+        // Window
+        kTitle        = beard::crc32::hash("title"),
+        kWindowWidth  = beard::crc32::hash("windowWidth"),
+        kWindowHeight = beard::crc32::hash("windowHeight"),
 
-	// Rectangle
-	Color = beard::crc32::hash("color"),
+        // Rectangle
+        kColor = beard::crc32::hash("color"),
 
-	// Image
-	Url     = beard::crc32::hash("url"),
-	FitMode = beard::crc32::hash("fitMode"),
-	Tint    = beard::crc32::hash("tint"),
+        // Image
+        kUrl     = beard::crc32::hash("url"),
+        kFitMode = beard::crc32::hash("fitMode"),
+        kTint    = beard::crc32::hash("tint"),
+    };
 };

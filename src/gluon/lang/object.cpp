@@ -1,24 +1,24 @@
 #include <gluon/lang/object.h>
 
-ZValue ZObject::Get(const std::string& Name) const
+Value Object::Get(const std::string& name) const
 {
-	return m_Values.get_value_or(Name, ZValue::Undefined);
+    return m_values.get_value_or(name, Value::Undefined);
 }
 
-void ZObject::Add(const std::string& propertyName, ZValue value)
+void Object::Add(const std::string& property_name, Value value)
 {
-	m_Values[propertyName] = value;
+    m_values[property_name] = value;
 }
 
-void ZObject::VisitGraph(FVisitorCallback callback) // NOLINT
+void Object::VisitGraph(VisitorCallback callback) // NOLINT
 {
-	ZCell::VisitGraph(callback);
+    Cell::VisitGraph(callback);
 
-	for (auto&& value : m_Values)
-	{
-		if (value.second.IsObject())
-		{
-			value.second.AsObject()->VisitGraph(callback);
-		}
-	}
+    for (auto&& value : m_values)
+    {
+        if (value.second.IsObject())
+        {
+            value.second.AsObject()->VisitGraph(callback);
+        }
+    }
 }

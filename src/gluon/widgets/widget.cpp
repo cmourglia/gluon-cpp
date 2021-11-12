@@ -9,410 +9,409 @@
 
 #include <filesystem>
 
-namespace Utils
+namespace utils
 {
-glm::vec4 ExtractColor(const beard::array<ZToken>& Tokens)
+glm::vec4 ExtractColor(const beard::array<Token>& tokens)
 {
-	glm::vec4 Color = {};
+    glm::vec4 color = {};
 
-	if (!Tokens.is_empty())
-	{
-		ZToken first_token = Tokens.first();
-		switch (first_token.Type)
-		{
-			case ETokenType::String:
-			{
-				ASSERT(Tokens.element_count() == 1, "A Color as a string can only be defined by one token");
-				first_token.Text.erase(std::remove_if(first_token.Text.begin(),
-				                                      first_token.Text.end(),
-				                                      [](const char c) { return c == '"'; }),
-				                       first_token.Text.end());
+    if (!tokens.is_empty())
+    {
+        Token first_token = tokens.first();
+        switch (first_token.token_type)
+        {
+            case TokenType::kString:
+            {
+                ASSERT(tokens.element_count() == 1, "A Color as a string can only be defined by one token");
+                first_token.text.erase(std::remove_if(first_token.text.begin(),
+                                                      first_token.text.end(),
+                                                      [](const char c) { return c == '"'; }),
+                                       first_token.text.end());
 
-				Color = ZColor::FromString(first_token.Text);
-			}
-			break;
+                color = color::FromString(first_token.text);
+            }
+            break;
 
-			case ETokenType::ZIdentifier:
-			{
-				static constexpr auto RGB_HASH  = beard::crc32::hash("rgb");
-				static constexpr auto RGBA_HASH = beard::crc32::hash("rgba");
-				static constexpr auto HSL_HASH  = beard::crc32::hash("hsl");
-				static constexpr auto HSLA_HASH = beard::crc32::hash("hsla");
+            case TokenType::kIdentifier:
+            {
+                static constexpr auto kRgbHash  = beard::crc32::hash("rgb");
+                static constexpr auto kRgbaHash = beard::crc32::hash("rgba");
+                static constexpr auto kHslHash  = beard::crc32::hash("hsl");
+                static constexpr auto kHslaHash = beard::crc32::hash("hsla");
 
-				const auto hash = beard::crc32::hash(first_token.Text);
+                const auto hash = beard::crc32::hash(first_token.text);
 
-				beard::array<f32> values;
-				for (const auto& t : Tokens)
-				{
-					if (t.Type == ETokenType::Number)
-					{
-						values.add(t.Number);
-					}
-				}
+                beard::array<f32> values;
+                for (const auto& t : tokens)
+                {
+                    if (t.token_type == TokenType::kNumber)
+                    {
+                        values.add(t.number);
+                    }
+                }
 
-				switch (hash)
-				{
-					case RGB_HASH:
-					{
-						if (values.element_count() == 3)
-						{
-							Color = ZColor::FromRGBA((i32)values[0], (i32)values[1], (i32)values[2]);
-						}
-						else
-						{
-							LOG_F(ERROR,
-							      "Line %d: Malformed rgb() call, should be "
-							      "rgb(red, green, blue)",
-							      first_token.Line);
-						}
-					}
-					break;
+                switch (hash)
+                {
+                    case kRgbHash:
+                    {
+                        if (values.element_count() == 3)
+                        {
+                            color = color::FromRGBA((i32)values[0], (i32)values[1], (i32)values[2]);
+                        }
+                        else
+                        {
+                            LOG_F(ERROR,
+                                  "Line %d: Malformed rgb() call, should be "
+                                  "rgb(red, green, blue)",
+                                  first_token.line);
+                        }
+                    }
+                    break;
 
-					case RGBA_HASH:
-					{
-						if (values.element_count() == 4)
-						{
-							Color = ZColor::FromRGBA((i32)values[0], (i32)values[1], (i32)values[2], values[3]);
-						}
-						else
-						{
-							LOG_F(ERROR,
-							      "Line %d: Malformed rgba() call, should be "
-							      "rgba(red, green, blue, alpha)",
-							      first_token.Line);
-						}
-					}
-					break;
+                    case kRgbaHash:
+                    {
+                        if (values.element_count() == 4)
+                        {
+                            color = color::FromRGBA((i32)values[0], (i32)values[1], (i32)values[2], values[3]);
+                        }
+                        else
+                        {
+                            LOG_F(ERROR,
+                                  "Line %d: Malformed rgba() call, should be "
+                                  "rgba(red, green, blue, alpha)",
+                                  first_token.line);
+                        }
+                    }
+                    break;
 
-					case HSL_HASH:
-					{
-						if (values.element_count() == 3)
-						{
-							Color = ZColor::FromHSLA((i32)values[0], (i32)values[1], (i32)values[2]);
-						}
-						else
-						{
-							LOG_F(ERROR,
-							      "Line %d: Malformed hsl() call, should be "
-							      "hsl(hue, saturation, lightness)",
-							      first_token.Line);
-						}
-					}
-					break;
+                    case kHslHash:
+                    {
+                        if (values.element_count() == 3)
+                        {
+                            color = color::FromHSLA((i32)values[0], (i32)values[1], (i32)values[2]);
+                        }
+                        else
+                        {
+                            LOG_F(ERROR,
+                                  "Line %d: Malformed hsl() call, should be "
+                                  "hsl(hue, saturation, lightness)",
+                                  first_token.line);
+                        }
+                    }
+                    break;
 
-					case HSLA_HASH:
-					{
-						if (values.element_count() == 4)
-						{
-							Color = ZColor::FromHSLA((i32)values[0], (i32)values[1], (i32)values[2], values[3]);
-						}
-						else
-						{
-							LOG_F(ERROR,
-							      "Line %d: Malformed hsla() call, should be "
-							      "hsla(hue, saturation, lightness, alpha",
-							      first_token.Line);
-						}
-					}
-					break;
-					default:
-					{
-						if (first_token.Text.compare("Color") == 0)
-						{
-							ASSERT(Tokens.element_count() == 3 && Tokens[2].Type == ETokenType::ZIdentifier,
-							       "We are looking for `Color.ColorName`");
-							if (auto it = ZColor::s_ColorsByName.find(Tokens[2].Text);
-							    it != ZColor::s_ColorsByName.end())
-							{
-								Color = it->second;
-							}
-							else
-							{
-								LOG_F(ERROR,
-								      "ling %d: Color '%s' is not a valid "
-								      "Color Name. See "
-								      "https://www.w3schools.com/colors/"
-								      "colors_names.asp for a complete list.",
-								      first_token.Line,
-								      Tokens[2].Text.c_str());
-							}
-						}
-						else
-						{
-							LOG_F(ERROR,
-							      "Line %d: Could not parse Color given '%s' "
-							      "value",
-							      first_token.Line,
-							      first_token.Text.c_str());
-						}
-					}
-					break;
-				}
-			}
-		}
-	}
+                    case kHslaHash:
+                    {
+                        if (values.element_count() == 4)
+                        {
+                            color = color::FromHSLA((i32)values[0], (i32)values[1], (i32)values[2], values[3]);
+                        }
+                        else
+                        {
+                            LOG_F(ERROR,
+                                  "Line %d: Malformed hsla() call, should be "
+                                  "hsla(hue, saturation, lightness, alpha",
+                                  first_token.line);
+                        }
+                    }
+                    break;
+                    default:
+                    {
+                        if (first_token.text.compare("Color") == 0)
+                        {
+                            ASSERT(tokens.element_count() == 3 && tokens[2].token_type == TokenType::kIdentifier,
+                                   "We are looking for `Color.ColorName`");
+                            if (auto it = color::kColorsByName.find(tokens[2].text); it != color::kColorsByName.end())
+                            {
+                                color = it->second;
+                            }
+                            else
+                            {
+                                LOG_F(ERROR,
+                                      "ling %d: Color '%s' is not a valid "
+                                      "Color Name. See "
+                                      "https://www.w3schools.com/colors/"
+                                      "colors_names.asp for a complete list.",
+                                      first_token.line,
+                                      tokens[2].text.c_str());
+                            }
+                        }
+                        else
+                        {
+                            LOG_F(ERROR,
+                                  "Line %d: Could not parse Color given '%s' "
+                                  "value",
+                                  first_token.line,
+                                  first_token.text.c_str());
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+    }
 
-	return Color;
+    return color;
 }
 
 }
 
-beard::array<ZWidget*> ZWidget::s_WidgetMap = {};
+beard::array<Widget*> Widget::s_widget_map = {};
 
-extern beard::string_hash_map<ZWidgetFactory*> s_WidgetFactories;
+extern beard::string_hash_map<WidgetFactory*> s_widget_factories;
 
-ZWidget::~ZWidget()
+Widget::~Widget()
 {
-	s_WidgetMap.remove(std::find(s_WidgetMap.begin(), s_WidgetMap.end(), this));
+    s_widget_map.remove(std::find(s_widget_map.begin(), s_widget_map.end(), this));
 
-	for (auto&& c : Children)
-	{
-		delete c;
-	}
-    Children.clear();
+    for (auto&& c : children)
+    {
+        delete c;
+    }
+    children.clear();
 }
 
-void ZWidget::deserialize(Parser::ZNode::Ptr Node)
+void Widget::deserialize(parser::Node::Ptr node)
 {
-	s_WidgetMap.add(this);
+    s_widget_map.add(this);
 
-	for (auto c : Node->Children)
-	{
-		if (c->Type == Parser::ENodeType::Structure)
-		{
-			auto child = (*s_WidgetFactories[c->Name])();
+    for (auto c : node->children)
+    {
+        if (c->node_type == parser::NodeType::kStructure)
+        {
+            auto child = (*s_widget_factories[c->name])();
 
-			Children.add(child);
+            children.add(child);
 
-			child->Parent = this;
+            child->parent = this;
 
-			child->deserialize(c);
-		}
-		else if (c->Type == Parser::ENodeType::Property)
-		{
-			ParseProperty(c);
-		}
-	}
+            child->deserialize(c);
+        }
+        else if (c->node_type == parser::NodeType::kProperty)
+        {
+            ParseProperty(c);
+        }
+    }
 }
 
-void ZWidget::BuildRenderInfos(beard::array<RectangleInfo>* Result)
+void Widget::BuildRenderInfos(beard::array<RectangleInfo>* result)
 {
-	BuildRenderInfosInternal(Result);
-	for (auto c : Children)
-	{
-		c->BuildRenderInfos(Result);
-	}
+    BuildRenderInfosInternal(result);
+    for (auto c : children)
+    {
+        c->BuildRenderInfos(result);
+    }
 }
 
-void ZWidget::Evaluate()
+void Widget::Evaluate()
 {
-	for (auto&& w : s_WidgetMap)
-	{
-		w->PreEvaluate();
-	}
+    for (auto&& w : s_widget_map)
+    {
+        w->PreEvaluate();
+    }
 
-	for (auto&& w : s_WidgetMap)
-	{
-		w->EvaluateInternal();
-	}
+    for (auto&& w : s_widget_map)
+    {
+        w->EvaluateInternal();
+    }
 
-	for (auto&& w : s_WidgetMap)
-	{
-		w->PostEvaluate();
-	}
+    for (auto&& w : s_widget_map)
+    {
+        w->PostEvaluate();
+    }
 }
 
-void ZWidget::EvaluateInternal()
+void Widget::EvaluateInternal()
 {
-	if (bDirty)
-	{
-		for (auto d : Dependencies)
-		{
-			d->EvaluateInternal();
-		}
+    if (is_dirty)
+    {
+        for (auto d : dependencies)
+        {
+            d->EvaluateInternal();
+        }
 
-		for (auto&& eval : Evaluators)
-		{
-			*eval.first = eval.second.Evaluate();
-		}
+        for (auto&& eval : evaluators)
+        {
+            *eval.first = eval.second.Evaluate();
+        }
 
-		bDirty = false;
-	}
+        is_dirty = false;
+    }
 }
 
-void ZWidget::touch()
+void Widget::touch()
 {
-	bDirty = true;
-	for (auto d : Dependants)
-	{
-		d->touch();
-	}
+    is_dirty = true;
+    for (auto d : dependees)
+    {
+        d->touch();
+    }
 }
 
-bool ZWidget::WindowResized(i32 w, i32 h)
+bool Widget::WindowResized(i32 new_width, i32 new_height)
 {
-	bool needUpdate = false;
+    bool needUpdate = false;
 
-	for (auto c : Children)
-	{
-		needUpdate |= c->WindowResized(w, h);
-	}
+    for (auto c : children)
+    {
+        needUpdate |= c->WindowResized(new_width, new_height);
+    }
 
-	return needUpdate;
+    return needUpdate;
 }
 
-void ZWidget::ParseProperty(Parser::ZNode::Ptr Node)
+void Widget::ParseProperty(parser::Node::Ptr node)
 {
-	const auto node_hash = beard::crc32::hash(Node->Name);
-	switch (node_hash)
-	{
-		case static_cast<u32>(ENodeHash::ID):
-		{
-			ASSERT(Node->Children.element_count() == 1, "ID: <ID>");
-			ID = Node->Children[0]->Name;
-		}
-		break;
+    const auto node_hash = beard::crc32::hash(node->name);
+    switch (node_hash)
+    {
+        case static_cast<u32>(NodeHash::kId):
+        {
+            ASSERT(node->children.element_count() == 1, "ID: <ID>");
+            id = node->children[0]->name;
+        }
+        break;
 
-		case static_cast<u32>(ENodeHash::X):
-		case static_cast<u32>(ENodeHash::Y):
-		case static_cast<u32>(ENodeHash::Width):
-		case static_cast<u32>(ENodeHash::Height):
-		{
-			auto infos = Node->Children[0];
+        case static_cast<u32>(NodeHash::kX):
+        case static_cast<u32>(NodeHash::kY):
+        case static_cast<u32>(NodeHash::kWidth):
+        case static_cast<u32>(NodeHash::kHeight):
+        {
+            auto infos = node->children[0];
 
-			GeometryExpressions[node_hash] = infos->AssociatedTokens;
+            geometry_expressions[node_hash] = infos->associated_tokens;
 
-			for (i32 i = 0; i < infos->AssociatedTokens.element_count() - 1; ++i)
-			{
-				if (infos->AssociatedTokens[i].Type == ETokenType::ZIdentifier &&
-				    infos->AssociatedTokens[i + 1].Type == ETokenType::Dot)
-				{
-					DependencyIDs.add(infos->AssociatedTokens[i].Text);
-				}
-			}
-		}
-		break;
+            for (i32 i = 0; i < infos->associated_tokens.element_count() - 1; ++i)
+            {
+                if (infos->associated_tokens[i].token_type == TokenType::kIdentifier &&
+                    infos->associated_tokens[i + 1].token_type == TokenType::kDot)
+                {
+                    dependency_ids.add(infos->associated_tokens[i].text);
+                }
+            }
+        }
+        break;
 
-		case static_cast<u32>(ENodeHash::Anchors):
-		{
-			LOG_F(WARNING, "Anchors not handled yet");
-		}
-		break;
+        case static_cast<u32>(NodeHash::kAnchors):
+        {
+            LOG_F(WARNING, "Anchors not handled yet");
+        }
+        break;
 
-		case static_cast<u32>(ENodeHash::Padding):
-		{
-			LOG_F(WARNING, "Padding not handled yet");
-		}
-		break;
+        case static_cast<u32>(NodeHash::kPadding):
+        {
+            LOG_F(WARNING, "Padding not handled yet");
+        }
+        break;
 
-		case static_cast<u32>(ENodeHash::Margins):
-		{
-			LOG_F(WARNING, "Margins not handled yet");
-		}
-		break;
+        case static_cast<u32>(NodeHash::kMargins):
+        {
+            LOG_F(WARNING, "Margins not handled yet");
+        }
+        break;
 
-		default:
-		{
-			ParserPropertyInternal(Node, node_hash);
-		}
-		break;
-	}
+        default:
+        {
+            ParserPropertyInternal(node, node_hash);
+        }
+        break;
+    }
 }
 
-ZWidget* GetWidgetByID(ZWidget* RootWidget, const std::string& Name)
+Widget* GetWidgetById(Widget* root_widget, const std::string& name)
 {
-	if (RootWidget->ID == Name)
-	{
-		return RootWidget;
-	}
+    if (root_widget->id == name)
+    {
+        return root_widget;
+    }
 
-	for (auto child : RootWidget->Children)
-	{
-		if (auto Node = GetWidgetByID(child, Name); Node != nullptr)
-		{
-			return Node;
-		}
-	}
+    for (auto child : root_widget->children)
+    {
+        if (auto Node = GetWidgetById(child, name); Node != nullptr)
+        {
+            return Node;
+        }
+    }
 
-	return nullptr;
+    return nullptr;
 }
 
-void BuildDependencyGraph(ZWidget* RootWidget, ZWidget* current_widget)
+void BuildDependencyGraph(Widget* root_widget, Widget* current_widget)
 {
-	for (auto ID : current_widget->DependencyIDs)
-	{
-		ZWidget* dep = ID == "Parent" ? current_widget->Parent : GetWidgetByID(RootWidget, ID);
+    for (auto ID : current_widget->dependency_ids)
+    {
+        Widget* dep = ID == "Parent" ? current_widget->parent : GetWidgetById(root_widget, ID);
 
-		if (dep != nullptr)
-		{
-			current_widget->Dependencies.add(dep);
-			dep->Dependants.add(current_widget);
-		}
-	}
+        if (dep != nullptr)
+        {
+            current_widget->dependencies.add(dep);
+            dep->dependees.add(current_widget);
+        }
+    }
 
-	for (auto c : current_widget->Children)
-	{
-		BuildDependencyGraph(RootWidget, c);
-	}
+    for (auto c : current_widget->children)
+    {
+        BuildDependencyGraph(root_widget, c);
+    }
 }
 
-void BuildExpressionEvaluators(ZWidget* RootWidget, ZWidget* current_widget)
+void BuildExpressionEvaluators(Widget* root_widget, Widget* current_widget)
 {
-	auto get_hash_index = [](u32 hash)
-	{
-		switch (hash)
-		{
-			case static_cast<u32>(ENodeHash::X):
-				return 0;
-			case static_cast<u32>(ENodeHash::Y):
-				return 1;
-			case static_cast<u32>(ENodeHash::Width):
-				return 2;
-			case static_cast<u32>(ENodeHash::Height):
-				return 3;
+    auto get_hash_index = [](u32 hash)
+    {
+        switch (hash)
+        {
+            case static_cast<u32>(NodeHash::kX):
+                return 0;
+            case static_cast<u32>(NodeHash::kY):
+                return 1;
+            case static_cast<u32>(NodeHash::kWidth):
+                return 2;
+            case static_cast<u32>(NodeHash::kHeight):
+                return 3;
 
-			default:
-				ASSERT_UNREACHABLE();
-				return -1;
-		}
-	};
+            default:
+                ASSERT_UNREACHABLE();
+                return -1;
+        }
+    };
 
-	auto get_property_ptr = [&current_widget](u32 hash) -> f32*
-	{
-		switch (hash)
-		{
-			case static_cast<u32>(ENodeHash::X):
-				return &current_widget->Pos.x;
-			case static_cast<u32>(ENodeHash::Y):
-				return &current_widget->Pos.y;
-			case static_cast<u32>(ENodeHash::Width):
-				return &current_widget->Size.x;
-			case static_cast<u32>(ENodeHash::Height):
-				return &current_widget->Size.y;
+    auto get_property_ptr = [&current_widget](u32 hash) -> f32*
+    {
+        switch (hash)
+        {
+            case static_cast<u32>(NodeHash::kX):
+                return &current_widget->pos.x;
+            case static_cast<u32>(NodeHash::kY):
+                return &current_widget->pos.y;
+            case static_cast<u32>(NodeHash::kWidth):
+                return &current_widget->size.x;
+            case static_cast<u32>(NodeHash::kHeight):
+                return &current_widget->size.y;
 
-			default:
-				ASSERT_UNREACHABLE();
-				return nullptr;
-		}
-	};
+            default:
+                ASSERT_UNREACHABLE();
+                return nullptr;
+        }
+    };
 
-	beard::hash_set<u32> remaining_attributes = {
-	    static_cast<u32>(ENodeHash::X),
-	    static_cast<u32>(ENodeHash::Y),
-	    static_cast<u32>(ENodeHash::Width),
-	    static_cast<u32>(ENodeHash::Height),
-	};
-	for (auto expr : current_widget->GeometryExpressions)
-	{
+    beard::hash_set<u32> remaining_attributes = {
+        static_cast<u32>(NodeHash::kX),
+        static_cast<u32>(NodeHash::kY),
+        static_cast<u32>(NodeHash::kWidth),
+        static_cast<u32>(NodeHash::kHeight),
+    };
+    for (auto expr : current_widget->geometry_expressions)
+    {
         remaining_attributes.remove((u32)expr.first);
 
-		auto expression = ShuntingYard::ZExpression::build(expr.second, RootWidget, current_widget);
+        auto expression = shunting_yard::Expression::Build(expr.second, root_widget, current_widget);
 
-		current_widget->Evaluators.add(std::make_pair(get_property_ptr(expr.first), expression));
-	}
+        current_widget->evaluators.add(std::make_pair(get_property_ptr(expr.first), expression));
+    }
 
-	for (auto c : current_widget->Children)
-	{
-		BuildExpressionEvaluators(RootWidget, c);
-	}
+    for (auto c : current_widget->children)
+    {
+        BuildExpressionEvaluators(root_widget, c);
+    }
 }

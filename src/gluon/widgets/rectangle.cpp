@@ -2,27 +2,27 @@
 
 #include <Gluon/Widgets/hashes.h>
 
-namespace Utils
+namespace utils
 {
-glm::vec4 ExtractColor(const beard::array<ZToken>& Tokens);
+glm::vec4 ExtractColor(const beard::array<Token>& tokens);
 }
 
-void ZRectangle::ParserPropertyInternal(Parser::ZNode::Ptr Node, const u32 node_hash)
+void Rectangle::ParserPropertyInternal(parser::Node::Ptr node, const u32 node_hash)
 {
-	if (node_hash == static_cast<u32>(ENodeHash::Color))
-	{
-		ASSERT(!Node->Children.is_empty(), "No Children is bad for a property");
-		FillColor = Utils::ExtractColor(Node->Children[0]->AssociatedTokens);
-	}
+    if (node_hash == static_cast<u32>(NodeHash::kColor))
+    {
+        ASSERT(!node->children.is_empty(), "No Children is bad for a property");
+        fill_color = utils::ExtractColor(node->children[0]->associated_tokens);
+    }
 }
 
-void ZRectangle::BuildRenderInfosInternal(beard::array<RectangleInfo>* Result)
+void Rectangle::BuildRenderInfosInternal(beard::array<RectangleInfo>* result)
 {
-	RectangleInfo rect = {
-	    .Position  = Pos,
-	    .Size      = Size,
-	    .FillColor = FillColor,
-	};
+    RectangleInfo rect = {
+        .position   = pos,
+        .size       = size,
+        .fill_color = fill_color,
+    };
 
-	Result->add(rect);
+    result->add(rect);
 }

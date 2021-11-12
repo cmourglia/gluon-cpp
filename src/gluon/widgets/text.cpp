@@ -1,19 +1,19 @@
 #include <Gluon/Widgets/text.h>
 
-namespace Utils
+namespace utils
 {
-glm::vec4 ExtractColor(const beard::array<ZToken>& Tokens);
+glm::vec4 ExtractColor(const beard::array<Token>& tokens);
 }
 
-void ZText::ParserPropertyInternal(Parser::ZNode::Ptr Node, u32 node_hash)
+void ZText::ParserPropertyInternal(parser::Node::Ptr Node, u32 node_hash)
 {
-	UNUSED(Node);
-	UNUSED(node_hash);
-	// TODO
+    UNUSED(Node);
+    UNUSED(node_hash);
+    // TODO
 }
 
 void ZText::BuildRenderInfosInternal(beard::array<RectangleInfo>* Result)
 {
-	UNUSED(Result);
-	// TODO
+    UNUSED(Result);
+    // TODO
 }

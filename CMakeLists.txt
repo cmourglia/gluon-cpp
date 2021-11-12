@@ -10,7 +10,7 @@ add_subdirectory(thirdparty)
 set(CORE_SRC
         src/gluon/core/types.cpp
         src/gluon/core/types.h
-)
+        )
 
 set(COMPILER_SRC
         src/gluon/compiler/parser.cpp
@@ -20,7 +20,7 @@ set(COMPILER_SRC
         src/gluon/compiler/parser.h
         src/gluon/compiler/shunting_yard.h
         src/gluon/compiler/tokenizer.h
-)
+        )
 
 set(LANGUAGE_SRC
         src/gluon/lang/ast.cpp
@@ -46,7 +46,7 @@ set(LANGUAGE_SRC
         src/gluon/lang/value.h
         src/gluon/lang/lexer.h
         src/gluon/lang/lexer.cpp
-)
+        )
 
 set(WIDGETS_SRC
         src/gluon/widgets/image.cpp
@@ -60,23 +60,23 @@ set(WIDGETS_SRC
         src/gluon/widgets/text.h
         src/gluon/widgets/widget.h
         src/gluon/widgets/window.h
-)
+        )
 
 set(APP_SRC
         src/gluon/app/app.cpp
 
         src/gluon/app/app.h
-)
+        )
 
 add_executable(gluon src/main.cpp
-    ${CORE_SRC}
-    ${COMPILER_SRC}
-    ${LANGUAGE_SRC}
-    ${WIDGETS_SRC}
-    ${APP_SRC}
-)
+        ${CORE_SRC}
+        ${COMPILER_SRC}
+        ${LANGUAGE_SRC}
+        ${WIDGETS_SRC}
+        ${APP_SRC}
+        )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE loguru::loguru glm::glm raylib nanovg stb_truetype beardLibrary)
+target_link_libraries(${PROJECT_NAME} PRIVATE loguru::loguru glm::glm SDL2main SDL2_image nanovg stb_truetype beardLibrary)
 target_include_directories(${PROJECT_NAME} PRIVATE src)
 target_compile_definitions(${PROJECT_NAME} PRIVATE $<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>)
 target_compile_options(${PROJECT_NAME} PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/W4> $<$<CXX_COMPILER_ID:MSVC>:/WX>)

@@ -3,79 +3,79 @@
 #include <gluon/lang/ast.h>
 #include <gluon/lang/object.h>
 
-ZInterpreter::ZInterpreter()
+Interpreter::Interpreter()
 {
-    m_Heap         = std::make_unique<ZHeap>(this);
-    m_GlobalObject = m_Heap->Allocate<ZObject>();
+    m_heap          = std::make_unique<Heap>(this);
+    m_global_object = m_heap->Allocate<Object>();
 }
 
-ZInterpreter::~ZInterpreter()
+Interpreter::~Interpreter()
 {
-    m_GlobalObject = nullptr;
-    m_Heap->Garbage();
+    m_global_object = nullptr;
+    m_heap->Garbage();
 }
 
-ZValue ZInterpreter::Run(ZScopeNode* Node)
+Value Interpreter::Run(ScopeNode* node)
 {
-    PushScope(Node);
+    PushScope(node);
 
-    ZValue last_value = ZValue::Undefined;
+    Value last_value = Value::Undefined;
 
     // for (const auto& c : Node->Children())
     //{
     //	last_value = c->Execute(this);
     //}
 
-    PopScope(Node);
+    PopScope(node);
 
     return last_value;
 }
 
-void ZInterpreter::PushScope(ZScopeNode* Node)
+void Interpreter::PushScope(ScopeNode* node)
 {
-    m_Stack.add({.Node = Node});
+    m_stack.add({.node = node});
 }
 
-void ZInterpreter::PopScope(ZScopeNode* Node)
+void Interpreter::PopScope(ScopeNode* node)
 {
     // FIXME: Check this
-    ASSERT(m_Stack.last().Node == Node, "Stack mismatch");
+    ASSERT(m_stack.last().node == node, "Stack mismatch");
 
-    m_Stack.pop_and_discard();
+    m_stack.pop_and_discard();
 }
 
-void ZInterpreter::DeclareVariable(const char* Name)
+void Interpreter::DeclareVariable(const char* name)
 {
-    ZScopeFrame& frame    = m_Stack.last();
-    frame.Variables[Name] = ZValue::Null;
+    ScopeFrame& frame     = m_stack.last();
+    frame.variables[name] = Value::Null;
 }
 
-void ZInterpreter::SetVariable(const char* Name, ZValue value)
+void Interpreter::SetVariable(const char* name, Value value)
 {
-    for (i32 i = m_Stack.element_count() - 1; i >= 0; --i)
+    for (i32 i = m_stack.element_count() - 1; i >= 0; --i)
     {
-        ZScopeFrame& frame = m_Stack[i];
-        if (auto it = frame.Variables.find(Name); it != frame.Variables.end())
+        ScopeFrame& frame = m_stack[i];
+        if (auto it = frame.variables.find(name); it != frame.variables.end())
         {
             it->second = value;
             return;
         }
     }
 
-    m_GlobalObject->Add(Name, value);
+    m_global_object->Add(name, value);
 }
 
-ZValue ZInterpreter::GetVariable(const char* Name)
+Value Interpreter::GetVariable(const char* name)
 {
-    for (i32 i = m_Stack.element_count() - 1; i >= 0; --i)
+    for (i32 i = m_stack.element_count() - 1; i >= 0; --i)
     {
-        ZScopeFrame& frame = m_Stack[i];
-        if (auto it = frame.Variables.find(Name); it != frame.Variables.end())
+        ScopeFrame& frame = m_stack[i];
+        if (auto it = frame.variables.find(name); it != frame.variables.end())
         {
             return it->second;
         }
     }
 
     // Look in the global object
-    return m_GlobalObject->Get(Name);
+    return m_global_object->Get(name);
 }

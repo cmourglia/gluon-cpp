@@ -2,21 +2,21 @@
 
 #include <gluon/lang/grammar.h>
 
-class ZASTPrinter
-    : public IExpressionVisitor
-    , public IStatementVisitor
+class AstPrinter
+    : public ExprVisitor
+    , public StmtVisitor
 {
 public:
-    void PrintAST(ZExpression& ASTRoot);
+    void PrintAST(Expr& ASTRoot);
 
 private:
-    ZValue VisitBinary(ZBinary& Binary) override;
-    ZValue VisitGrouping(ZGrouping& Grouping) override;
-    ZValue VisitLiteral(ZLiteral& Literal) override;
-    ZValue VisitUnary(ZUnary& Unary) override;
+    Value VisitBinary(BinaryExpr& binary) override;
+    Value VisitGrouping(GroupingExpr& grouping) override;
+    Value VisitLiteral(LiteralExpr& literal) override;
+    Value VisitUnary(UnaryExpr& unary) override;
 
     void AddIndentation();
 
-    std::string m_String;
-    i32         m_Indentation = 0;
+    std::string m_string;
+    i32         m_indentation = 0;
 };

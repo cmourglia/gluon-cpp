@@ -7,152 +7,152 @@
 
 #include <memory>
 
-class ZBinary;
-class ZGrouping;
-class ZLiteral;
-class ZUnary;
+class BinaryExpr;
+class GroupingExpr;
+class LiteralExpr;
+class UnaryExpr;
 
-class IExpressionVisitor
+class ExprVisitor
 {
 public:
-    virtual ZValue VisitBinary(ZBinary& Binary)       = 0;
-    virtual ZValue VisitGrouping(ZGrouping& Grouping) = 0;
-    virtual ZValue VisitLiteral(ZLiteral& Literal)    = 0;
-    virtual ZValue VisitUnary(ZUnary& Unary)          = 0;
+    virtual Value VisitBinary(BinaryExpr& Binary)       = 0;
+    virtual Value VisitGrouping(GroupingExpr& Grouping) = 0;
+    virtual Value VisitLiteral(LiteralExpr& Literal)    = 0;
+    virtual Value VisitUnary(UnaryExpr& Unary)          = 0;
 };
 
-class ZExpression
+class Expr
 {
 public:
-    NONCOPYABLE(ZExpression);
-    NONMOVEABLE(ZExpression);
-    ZExpression()          = default;
-    virtual ~ZExpression() = default;
+    NONCOPYABLE(Expr);
+    NONMOVEABLE(Expr);
+    Expr()          = default;
+    virtual ~Expr() = default;
 
-    virtual ZValue Accept(IExpressionVisitor& visitor) = 0;
+    virtual Value Accept(ExprVisitor& visitor) = 0;
 };
 
-class ZBinary : public ZExpression
+class BinaryExpr : public Expr
 {
 public:
-    explicit ZBinary(std::unique_ptr<ZExpression> Left, ZToken Operator, std::unique_ptr<ZExpression> Right)
-        : m_Left{std::move(Left)}
-        , m_Operator{std::move(Operator)}
-        , m_Right{std::move(Right)}
+    explicit BinaryExpr(std::unique_ptr<Expr> left, Token op, std::unique_ptr<Expr> right)
+        : m_left{std::move(left)}
+        , m_op{std::move(op)}
+        , m_right{std::move(right)}
     {
     }
 
-    ZValue Accept(IExpressionVisitor& Visitor) override
+    Value Accept(ExprVisitor& Visitor) override
     {
         return Visitor.VisitBinary(*this);
     }
 
-    ZExpression* Left() const
+    Expr* left() const
     {
-        return m_Left.get();
+        return m_left.get();
     }
 
-    ZToken Operator() const
+    Token op() const
     {
-        return m_Operator;
+        return m_op;
     }
 
-    ZExpression* Right() const
+    Expr* right() const
     {
-        return m_Right.get();
+        return m_right.get();
     }
 
 private:
-    std::unique_ptr<ZExpression> m_Left;
-    ZToken                       m_Operator;
-    std::unique_ptr<ZExpression> m_Right;
+    std::unique_ptr<Expr> m_left;
+    Token                 m_op;
+    std::unique_ptr<Expr> m_right;
 };
 
-class ZGrouping : public ZExpression
+class GroupingExpr : public Expr
 {
 public:
-    explicit ZGrouping(std::unique_ptr<ZExpression> Expression)
-        : m_Expression{std::move(Expression)}
+    explicit GroupingExpr(std::unique_ptr<Expr> expr)
+        : m_expr{std::move(expr)}
     {
     }
 
-    ZValue Accept(IExpressionVisitor& Visitor) override
+    Value Accept(ExprVisitor& Visitor) override
     {
         return Visitor.VisitGrouping(*this);
     }
 
-    ZExpression* Expression() const
+    Expr* expr() const
     {
-        return m_Expression.get();
+        return m_expr.get();
     }
 
 private:
-    std::unique_ptr<ZExpression> m_Expression;
+    std::unique_ptr<Expr> m_expr;
 };
 
-class ZLiteral : public ZExpression
+class LiteralExpr : public Expr
 {
 public:
-    explicit ZLiteral(ZValue Value)
-        : m_Value{Value}
+    explicit LiteralExpr(Value value)
+        : m_value{value}
     {
     }
 
-    ZValue Accept(IExpressionVisitor& Visitor) override
+    Value Accept(ExprVisitor& Visitor) override
     {
         return Visitor.VisitLiteral(*this);
     }
 
-    ZValue Value() const
+    Value value() const
     {
-        return m_Value;
+        return m_value;
     }
 
 private:
-    ZValue m_Value;
+    Value m_value;
 };
 
-class ZUnary : public ZExpression
+class UnaryExpr : public Expr
 {
 public:
-    explicit ZUnary(ZToken Operator, std::unique_ptr<ZExpression> Right)
-        : m_Operator{std::move(Operator)}
-        , m_Right{std::move(Right)}
+    explicit UnaryExpr(Token op, std::unique_ptr<Expr> right)
+        : m_op{std::move(op)}
+        , m_right{std::move(right)}
     {
     }
 
-    ZValue Accept(IExpressionVisitor& Visitor) override
+    Value Accept(ExprVisitor& Visitor) override
     {
         return Visitor.VisitUnary(*this);
     }
 
-    ZToken Operator() const
+    Token op() const
     {
-        return m_Operator;
+        return m_op;
     }
 
-    ZExpression* Right() const
+    Expr* right() const
     {
-        return m_Right.get();
+        return m_right.get();
     }
 
 private:
-    ZToken                       m_Operator;
-    std::unique_ptr<ZExpression> m_Right;
+    Token                 m_op;
+    std::unique_ptr<Expr> m_right;
 };
 
-class IStatementVisitor
+class StmtVisitor
 {
 public:
 };
 
-class ZStatement
+class Stmt
 {
 public:
-    NONCOPYABLE(ZStatement);
-    NONMOVEABLE(ZStatement);
-    ZStatement()          = default;
-    virtual ~ZStatement() = default;
+    NONCOPYABLE(Stmt);
+    NONMOVEABLE(Stmt);
+    Stmt()          = default;
+    virtual ~Stmt() = default;
 
-    virtual ZValue Accept(IStatementVisitor& visitor) = 0;
+    virtual Value Accept(StmtVisitor& visitor) = 0;
 };

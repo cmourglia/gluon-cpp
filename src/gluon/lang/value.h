@@ -4,7 +4,7 @@
 
 #include <string>
 
-class ZObject;
+class Object;
 
 enum class EValueType
 {
@@ -22,46 +22,46 @@ struct ZString
     i32   Length;
 };
 
-class ZValue
+class Value
 {
 public:
-    ZValue() = default;
+    Value() = default;
 
-    explicit ZValue(std::nullptr_t)
+    explicit Value(std::nullptr_t)
         : m_ValueType{EValueType::Null}
         , m_Data{}
     {
     }
 
-    explicit ZValue(f64 Value)
+    explicit Value(f64 Value)
         : m_ValueType{EValueType::Number}
         , m_Data{}
     {
         m_Data.AsNumber = Value;
     }
 
-    explicit ZValue(i32 Value)
+    explicit Value(i32 Value)
         : m_ValueType{EValueType::Number}
         , m_Data{}
     {
         m_Data.AsNumber = Value;
     }
 
-    explicit ZValue(bool Value)
+    explicit Value(bool Value)
         : m_ValueType{EValueType::Boolean}
         , m_Data{}
     {
         m_Data.AsBoolean = Value;
     }
 
-    explicit ZValue(ZObject* Object)
+    explicit Value(Object* Object)
         : m_ValueType{EValueType::ZObject}
         , m_Data{}
     {
         m_Data.AsObject = Object;
     }
 
-    explicit ZValue(std::string String)
+    explicit Value(std::string String)
         : m_ValueType{EValueType::String}
         , m_Data{}
     {
@@ -83,7 +83,7 @@ public:
     // clang-format off
 	bool AsBoolean() const { return m_Data.AsBoolean; }
 	f64 AsNumber() const { return m_Data.AsNumber; }
-	ZObject* AsObject() const { return m_Data.AsObject; }
+	Object* AsObject() const { return m_Data.AsObject; }
     // clang-format on
     std::string AsString() const
     {
@@ -97,20 +97,20 @@ public:
 
     std::string ToString() const;
 
-    static const ZValue Undefined;
-    static const ZValue Null;
+    static const Value Undefined;
+    static const Value Null;
 
 private:
     EValueType m_ValueType = EValueType::Undefined;
 
     union
     {
-        bool     AsBoolean;
-        f64      AsNumber;
-        ZString  AsString;
-        ZObject* AsObject;
+        bool    AsBoolean;
+        f64     AsNumber;
+        ZString AsString;
+        Object* AsObject;
     } m_Data;
 };
 
-bool operator==(const ZValue& lhs, const ZValue& rhs);
-bool operator!=(const ZValue& lhs, const ZValue& rhs);
+bool operator==(const Value& lhs, const Value& rhs);
+bool operator!=(const Value& lhs, const Value& rhs);

@@ -2,34 +2,33 @@
 
 #include <Gluon/Widgets/widget.h>
 
-struct NSVGimage;
-struct ZImage : public ZWidget
+struct Image : public Widget
 {
-	enum class FitMode
-	{
-		Stretch,
-		Fit,
-		Crop,
-	};
+    enum class FitMode
+    {
+        Stretch,
+        Fit,
+        Crop,
+    };
 
-	static ZWidget* create()
-	{
-		return new ZImage{};
-	}
+    static Widget* create()
+    {
+        return new Image{};
+    }
 
-	virtual ~ZImage();
+    virtual ~Image();
 
-	virtual void PostEvaluate() override;
+    virtual void PostEvaluate() override;
 
-	std::string ImageURL;
-	glm::vec2   ImageSize = {0.0f, 0.0f};
+    std::string image_url;
+    glm::vec2   image_size = {0.0f, 0.0f};
 
-	FitMode fitMode = FitMode::Stretch;
+    FitMode fit_mode = FitMode::Stretch;
 
-	glm::vec4 imageTint = glm::vec4{1.0f, 1.0f, 1.0f, 1.0f};
-	ImageInfo ImageInfo = {};
+    glm::vec4 image_tint = glm::vec4{1.0f, 1.0f, 1.0f, 1.0f};
+    ImageInfo image_info = {};
 
 private:
-	virtual void ParserPropertyInternal(Parser::ZNode::Ptr Node, const u32 node_hash) override;
-	virtual void BuildRenderInfosInternal(beard::array<RectangleInfo>* Result) override;
+    virtual void ParserPropertyInternal(parser::Node::Ptr node, const u32 node_hash) override;
+    virtual void BuildRenderInfosInternal(beard::array<RectangleInfo>* result) override;
 };

@@ -7,313 +7,313 @@
 #include <deque>
 #include <stack>
 
-namespace ShuntingYard
+namespace shunting_yard
 {
 
-f32 ZExpression::Evaluate() const
+f32 Expression::Evaluate() const
 {
-	beard::array<f32> ValueStack;
+    beard::array<f32> value_stack;
 
-	auto WorkingQueue = EvaluationQueue;
+    auto working_queue = evaluation_queue;
 
-	while (!WorkingQueue.is_empty())
-	{
-		auto* Node = WorkingQueue.first().get();
-		WorkingQueue.pop_and_discard();
+    while (!working_queue.is_empty())
+    {
+        auto* node = working_queue.first().get();
+        working_queue.pop_and_discard();
 
-		switch (Node->Type)
-		{
-			case ENodeType::Constant:
-			{
-				ValueStack.add(reinterpret_cast<ConstantNode*>(Node)->Constant);
-			}
-			break;
+        switch (node->type)
+        {
+            case NodeType::kConstant:
+            {
+                value_stack.add(reinterpret_cast<ConstantNode*>(node)->constant);
+            }
+            break;
 
-			case ENodeType::Operator:
-			{
-				// TODO: Unary operators
+            case NodeType::kOperator:
+            {
+                // TODO: Unary operators
 
-				f32 Right = ValueStack.pop();
-				f32 Left  = ValueStack.pop();
+                f32 right = value_stack.pop();
+                f32 left  = value_stack.pop();
 
-				ValueStack.add(EvaluateOperator(reinterpret_cast<OperatorNode*>(Node), Left, Right));
-			}
-			break;
+                value_stack.add(EvaluateOperator(reinterpret_cast<OperatorNode*>(node), left, right));
+            }
+            break;
 
-			case ENodeType::ZFunction:
-			{
-				ValueStack.add(EvaluateFunction(reinterpret_cast<FunctionNode*>(Node)));
-			}
-			break;
-		}
-	}
+            case NodeType::kFunction:
+            {
+                value_stack.add(EvaluateFunction(reinterpret_cast<FunctionNode*>(node)));
+            }
+            break;
+        }
+    }
 
-	return ValueStack.last();
+    return value_stack.last();
 }
 
-f32 ZExpression::EvaluateOperator(OperatorNode* Operator, f32 Left, f32 Right)
+f32 Expression::EvaluateOperator(OperatorNode* op, f32 left, f32 right)
 {
-	switch (Operator->Operator)
-	{
-		case EOperator::Add:
-			return Operator->bUnary ? Left : Left + Right;
-		case EOperator::Substract:
-			return Operator->bUnary ? -Left : Left - Right;
-		case EOperator::Multiply:
-			return Left * Right;
-		case EOperator::Divide:
-			return Left / Right;
+    switch (op->op)
+    {
+        case Operator::kAdd:
+            return op->unary ? left : left + right;
+        case Operator::kSubstract:
+            return op->unary ? -left : left - right;
+        case Operator::kMultiply:
+            return left * right;
+        case Operator::kDivide:
+            return left / right;
 
-		case EOperator::OpenParen:
-		case EOperator::CloseParen:
-			// We should never have those in the evaluation queue
-			ASSERT_UNREACHABLE();
-			break;
-	}
+        case Operator::kOpenParen:
+        case Operator::kCloseParen:
+            // We should never have those in the evaluation queue
+            ASSERT_UNREACHABLE();
+            break;
+    }
 
-	return 0.0f;
+    return 0.0f;
 }
 
-inline bool IsOperator(ETokenType ZToken)
+inline bool IsOperator(TokenType::Enum token)
 {
-	switch (ZToken)
-	{
-		case ETokenType::Plus:
-		case ETokenType::Minus:
-		case ETokenType::Asterisk:
-		case ETokenType::Slash:
-			return true;
+    switch (token)
+    {
+        case TokenType::kPlus:
+        case TokenType::kMinus:
+        case TokenType::kAsterisk:
+        case TokenType::kSlash:
+            return true;
 
-		default:
-			break;
-	}
+        default:
+            break;
+    }
 
-	return false;
+    return false;
 }
 
-inline EOperator GetOperator(ETokenType ZToken)
+inline Operator::Enum GetOperator(TokenType::Enum token)
 {
-	// clang-format off
-	switch (ZToken)
+    // clang-format off
+	switch (token)
 	{
-		case ETokenType::Plus: return EOperator::Add;
-		case ETokenType::Minus: return EOperator::Substract;
-		case ETokenType::Asterisk: return EOperator::Multiply;
-		case ETokenType::Slash: return EOperator::Divide;
-		default:
-			ASSERT_UNREACHABLE();
-			break;
-	}
-	// clang-format on
-
-	return EOperator::OpenParen;
-}
-
-inline i32 GetPrecedence(EOperator Operator)
-{
-	// clang-format off
-	switch (Operator)
-	{
-		case EOperator::Add:       return 2;
-		case EOperator::Substract: return 2;
-		case EOperator::Multiply:  return 3;
-		case EOperator::Divide:    return 3;
+		case TokenType::kPlus: return Operator::kAdd;
+		case TokenType::kMinus: return Operator::kSubstract;
+		case TokenType::kAsterisk: return Operator::kMultiply;
+		case TokenType::kSlash: return Operator::kDivide;
 		default:
 			ASSERT_UNREACHABLE();
 			break;
 	}
-	// clang-format on
+    // clang-format on
 
-	return 0;
+    return Operator::kOpenParen;
 }
 
-ZExpression ZExpression::build(const beard::array<ZToken>& Tokens, ZWidget* RootWidget, ZWidget* CurrentWidget)
+inline i32 GetPrecedence(Operator::Enum op)
 {
-	ZExpression Result;
-
-	std::stack<EOperator> OperatorStack;
-
-	for (i32 i = 0; i < Tokens.element_count(); ++i)
+    // clang-format off
+	switch (op)
 	{
-		ZToken ZToken = Tokens[i];
-
-		switch (ZToken.Type)
-		{
-			case ETokenType::Number:
-			{
-				Result.EvaluationQueue.add(std::make_shared<ConstantNode>(ZToken.Number));
-			}
+		case Operator::kAdd:       return 2;
+		case Operator::kSubstract: return 2;
+		case Operator::kMultiply:  return 3;
+		case Operator::kDivide:    return 3;
+		default:
+			ASSERT_UNREACHABLE();
 			break;
-
-			case ETokenType::OpenParen:
-			{
-				OperatorStack.push(EOperator::OpenParen);
-			}
-			break;
-
-			case ETokenType::CloseParen:
-			{
-				while (OperatorStack.top() != EOperator::OpenParen)
-				{
-					Result.EvaluationQueue.add(std::make_shared<OperatorNode>(OperatorStack.top(), false));
-					OperatorStack.pop();
-				}
-
-				OperatorStack.pop();
-			}
-			break;
-
-			case ETokenType::Minus:
-			case ETokenType::Plus:
-			{
-				bool bIsFirstElement      = (i == 0);
-				bool bPreviousIsOpenParen = (i > 0) && Tokens[i - 1].Type == ETokenType::OpenParen;
-				bool bPreviousIsOperator  = (i > 0) && IsOperator(Tokens[i - 1].Type);
-				bool bIsUnary             = bIsFirstElement || bPreviousIsOpenParen || bPreviousIsOperator;
-
-				bool bIsNotLast    = (i + 1) < Tokens.element_count();
-				bool bNextIsNumber = bIsNotLast && (Tokens[i + 1].Type == ETokenType::Number);
-
-				// Special case for bUnary plus / minus
-				if (bIsUnary && bNextIsNumber)
-				{
-					f32 Mult = ZToken.Type == ETokenType::Minus ? -1.0f : 1.0f;
-					Result.EvaluationQueue.add(std::make_shared<ConstantNode>(Mult * Tokens[++i].Number));
-
-					continue;
-				}
-
-				// We are looking at operators, just continue
-			}
-
-			case ETokenType::Asterisk:
-			case ETokenType::Slash:
-			{
-				EOperator Operator = GetOperator(ZToken.Type);
-
-				if (!OperatorStack.empty())
-				{
-					EOperator Other = OperatorStack.top();
-					if (GetPrecedence(Operator) <= GetPrecedence(Other))
-					{
-						OperatorStack.pop();
-						Result.EvaluationQueue.add(std::make_shared<OperatorNode>(Other, false));
-					}
-				}
-
-				OperatorStack.push(Operator);
-			}
-			break;
-
-			case ETokenType::ZIdentifier:
-			{
-				bool hasTwoNextValues = (i + 2) < Tokens.element_count();
-				bool nextIsDot        = hasTwoNextValues && (Tokens[i + 1].Type == ETokenType::Dot);
-				bool nextIsProperty   = hasTwoNextValues && (Tokens[i + 2].Type == ETokenType::ZIdentifier);
-
-				ZWidget* Widget = nullptr;
-
-				std::string Binding;
-
-				if (hasTwoNextValues && nextIsDot && nextIsProperty)
-				{
-					auto widgetId = ZToken.Text;
-					if (widgetId == "parent")
-					{
-						Widget = CurrentWidget->Parent;
-					}
-					else
-					{
-						Widget = GetWidgetByID(RootWidget, widgetId);
-					}
-
-					Binding = Tokens[i + 2].Text;
-					i += 2;
-				}
-				else
-				{
-					Widget  = CurrentWidget;
-					Binding = ZToken.Text;
-				}
-
-				EFunction Function;
-
-				if (Binding == "width")
-				{
-					Function = EFunction::Width;
-				}
-				else if (Binding == "height")
-				{
-					Function = EFunction::Height;
-				}
-				else if (Binding == "x")
-				{
-					Function = EFunction::X;
-				}
-				else if (Binding == "y")
-				{
-					Function = EFunction::Y;
-				}
-				else if (Binding == "bottom")
-				{
-					Function = EFunction::Bottom;
-				}
-				else if (Binding == "top")
-				{
-					Function = EFunction::Top;
-				}
-				else if (Binding == "left")
-				{
-					Function = EFunction::Left;
-				}
-				else if (Binding == "right")
-				{
-					Function = EFunction::Right;
-				}
-
-				Result.EvaluationQueue.add(std::make_shared<FunctionNode>(Function, Widget));
-			}
-			break;
-
-			default:
-				ASSERT_UNREACHABLE();
-				break;
-		}
 	}
+    // clang-format on
 
-	while (!OperatorStack.empty())
-	{
-		if (OperatorStack.top() == EOperator::OpenParen || OperatorStack.top() == EOperator::CloseParen)
-		{
-			LOG_F(ERROR, "Imbalanced expression");
-		}
-		else
-		{
-			Result.EvaluationQueue.add(std::make_shared<OperatorNode>(OperatorStack.top(), false));
-		}
-		OperatorStack.pop();
-	}
-
-	return Result;
+    return 0;
 }
 
-f32 ZExpression::EvaluateFunction(FunctionNode* Function)
+Expression Expression::Build(const beard::array<Token>& tokens, Widget* root_widget, Widget* current_widget)
 {
-	// clang-format off
-	switch (Function->Function)
+    Expression result;
+
+    std::stack<Operator::Enum> operator_stack;
+
+    for (i32 i = 0; i < tokens.element_count(); ++i)
+    {
+        Token token = tokens[i];
+
+        switch (token.token_type)
+        {
+            case TokenType::kNumber:
+            {
+                result.evaluation_queue.add(std::make_shared<ConstantNode>(token.number));
+            }
+            break;
+
+            case TokenType::kOpenParen:
+            {
+                operator_stack.push(Operator::kOpenParen);
+            }
+            break;
+
+            case TokenType::kCloseParen:
+            {
+                while (operator_stack.top() != Operator::kOpenParen)
+                {
+                    result.evaluation_queue.add(std::make_shared<OperatorNode>(operator_stack.top(), false));
+                    operator_stack.pop();
+                }
+
+                operator_stack.pop();
+            }
+            break;
+
+            case TokenType::kMinus:
+            case TokenType::kPlus:
+            {
+                bool is_first_element       = (i == 0);
+                bool previous_is_open_paren = (i > 0) && tokens[i - 1].token_type == TokenType::kOpenParen;
+                bool previous_is_operator   = (i > 0) && IsOperator(tokens[i - 1].token_type);
+                bool is_unary               = is_first_element || previous_is_open_paren || previous_is_operator;
+
+                bool is_not_last    = (i + 1) < tokens.element_count();
+                bool next_is_number = is_not_last && (tokens[i + 1].token_type == TokenType::kNumber);
+
+                // Special case for bUnary plus / minus
+                if (is_unary && next_is_number)
+                {
+                    f32 mult = token.token_type == TokenType::kMinus ? -1.0f : 1.0f;
+                    result.evaluation_queue.add(std::make_shared<ConstantNode>(mult * tokens[++i].number));
+
+                    continue;
+                }
+
+                // We are looking at operators, just continue
+            }
+
+            case TokenType::kAsterisk:
+            case TokenType::kSlash:
+            {
+                Operator::Enum op = GetOperator(token.token_type);
+
+                if (!operator_stack.empty())
+                {
+                    Operator::Enum other = operator_stack.top();
+                    if (GetPrecedence(op) <= GetPrecedence(other))
+                    {
+                        operator_stack.pop();
+                        result.evaluation_queue.add(std::make_shared<OperatorNode>(other, false));
+                    }
+                }
+
+                operator_stack.push(op);
+            }
+            break;
+
+            case TokenType::kIdentifier:
+            {
+                bool hasTwoNextValues = (i + 2) < tokens.element_count();
+                bool nextIsDot        = hasTwoNextValues && (tokens[i + 1].token_type == TokenType::kDot);
+                bool nextIsProperty   = hasTwoNextValues && (tokens[i + 2].token_type == TokenType::kIdentifier);
+
+                Widget* Widget = nullptr;
+
+                std::string Binding;
+
+                if (hasTwoNextValues && nextIsDot && nextIsProperty)
+                {
+                    auto widgetId = token.text;
+                    if (widgetId == "parent")
+                    {
+                        Widget = current_widget->parent;
+                    }
+                    else
+                    {
+                        Widget = GetWidgetById(root_widget, widgetId);
+                    }
+
+                    Binding = tokens[i + 2].text;
+                    i += 2;
+                }
+                else
+                {
+                    Widget  = current_widget;
+                    Binding = token.text;
+                }
+
+                Function::Enum function;
+
+                if (Binding == "width")
+                {
+                    function = Function::kWidth;
+                }
+                else if (Binding == "height")
+                {
+                    function = Function::kHeight;
+                }
+                else if (Binding == "x")
+                {
+                    function = Function::kX;
+                }
+                else if (Binding == "y")
+                {
+                    function = Function::kY;
+                }
+                else if (Binding == "bottom")
+                {
+                    function = Function::kBottom;
+                }
+                else if (Binding == "top")
+                {
+                    function = Function::kTop;
+                }
+                else if (Binding == "left")
+                {
+                    function = Function::kLeft;
+                }
+                else if (Binding == "right")
+                {
+                    function = Function::kRight;
+                }
+
+                result.evaluation_queue.add(std::make_shared<FunctionNode>(function, current_widget));
+            }
+            break;
+
+            default:
+                ASSERT_UNREACHABLE();
+                break;
+        }
+    }
+
+    while (!operator_stack.empty())
+    {
+        if (operator_stack.top() == Operator::kOpenParen || operator_stack.top() == Operator::kCloseParen)
+        {
+            LOG_F(ERROR, "Imbalanced expression");
+        }
+        else
+        {
+            result.evaluation_queue.add(std::make_shared<OperatorNode>(operator_stack.top(), false));
+        }
+        operator_stack.pop();
+    }
+
+    return result;
+}
+
+f32 Expression::EvaluateFunction(FunctionNode* function)
+{
+    // clang-format off
+	switch (function->function)
 	{
-		case EFunction::X:      return Function->Widget->Pos.x;
-		case EFunction::Y:      return Function->Widget->Pos.y;
-		case EFunction::Width:  return Function->Widget->Size.x;
-		case EFunction::Height: return Function->Widget->Size.y;
+		case Function::kX:      return function->widget->pos.x;
+		case Function::kY:      return function->widget->pos.y;
+		case Function::kWidth:  return function->widget->size.x;
+		case Function::kHeight: return function->widget->size.y;
 
-		case EFunction::Left:   return Function->Widget->Pos.x;
-		case EFunction::Right:  return Function->Widget->Pos.x + Function->Widget->Size.x;
-		case EFunction::Top:    return Function->Widget->Pos.y;
-		case EFunction::Bottom: return Function->Widget->Pos.y + Function->Widget->Size.y;
+		case Function::kLeft:   return function->widget->pos.x;
+		case Function::kRight:  return function->widget->pos.x + function->widget->size.x;
+		case Function::kTop:    return function->widget->pos.y;
+		case Function::kBottom: return function->widget->pos.y + function->widget->size.y;
 	}
-	// clang-format on
+    // clang-format on
 
-	return 0.0f;
+    return 0.0f;
 }
 }

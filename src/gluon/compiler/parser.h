@@ -9,65 +9,68 @@
 #include <string>
 #include <vector>
 
-struct ZParsedApplication
+struct ParsedApplication
 {
-	std::optional<std::string> applicationName{};
+    std::optional<std::string> application_name{};
 };
 
-struct ZWidget;
+struct Widget;
 
-ZWidget* parse_gluon_buffer(const char* Buffer);
+Widget* ParseGluonBuffer(const char* buffer);
 
-namespace Parser
+namespace parser
 {
-enum class ENodeType
+struct NodeType
 {
-	Unknown,
+    enum Enum
+    {
+        kUnknown,
 
-	Structure,
-	Property,
-	ZValue,
+        kStructure,
+        kProperty,
+        kValue,
+    };
 };
 
-struct ZNode
+struct Node
 {
-	using Ptr = std::shared_ptr<ZNode>;
+    using Ptr = std::shared_ptr<Node>;
 
-	explicit ZNode(ENodeType t)
-	    : Type(t)
-	{
-	}
+    explicit Node(NodeType::Enum t)
+        : node_type(t)
+    {
+    }
 
-	ENodeType   Type;
-	std::string Name;
+    NodeType::Enum node_type;
+    std::string    name;
 
-	beard::array<ZToken> AssociatedTokens;
+    beard::array<Token> associated_tokens;
 
-	ZNode*                   Parent;
-	beard::array<ZNode::Ptr> Children;
+    Node*                   parent;
+    beard::array<Node::Ptr> children;
 };
 
-struct StructureNode : public ZNode
+struct StructureNode : public Node
 {
-	StructureNode()
-	    : ZNode(ENodeType::Structure)
-	{
-	}
+    StructureNode()
+        : Node(NodeType::kStructure)
+    {
+    }
 };
 
-struct PropertyNode : public ZNode
+struct PropertyNode : public Node
 {
-	PropertyNode()
-	    : ZNode(ENodeType::Property)
-	{
-	}
+    PropertyNode()
+        : Node(NodeType::kProperty)
+    {
+    }
 };
 
-struct ValueNode : ZNode
+struct ValueNode : Node
 {
-	ValueNode()
-	    : ZNode(ENodeType::ZValue)
-	{
-	}
+    ValueNode()
+        : Node(NodeType::kValue)
+    {
+    }
 };
 }

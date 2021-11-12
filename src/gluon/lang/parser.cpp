@@ -7,12 +7,12 @@
 #include <algorithm>
 #include <iterator>
 
-ZParser::ZParser(beard::array<ZToken> Tokens)
-    : m_Tokens(std::move(Tokens))
+Parser::Parser(beard::array<Token> tokens)
+    : m_tokens(std::move(tokens))
 {
 }
 
-std::unique_ptr<ZExpression> ZParser::Parse()
+std::unique_ptr<Expr> Parser::Parse()
 {
     /*auto Program = Make<ZBinary>(Make<ZUnary>(ZToken{.Type = ETokenType::Subtract, .Text = "-"},
                                               Make<ZLiteral>(ZValue{123})),
@@ -37,7 +37,7 @@ std::unique_ptr<ZExpression> ZParser::Parse()
 /**
  * expression -> equality ;
  */
-std::unique_ptr<ZExpression> ZParser::Expression()
+std::unique_ptr<Expr> Parser::Expression()
 {
     return nullptr;
 }
@@ -45,14 +45,14 @@ std::unique_ptr<ZExpression> ZParser::Expression()
 /**
  * equality   -> comparison ( ( "!=" | "==" ) comparison )* ;
  */
-std::unique_ptr<ZExpression> ZParser::Equality()
+std::unique_ptr<Expr> Parser::Equality()
 {
     auto Expr = Comparison();
 
-    while (Match({ETokenType::Equals, ETokenType::NotEquals}))
+    while (Match({TokenType::kEquals, TokenType::kNotEquals}))
     {
         auto Operator = ConsumedToken();
-        Expr          = Make<ZBinary>(std::move(Expr), Operator, Comparison());
+        Expr          = Make<BinaryExpr>(std::move(Expr), Operator, Comparison());
     }
 
     return Expr;
@@ -61,14 +61,14 @@ std::unique_ptr<ZExpression> ZParser::Equality()
 /**
  * comparison -> term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
  */
-std::unique_ptr<ZExpression> ZParser::Comparison()
+std::unique_ptr<Expr> Parser::Comparison()
 {
     auto Expr = Term();
 
-    while (Match({ETokenType::Greater, ETokenType::GreaterEquals, ETokenType::Less, ETokenType::LessEquals}))
+    while (Match({TokenType::kGreater, TokenType::kGreaterEquals, TokenType::kLess, TokenType::kLessEquals}))
     {
         auto Operator = ConsumedToken();
-        Expr          = Make<ZBinary>(std::move(Expr), Operator, Term());
+        Expr          = Make<BinaryExpr>(std::move(Expr), Operator, Term());
     }
 
     return Expr;
@@ -77,14 +77,14 @@ std::unique_ptr<ZExpression> ZParser::Comparison()
 /**
  * term       -> factor ( ( "-" | "+" ) factor )* ;
  */
-std::unique_ptr<ZExpression> ZParser::Term()
+std::unique_ptr<Expr> Parser::Term()
 {
     auto Expr = Factor();
 
-    while (Match({ETokenType::Add, ETokenType::Subtract}))
+    while (Match({TokenType::kAdd, TokenType::kSubtract}))
     {
         auto Operator = ConsumedToken();
-        Expr          = Make<ZBinary>(std::move(Expr), Operator, Factor());
+        Expr          = Make<BinaryExpr>(std::move(Expr), Operator, Factor());
     }
 
     return Expr;
@@ -93,14 +93,14 @@ std::unique_ptr<ZExpression> ZParser::Term()
 /**
  * factor     -> unary ( ( "/" | "*" ) unary )* ;
  */
-std::unique_ptr<ZExpression> ZParser::Factor()
+std::unique_ptr<Expr> Parser::Factor()
 {
     auto Expr = Unary();
 
-    while (Match({ETokenType::Divide, ETokenType::Multiply}))
+    while (Match({TokenType::kDivide, TokenType::kMultiply}))
     {
         auto Operator = ConsumedToken();
-        Expr          = Make<ZBinary>(std::move(Expr), Operator, Unary());
+        Expr          = Make<BinaryExpr>(std::move(Expr), Operator, Unary());
     }
     return Expr;
 }
@@ -108,12 +108,12 @@ std::unique_ptr<ZExpression> ZParser::Factor()
 /**
  * unary      -> ( "not" | "-" ) unary | primary;
  */
-std::unique_ptr<ZExpression> ZParser::Unary()
+std::unique_ptr<Expr> Parser::Unary()
 {
-    if (Match({ETokenType::Not, ETokenType::Subtract}))
+    if (Match({TokenType::kNot, TokenType::kSubtract}))
     {
         auto Operator = ConsumedToken();
-        return Make<ZUnary>(Operator, Unary());
+        return Make<UnaryExpr>(Operator, Unary());
     }
 
     return Primary();
@@ -122,33 +122,33 @@ std::unique_ptr<ZExpression> ZParser::Unary()
 /**
  * primary    -> NUMBER | STRING | "true" | "false" | "null" | "(" expression ")" ;
  */
-std::unique_ptr<ZExpression> ZParser::Primary()
+std::unique_ptr<Expr> Parser::Primary()
 {
     // clang-format off
-    if (Match({ETokenType::False}))  return Make<ZLiteral>(ZValue{false});                  // NOLINT
-    if (Match({ETokenType::True}))   return Make<ZLiteral>(ZValue{true});                   // NOLINT
-    if (Match({ETokenType::Null}))   return Make<ZLiteral>(ZValue{nullptr});                // NOLINT
-    if (Match({ETokenType::Number})) return Make<ZLiteral>(ZValue{ConsumedToken().Number}); // NOLINT
-    if (Match({ETokenType::String})) return Make<ZLiteral>(ZValue{ConsumedToken().Text});   // NOLINT
+    if (Match({TokenType::kFalse}))  return Make<LiteralExpr>(Value{false});                // NOLINT
+    if (Match({TokenType::kTrue}))   return Make<LiteralExpr>(Value{true});                 // NOLINT
+    if (Match({TokenType::kNull}))   return Make<LiteralExpr>(Value{nullptr});                    // NOLINT
+    if (Match({TokenType::kNumber})) return Make<LiteralExpr>(Value{ConsumedToken().number});     // NOLINT
+    if (Match({TokenType::kString})) return Make<LiteralExpr>(Value{ConsumedToken().text}); // NOLINT
     // clang-format on
 
-    if (Match({ETokenType::OpenParen}))
+    if (Match({TokenType::kOpenParen}))
     {
         auto Expr = Expression();
-        Consume(ETokenType::CloseParen, "Expecting ')' after expression.");
+        Consume(TokenType::kCloseParen, "Expecting ')' after expression.");
 
-        return Make<ZGrouping>(std::move(Expr));
+        return Make<GroupingExpr>(std::move(Expr));
     }
 
     ASSERT_UNREACHABLE();
     return nullptr;
 }
 
-bool ZParser::Match(std::initializer_list<ETokenType> TokenTypes)
+bool Parser::Match(std::initializer_list<TokenType::Enum> token_types)
 {
-    for (ETokenType TokenType : TokenTypes)
+    for (auto token_type : token_types)
     {
-        if (Check(TokenType))
+        if (Check(token_type))
         {
             Advance();
             return true;
@@ -158,24 +158,24 @@ bool ZParser::Match(std::initializer_list<ETokenType> TokenTypes)
     return false;
 }
 
-bool ZParser::Check(ETokenType TokenType) const
+bool Parser::Check(TokenType::Enum token_type) const
 {
-    return m_Tokens[m_CurrentToken].Type == TokenType;
+    return m_tokens[m_current_token].token_type == token_type;
 }
 
-bool ZParser::Done() const
+bool Parser::Done() const
 {
-    return m_CurrentToken >= m_Tokens.element_count();
+    return m_current_token >= m_tokens.element_count();
 }
 
-void ZParser::Advance()
+void Parser::Advance()
 {
-    m_CurrentToken += 1;
+    m_current_token += 1;
 }
 
-void ZParser::Consume(ETokenType TokenType, const char* ErrorString)
+void Parser::Consume(TokenType::Enum token_type, const char* ErrorString)
 {
-    if (Check(TokenType))
+    if (Check(token_type))
     {
         Advance();
     }
@@ -185,12 +185,12 @@ void ZParser::Consume(ETokenType TokenType, const char* ErrorString)
     }
 }
 
-ZToken ZParser::ConsumedToken() const
+Token Parser::ConsumedToken() const
 {
-    if (m_CurrentToken > 0)
+    if (m_current_token > 0)
     {
-        return m_Tokens[m_CurrentToken - 1];
+        return m_tokens[m_current_token - 1];
     }
 
-    return ZToken{};
+    return Token{};
 }

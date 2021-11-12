@@ -2,17 +2,17 @@
 
 #include <Gluon/Widgets/widget.h>
 
-struct ZRectangle : public ZWidget
+struct Rectangle : public Widget
 {
-	static ZWidget* create()
-	{
-		return new ZRectangle{};
-	}
+    static Widget* create()
+    {
+        return new Rectangle{};
+    }
 
-	glm::vec4 FillColor;
-	glm::vec4 BorderColor;
+    glm::vec4 fill_color;
+    glm::vec4 border_color;
 
 private:
-	virtual void ParserPropertyInternal(Parser::ZNode::Ptr Node, const u32 node_hash) override;
-	virtual void BuildRenderInfosInternal(beard::array<RectangleInfo>* Result) override;
+    virtual void ParserPropertyInternal(parser::Node::Ptr node, const u32 node_hash) override;
+    virtual void BuildRenderInfosInternal(beard::array<RectangleInfo>* result) override;
 };

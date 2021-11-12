@@ -2,59 +2,59 @@
 
 #include <beard/io/io.h>
 
-std::string ToString(ETokenType TokenType)
+std::string ToString(TokenType::Enum token_type)
 {
     // clang-format off
-	switch (TokenType)
+	switch (token_type)
 	{
-		case ETokenType::Unknown:        return "Unknown";
-		case ETokenType::OpenBrace:      return "OpenBrace";
-		case ETokenType::CloseBrace:     return "CloseBrace";
-		case ETokenType::OpenParen:      return "OpenParen";
-		case ETokenType::CloseParen:     return "CloseParen";
-		case ETokenType::OpenBracket:    return "OpenBracket";
-		case ETokenType::CloseBracket:   return "CloseBracket";
-		case ETokenType::Comma:          return "Comma";
-		case ETokenType::Colon:          return "Colon";
-		case ETokenType::Semicolon:      return "Semicolon";
-		case ETokenType::Dot:            return "Dot";
-		case ETokenType::Add:            return "Add";
-		case ETokenType::Subtract:       return "Subtract";
-		case ETokenType::Multiply:       return "Multiply";
-		case ETokenType::Divide:         return "Divide";
-		case ETokenType::Modulo:         return "Modulo";
-		case ETokenType::Power:          return "Power";
-		case ETokenType::If:             return "If";
-		case ETokenType::Else:           return "Else";
-		case ETokenType::While:          return "While";
-		case ETokenType::For:            return "For";
-		case ETokenType::Let:            return "Let";
-		case ETokenType::Null:           return "Null";
-		case ETokenType::True:           return "True";
-		case ETokenType::False:          return "False";
-		case ETokenType::And:            return "And";
-		case ETokenType::Or:             return "Or";
-		case ETokenType::Not:            return "Not";
-		case ETokenType::Equals:         return "Equals";
-		case ETokenType::NotEquals:      return "NotEquals";
-		case ETokenType::Greater:        return "Greater";
-		case ETokenType::GreaterEquals:  return "GreaterEquals";
-		case ETokenType::Less:           return "Less";
-		case ETokenType::LessEquals:     return "LessEquals";
-		case ETokenType::Assign:         return "Assign";
-		case ETokenType::AddAssign:      return "AddAssign";
-		case ETokenType::SubtractAssign: return "SubtractAssign";
-		case ETokenType::MultiplyAssign: return "MultiplyAssign";
-		case ETokenType::DivideAssign:   return "DivideAssign";
-		case ETokenType::ModuloAssign:   return "ModuloAssign";
-		case ETokenType::PowerAssign:    return "PowerAssign";
-		case ETokenType::Number:         return "Number";
-		case ETokenType::String:         return "String";
-		case ETokenType::Identifier:     return "Identifier";
-		case ETokenType::Comment:        return "Comment";
+		case TokenType::kUnknown:        return "Unknown";
+		case TokenType::kOpenBrace:      return "OpenBrace";
+		case TokenType::kCloseBrace:     return "CloseBrace";
+		case TokenType::kOpenParen:      return "OpenParen";
+		case TokenType::kCloseParen:     return "CloseParen";
+		case TokenType::kOpenBracket:    return "OpenBracket";
+		case TokenType::kCloseBracket:   return "CloseBracket";
+		case TokenType::kComma:          return "Comma";
+		case TokenType::kColon:          return "Colon";
+		case TokenType::kSemicolon:      return "Semicolon";
+		case TokenType::kDot:            return "Dot";
+		case TokenType::kAdd:            return "Add";
+		case TokenType::kSubtract:       return "Subtract";
+		case TokenType::kMultiply:       return "Multiply";
+		case TokenType::kDivide:         return "Divide";
+		case TokenType::kModulo:         return "Modulo";
+		case TokenType::kPower:          return "Power";
+		case TokenType::kIf:             return "If";
+		case TokenType::kElse:           return "Else";
+		case TokenType::kWhile:          return "While";
+		case TokenType::kFor:            return "For";
+		case TokenType::kLet:            return "Let";
+		case TokenType::kNull:           return "Null";
+		case TokenType::kTrue:           return "True";
+		case TokenType::kFalse:          return "False";
+		case TokenType::kAnd:            return "And";
+		case TokenType::kOr:             return "Or";
+		case TokenType::kNot:            return "Not";
+		case TokenType::kEquals:         return "Equals";
+		case TokenType::kNotEquals:      return "NotEquals";
+		case TokenType::kGreater:        return "Greater";
+		case TokenType::kGreaterEquals:  return "GreaterEquals";
+		case TokenType::kLess:           return "Less";
+		case TokenType::kLessEquals:     return "LessEquals";
+		case TokenType::kAssign:         return "Assign";
+		case TokenType::kAddAssign:      return "AddAssign";
+		case TokenType::kSubtractAssign: return "SubtractAssign";
+		case TokenType::kMultiplyAssign: return "MultiplyAssign";
+		case TokenType::kDivideAssign:   return "DivideAssign";
+		case TokenType::kModuloAssign:   return "ModuloAssign";
+		case TokenType::kPowerAssign:    return "PowerAssign";
+		case TokenType::kNumber:         return "Number";
+		case TokenType::kString:         return "String";
+		case TokenType::kIdentifier:     return "Identifier";
+		case TokenType::kComment:        return "Comment";
 		// case ETokenType::Spacing:        return "Spacing";
-		case ETokenType::EndOfLine:      return "EndOfLine";
-		case ETokenType::EndOfStream:    return "EndOfStream";
+		case TokenType::kEOL:      return "EndOfLine";
+		case TokenType::kEOF:    return "EndOfStream";
 	}
     // clang-format on
 
@@ -62,123 +62,123 @@ std::string ToString(ETokenType TokenType)
     return "";
 }
 
-inline bool IsEndOfLine(char Char)
+inline bool IsEndOfLine(char ch)
 {
-    bool bEndOfLine = (Char == '\n');
-    return bEndOfLine;
+    bool is_eol = (ch == '\n');
+    return is_eol;
 }
 
-inline bool IsSpacing(char Char)
+inline bool IsSpacing(char ch)
 {
-    bool bSpacing = (Char == ' ') || (Char == '\t') || (Char == '\v') || (Char == '\f');
-    return bSpacing;
+    bool is_spacing = (ch == ' ') || (ch == '\t') || (ch == '\v') || (ch == '\f');
+    return is_spacing;
 }
 
-inline bool IsWhitespace(char Char)
+inline bool IsWhitespace(char ch)
 {
-    bool bWhitespace = IsEndOfLine(Char) || IsSpacing(Char);
-    return bWhitespace;
+    bool is_whitespace = IsEndOfLine(ch) || IsSpacing(ch);
+    return is_whitespace;
 }
 
-inline bool IsAlpha(char Char)
+inline bool IsAlpha(char ch)
 {
-    bool bLowerCase = (Char >= 'a' && Char <= 'z');
-    bool bUpperCase = (Char >= 'A' && Char <= 'Z');
-    bool bAlpha     = bLowerCase || bUpperCase;
+    bool is_lower_case = (ch >= 'a' && ch <= 'z');
+    bool is_upper_case = (ch >= 'A' && ch <= 'Z');
+    bool is_alpha      = is_lower_case || is_upper_case;
 
-    return bAlpha;
+    return is_alpha;
 }
 
-inline bool IsNumber(char Char)
+inline bool IsNumber(char ch)
 {
-    bool bNumber = (Char >= '0' && Char <= '9');
-    return bNumber;
+    bool is_number = (ch >= '0' && ch <= '9');
+    return is_number;
 }
 
-inline bool IsValidIdentifierCharacter(char Char)
+inline bool IsValidIdentifierCharacter(char ch)
 {
-    bool bValid = IsAlpha(Char) || IsNumber(Char) || Char == '_';
-    return bValid;
+    bool is_valid = IsAlpha(ch) || IsNumber(ch) || ch == '_';
+    return is_valid;
 }
 
-ZLexer::ZLexer(const char* Filename)
-    : m_Filename{Filename}
+Lexer::Lexer(const char* filename)
+    : m_filename{filename}
 {
-    m_Buffer = beard::io::read_whole_file(Filename);
-    m_Stream = m_Buffer.c_str();
+    m_buffer = beard::io::read_whole_file(filename);
+    m_stream = m_buffer.c_str();
 }
 
-beard::array<ZToken> ZLexer::Lex()
+beard::array<Token> Lexer::Lex()
 {
-    beard::array<ZToken> Tokens;
+    beard::array<Token> tokens;
 
     for (;;)
     {
-        ZToken Token = GetNextToken();
-        Tokens.add(Token);
+        Token token = GetNextToken();
+        tokens.add(token);
 
-        if (Token.Type == ETokenType::EndOfStream)
+        if (token.token_type == TokenType::kEOF)
         {
             break;
         }
     }
 
-    return Tokens;
+    return tokens;
 }
 
-ZToken ZLexer::GetNextToken()
+Token Lexer::GetNextToken()
 {
-    ZToken Token = {
-        .Filename = m_Filename,
-        .Column   = m_Column,
-        .Line     = m_Line,
+    Token token = {
+        .filename = m_filename,
+        .column   = m_Column,
+        .line     = m_Line,
     };
 
-    const char* Start = m_Stream;
-    m_CurrentChar     = m_Stream[0];
+    const char* Start = m_stream;
+    m_current_char    = m_stream[0];
     AdvanceChars(1);
 
-    switch (m_CurrentChar)
+    switch (m_current_char)
     {
         case '\0':
-            Token.Type = ETokenType::EndOfStream;
+            token.token_type = TokenType::kEOF;
             break;
 
         case '{':
-            Token.Type = ETokenType::OpenBrace;
+            token.token_type = TokenType::kOpenBrace;
             break;
         case '}':
-            Token.Type = ETokenType::CloseBrace;
+            token.token_type = TokenType::kCloseBrace;
             break;
         case '(':
-            Token.Type = ETokenType::OpenParen;
+            token.token_type = TokenType::kOpenParen;
             break;
         case ')':
-            Token.Type = ETokenType::CloseParen;
+            token.token_type = TokenType::kCloseParen;
             break;
         case '[':
-            Token.Type = ETokenType::OpenBracket;
+            token.token_type = TokenType::kOpenBracket;
             break;
         case ']':
-            Token.Type = ETokenType::CloseBracket;
+            token.token_type = TokenType::kCloseBracket;
             break;
         case ',':
-            Token.Type = ETokenType::Comma;
+            token.token_type = TokenType::kComma;
             break;
         case ':':
-            Token.Type = ETokenType::Colon;
+            token.token_type = TokenType::kColon;
             break;
         case ';':
-            Token.Type = ETokenType::Semicolon;
+            token.token_type = TokenType::kSemicolon;
             break;
         case '.':
-            Token.Type = ETokenType::Dot;
+            token.token_type = TokenType::kDot;
             break;
 
         case '"':
         case '\'':
         case '`':
-            HandleString(&Token);
+            HandleString(&token);
             break;
 
         case ' ':
@@ -190,90 +190,90 @@ ZToken ZLexer::GetNextToken()
         case '\n':
             m_Column = 0;
             m_Line += 1;
-            Token.Type = ETokenType::EndOfLine;
+            token.token_type = TokenType::kEOL;
             break;
 
         default:
-            HandleGeneralCase(&Token);
+            HandleGeneralCase(&token);
             break;
     }
 
-    if (Token.Type == ETokenType::String)
+    if (token.token_type == TokenType::kString)
     {
         // Do not keep "" or ''
-        Token.Text = std::string(Start + 1, m_Stream - 1);
+        token.text = std::string(Start + 1, m_stream - 1);
     }
     else
     {
-        Token.Text = std::string(Start, m_Stream);
+        token.text = std::string(Start, m_stream);
     }
 
-    if (Token.Type == ETokenType::Identifier)
+    if (token.token_type == TokenType::kIdentifier)
     {
         // Maybe it is not and identifier after all...
-        if (Token.Text == "if")
+        if (token.text == "if")
         {
-            Token.Type = ETokenType::If;
+            token.token_type = TokenType::kIf;
         }
-        else if (Token.Text == "else")
+        else if (token.text == "else")
         {
-            Token.Type = ETokenType::Else;
+            token.token_type = TokenType::kElse;
         }
-        else if (Token.Text == "while")
+        else if (token.text == "while")
         {
-            Token.Type = ETokenType::While;
+            token.token_type = TokenType::kWhile;
         }
-        else if (Token.Text == "for")
+        else if (token.text == "for")
         {
-            Token.Type = ETokenType::For;
+            token.token_type = TokenType::kFor;
         }
-        else if (Token.Text == "let")
+        else if (token.text == "let")
         {
-            Token.Type = ETokenType::Let;
+            token.token_type = TokenType::kLet;
         }
-        else if (Token.Text == "null")
+        else if (token.text == "null")
         {
-            Token.Type = ETokenType::Null;
+            token.token_type = TokenType::kNull;
         }
-        else if (Token.Text == "true")
+        else if (token.text == "true")
         {
-            Token.Type = ETokenType::True;
+            token.token_type = TokenType::kTrue;
         }
-        else if (Token.Text == "false")
+        else if (token.text == "false")
         {
-            Token.Type = ETokenType::False;
+            token.token_type = TokenType::kFalse;
         }
-        else if (Token.Text == "and")
+        else if (token.text == "and")
         {
-            Token.Type = ETokenType::And;
+            token.token_type = TokenType::kAnd;
         }
-        else if (Token.Text == "or")
+        else if (token.text == "or")
         {
-            Token.Type = ETokenType::Or;
+            token.token_type = TokenType::kOr;
         }
-        else if (Token.Text == "not")
+        else if (token.text == "not")
         {
-            Token.Type = ETokenType::Not;
+            token.token_type = TokenType::kNot;
         }
     }
 
-    return Token;
+    return token;
 }
 
-void ZLexer::AdvanceChars(u32 Count)
+void Lexer::AdvanceChars(u32 count)
 {
-    m_Column += Count;
-    m_Stream += Count;
+    m_Column += count;
+    m_stream += count;
 }
 
-void ZLexer::HandleString(ZToken* Token)
+void Lexer::HandleString(Token* token)
 {
-    Token->Type = ETokenType::String;
+    token->token_type = TokenType::kString;
 
-    while (m_Stream[0] != '\0' && m_Stream[0] != m_CurrentChar)
+    while (m_stream[0] != '\0' && m_stream[0] != m_current_char)
     {
         // \' should not stop the string
-        if (m_Stream[0] == '\\' && m_Stream[1] != '\0')
+        if (m_stream[0] == '\\' && m_stream[1] != '\0')
         {
             AdvanceChars(1);
         }
@@ -282,24 +282,24 @@ void ZLexer::HandleString(ZToken* Token)
     AdvanceChars(1);
 }
 
-void ZLexer::HandleSlash(ZToken* Token)
+void Lexer::HandleSlash(Token* token)
 {
     if (NextMatches('/'))
     {
-        Token->Type = ETokenType::Comment;
+        token->token_type = TokenType::kComment;
 
-        while (!IsEOF() && !IsEndOfLine(m_Stream[0]))
+        while (!IsEOF() && !IsEndOfLine(m_stream[0]))
         {
             AdvanceChars(1);
         }
     }
     else if (NextMatches('*'))
     {
-        Token->Type = ETokenType::Comment;
+        token->token_type = TokenType::kComment;
 
-        while ((m_Stream[0] != '\0' && m_Stream[1] != '\0') && !(m_Stream[0] == '*' && m_Stream[1] == '/'))
+        while ((m_stream[0] != '\0' && m_stream[1] != '\0') && !(m_stream[0] == '*' && m_stream[1] == '/'))
         {
-            if (IsEndOfLine(m_Stream[0]))
+            if (IsEndOfLine(m_stream[0]))
             {
                 m_Line += 1;
             }
@@ -307,79 +307,79 @@ void ZLexer::HandleSlash(ZToken* Token)
             AdvanceChars(1);
         }
 
-        if (m_Stream[0] == '*')
+        if (m_stream[0] == '*')
         {
             AdvanceChars(2);
         }
     }
     else if (NextMatches('='))
     {
-        Token->Type = ETokenType::DivideAssign;
+        token->token_type = TokenType::kDivideAssign;
         AdvanceChars(1);
     }
     else
     {
-        Token->Type = ETokenType::Divide;
+        token->token_type = TokenType::kDivide;
     }
 }
 
-bool ZLexer::NextMatches(char Char)
+bool Lexer::NextMatches(char ch)
 {
-    return !IsEOF() && m_Stream[0] == Char;
+    return !IsEOF() && m_stream[0] == ch;
 }
 
-bool ZLexer::IsEOF()
+bool Lexer::IsEOF()
 {
-    return m_Stream[0] == '\0';
+    return m_stream[0] == '\0';
 }
 
-void ZLexer::HandleGeneralCase(ZToken* Token)
+void Lexer::HandleGeneralCase(Token* token)
 {
-    if (IsAlpha(m_CurrentChar) || m_CurrentChar == '_' || m_CurrentChar == '$')
+    if (IsAlpha(m_current_char) || m_current_char == '_' || m_current_char == '$')
     {
         // _ and $ are valid identifier starting characters
-        Token->Type = ETokenType::Identifier;
+        token->token_type = TokenType::kIdentifier;
 
-        while (IsEOF() && IsValidIdentifierCharacter(m_Stream[0]))
+        while (IsEOF() && IsValidIdentifierCharacter(m_stream[0]))
         {
             AdvanceChars(1);
         }
     }
-    else if (IsNumber(m_CurrentChar))
+    else if (IsNumber(m_current_char))
     {
-        Token->Type   = ETokenType::Number;
-        Token->Number = ParseNumber();
+        token->token_type = TokenType::kNumber;
+        token->number     = ParseNumber();
     }
     else
     {
-        HandleOperators(Token);
+        HandleOperators(token);
     }
 }
 
-void ZLexer::HandleOperators(ZToken* Token)
+void Lexer::HandleOperators(Token* token)
 {
-    auto WithFollowingEqual = [&Token, this](ETokenType DefaultValue, ETokenType AssignValue)
+    auto WithFollowingEqual = [&token, this](TokenType::Enum default_value, TokenType::Enum assign_value)
     {
         if (NextMatches('='))
         {
-            Token->Type = AssignValue;
+            token->token_type = assign_value;
             AdvanceChars(1);
         }
         else
         {
-            Token->Type = DefaultValue;
+            token->token_type = default_value;
         }
     };
 
-    switch (m_CurrentChar)
+    switch (m_current_char)
     {
         case '=':
-            WithFollowingEqual(ETokenType::Assign, ETokenType::Equals);
+            WithFollowingEqual(TokenType::kAssign, TokenType::kEquals);
             break;
         case '!':
             if (NextMatches('='))
             {
-                Token->Type = ETokenType::NotEquals;
+                token->token_type = TokenType::kNotEquals;
                 AdvanceChars(1);
             }
             else
@@ -388,25 +388,25 @@ void ZLexer::HandleOperators(ZToken* Token)
                 ASSERT_UNREACHABLE();
             }
         case '>':
-            WithFollowingEqual(ETokenType::Greater, ETokenType::GreaterEquals);
+            WithFollowingEqual(TokenType::kGreater, TokenType::kGreaterEquals);
             break;
         case '<':
-            WithFollowingEqual(ETokenType::Less, ETokenType::LessEquals);
+            WithFollowingEqual(TokenType::kLess, TokenType::kLessEquals);
             break;
         case '+':
-            WithFollowingEqual(ETokenType::Add, ETokenType::AddAssign);
+            WithFollowingEqual(TokenType::kAdd, TokenType::kAddAssign);
             break;
         case '-':
-            WithFollowingEqual(ETokenType::Subtract, ETokenType::SubtractAssign);
+            WithFollowingEqual(TokenType::kSubtract, TokenType::kSubtractAssign);
             break;
         case '*':
-            WithFollowingEqual(ETokenType::Multiply, ETokenType::MultiplyAssign);
+            WithFollowingEqual(TokenType::kMultiply, TokenType::kMultiplyAssign);
             break;
         case '%':
-            WithFollowingEqual(ETokenType::Modulo, ETokenType::ModuloAssign);
+            WithFollowingEqual(TokenType::kModulo, TokenType::kModuloAssign);
             break;
         case '^':
-            WithFollowingEqual(ETokenType::Power, ETokenType::PowerAssign);
+            WithFollowingEqual(TokenType::kPower, TokenType::kPowerAssign);
             break;
 
         default:
@@ -415,33 +415,33 @@ void ZLexer::HandleOperators(ZToken* Token)
     }
 }
 
-f32 ZLexer::ParseNumber()
+f32 Lexer::ParseNumber()
 {
-    f32 Value = static_cast<f32>(m_CurrentChar - '0');
+    f32 Value = static_cast<f32>(m_current_char - '0');
 
-    while (m_Stream[0] != '\0' && IsNumber(m_Stream[0]))
+    while (m_stream[0] != '\0' && IsNumber(m_stream[0]))
     {
-        f32 Digit = static_cast<f32>(m_Stream[0] - '0');
+        f32 Digit = static_cast<f32>(m_stream[0] - '0');
         Value     = 10.0f * Value + Digit;
         AdvanceChars(1);
     }
 
-    if (m_Stream[0] != '\0' && m_Stream[0] == '.')
+    if (m_stream[0] != '\0' && m_stream[0] == '.')
     {
         AdvanceChars(1);
 
         f32 Mult = 0.1f;
 
-        while (IsNumber(m_Stream[0]))
+        while (IsNumber(m_stream[0]))
         {
-            f32 Digit = static_cast<f32>(m_Stream[0] - '0');
+            f32 Digit = static_cast<f32>(m_stream[0] - '0');
             Value     = Value + Mult * Digit;
             Mult *= 0.1f;
             AdvanceChars(1);
         }
     }
 
-    if (m_Stream[0] == 'f')
+    if (m_stream[0] == 'f')
     {
         AdvanceChars(1);
     }

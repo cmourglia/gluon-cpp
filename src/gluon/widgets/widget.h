@@ -10,60 +10,60 @@
 #include <memory>
 #include <string>
 
-struct ZWidget
+struct Widget
 {
-	ZWidget() = default;
-	virtual ~ZWidget();
+    Widget() = default;
+    virtual ~Widget();
 
-	NONMOVEABLE(ZWidget);
-	NONCOPYABLE(ZWidget);
+    NONMOVEABLE(Widget);
+    NONCOPYABLE(Widget);
 
-	virtual void deserialize(Parser::ZNode::Ptr Node) final;
-	virtual void BuildRenderInfos(beard::array<RectangleInfo>* Result) final;
+    virtual void deserialize(parser::Node::Ptr node) final;
+    virtual void BuildRenderInfos(beard::array<RectangleInfo>* result) final;
 
-	virtual bool WindowResized(i32 newWidth, i32 newHeight);
-	virtual void touch() final;
+    virtual bool WindowResized(i32 new_width, i32 new_height);
+    virtual void touch() final;
 
-	beard::array<ZWidget*> Children;
-	ZWidget*               Parent = nullptr;
+    beard::array<Widget*> children;
+    Widget*               parent = nullptr;
 
-	std::string ID;
+    std::string id;
 
-	glm::vec2 Pos  = glm::vec2(0.0f);
-	glm::vec2 Size = glm::vec2(0.0f);
+    glm::vec2 pos  = glm::vec2(0.0f);
+    glm::vec2 size = glm::vec2(0.0f);
 
-	beard::string_hash_set DependencyIDs;
-	beard::hash_map<u32, beard::array<ZToken>> GeometryExpressions;
+    beard::string_hash_set                    dependency_ids;
+    beard::hash_map<u32, beard::array<Token>> geometry_expressions;
 
-	beard::array<ZWidget*> Dependencies;
-	beard::array<ZWidget*> Dependants;
-	bool                   bDirty = true;
+    beard::array<Widget*> dependencies;
+    beard::array<Widget*> dependees;
+    bool                  is_dirty = true;
 
-	beard::array<std::pair<f32*, ShuntingYard::ZExpression>> Evaluators;
+    beard::array<std::pair<f32*, shunting_yard::Expression>> evaluators;
 
-	static void Evaluate();
+    static void Evaluate();
 
 protected:
-	static beard::array<ZWidget*> s_WidgetMap;
+    static beard::array<Widget*> s_widget_map;
 
-	virtual void EvaluateInternal();
+    virtual void EvaluateInternal();
 
 private:
-	virtual void ParseProperty(Parser::ZNode::Ptr Node) final;
-	virtual void ParserPropertyInternal(Parser::ZNode::Ptr Node, u32 node_hash) = 0;
+    virtual void ParseProperty(parser::Node::Ptr node) final;
+    virtual void ParserPropertyInternal(parser::Node::Ptr node, u32 node_hash) = 0;
 
-	virtual void BuildRenderInfosInternal(beard::array<RectangleInfo>* Result) = 0;
+    virtual void BuildRenderInfosInternal(beard::array<RectangleInfo>* result) = 0;
 
-	virtual void PreEvaluate()
-	{
-	}
-	virtual void PostEvaluate()
-	{
-	}
+    virtual void PreEvaluate()
+    {
+    }
+    virtual void PostEvaluate()
+    {
+    }
 };
 
-using ZWidgetFactory = ZWidget*();
+using WidgetFactory = Widget*();
 
-ZWidget* GetWidgetByID(ZWidget* RootWidget, const std::string& Name);
-void     BuildDependencyGraph(ZWidget* RootWidget, ZWidget* current_widget);
-void     BuildExpressionEvaluators(ZWidget* RootWidget, ZWidget* current_widget);
+Widget* GetWidgetById(Widget* root_widget, const std::string& name);
+void    BuildDependencyGraph(Widget* root_widget, Widget* current_widget);
+void    BuildExpressionEvaluators(Widget* root_widget, Widget* current_widget);

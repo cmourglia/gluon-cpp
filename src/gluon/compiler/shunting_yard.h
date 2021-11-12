@@ -6,103 +6,112 @@
 
 #include <memory>
 
-struct ZWidget;
+struct Widget;
 
-namespace ShuntingYard
+namespace shunting_yard
 {
-enum class ENodeType
+struct NodeType
 {
-	Constant,
-	Operator,
-	ZFunction,
+    enum Enum
+    {
+        kConstant,
+        kOperator,
+        kFunction,
+    };
 };
 
-enum class EOperator
+struct Operator
 {
-	Add,
-	Substract,
-	Multiply,
-	Divide,
-	OpenParen,
-	CloseParen,
+    enum Enum
+    {
+        kAdd,
+        kSubstract,
+        kMultiply,
+        kDivide,
+        kOpenParen,
+        kCloseParen,
+    };
 };
 
-enum class EFunction
+struct Function
 {
-	Width,
-	Height,
-	X,
-	Y,
-	Bottom,
-	Top,
-	Left,
-	Right,
+    enum Enum
+    {
+        kWidth,
+        kHeight,
+        kX,
+        kY,
+        kBottom,
+        kTop,
+        kLeft,
+        kRight,
+    };
 };
 
-struct ZNode
+struct Node
 {
-	explicit ZNode(ENodeType Type)
-	    : Type{Type}
-	{
-	}
+    explicit Node(NodeType::Enum type)
+        : type{type}
+    {
+    }
 
-	ENodeType Type;
+    NodeType::Enum type;
 };
 
-struct ConstantNode : public ZNode
+struct ConstantNode : public Node
 {
-	explicit ConstantNode(f32 Value = 0.0f)
-	    : ZNode{ENodeType::Constant}
-	    , Constant{Value}
-	{
-	}
+    explicit ConstantNode(f32 value = 0.0f)
+        : Node{NodeType::kConstant}
+        , constant{value}
+    {
+    }
 
-	f32 Constant;
+    f32 constant;
 };
 
-struct OperatorNode : public ZNode
+struct OperatorNode : public Node
 {
-	OperatorNode(EOperator Operator, bool bUnary)
-	    : ZNode(ENodeType::Operator)
-	    , Operator{Operator}
-	    , bUnary{bUnary}
-	{
-	}
+    OperatorNode(Operator::Enum op, bool unary)
+        : Node(NodeType::kOperator)
+        , op{op}
+        , unary{unary}
+    {
+    }
 
-	EOperator Operator;
-	bool      bUnary = false;
+    Operator::Enum op;
+    bool           unary = false;
 };
 
-struct FunctionNode : public ZNode
+struct FunctionNode : public Node
 {
-	FunctionNode(EFunction Function, ZWidget* Widget)
-	    : ZNode{ENodeType::ZFunction}
-	    , Function{Function}
-	    , Widget{Widget}
-	{
-	}
+    FunctionNode(Function::Enum function, Widget* widget)
+        : Node{NodeType::kFunction}
+        , function{function}
+        , widget{widget}
+    {
+    }
 
-	EFunction Function;
-	ZWidget*  Widget;
+    Function::Enum function;
+    Widget*        widget;
 };
 
-struct ZExpression
+struct Expression
 {
-	beard::array<std::shared_ptr<ZNode>> EvaluationQueue;
+    beard::array<std::shared_ptr<Node>> evaluation_queue;
 
-	static ZExpression build(const beard::array<ZToken>& Tokens, ZWidget* RootWidget, ZWidget* CurrentWidget);
+    static Expression Build(const beard::array<Token>& tokens, Widget* root_widget, Widget* current_widget);
 
-	static ZExpression Zero()
-	{
-		ZExpression Result;
-		Result.EvaluationQueue.add(std::make_shared<ConstantNode>(0.0f));
-		return Result;
-	}
+    static Expression Zero()
+    {
+        Expression result;
+        result.evaluation_queue.add(std::make_shared<ConstantNode>(0.0f));
+        return result;
+    }
 
-	f32 Evaluate() const;
+    f32 Evaluate() const;
 
 private:
-	static f32 EvaluateOperator(OperatorNode* Operator, f32 Left, f32 Right);
-	static f32 EvaluateFunction(FunctionNode* Function);
+    static f32 EvaluateOperator(OperatorNode* op, f32 left, f32 right);
+    static f32 EvaluateFunction(FunctionNode* function);
 };
 }

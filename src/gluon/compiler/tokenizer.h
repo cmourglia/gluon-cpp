@@ -7,53 +7,56 @@
 #include <string>
 #include <vector>
 
-enum class ETokenType
+struct TokenType
 {
-	Unknown,
+    enum Enum
+    {
+        kUnknown,
 
-	OpenBrace,
-	CloseBrace,
-	OpenParen,
-	CloseParen,
-	OpenBracket,
-	CloseBracket,
-	Comma,
-	Colon,
-	Semicolon,
-	Dot,
+        kOpenBrace,
+        kCloseBrace,
+        kOpenParen,
+        kCloseParen,
+        kOpenBracket,
+        kCloseBracket,
+        kComma,
+        kColon,
+        kSemicolon,
+        kDot,
 
-	Plus,
-	Minus,
-	Asterisk,
-	Slash,
+        kPlus,
+        kMinus,
+        kAsterisk,
+        kSlash,
 
-	Number,
-	String,
-	ZIdentifier,
+        kNumber,
+        kString,
+        kIdentifier,
 
-	Spacing,
-	EndOfLine,
-	Comment,
+        kSpacing,
+        kEOL,
+        kComment,
 
-	EndOfStream,
+        kEOF,
+    };
 };
 
-struct ZToken
+struct Token
 {
-	std::string Filename;
-	u32         Column, Line;
+    std::string filename;
+    u32         column, line;
 
-	ETokenType  Type;
-	std::string Text;
-	f32         Number;
+    TokenType::Enum token_type;
+    std::string     text;
+    f32             number;
 };
 
-struct ZTokenizer
+struct Tokenizer
 {
-	std::string Filename;
-	u32         Column, Line;
+    std::string filename;
+    u32         column, line;
 
-	const char* Stream;
+    const char* stream;
 };
 
-beard::array<ZToken> Tokenize(const char* Buffer);
+beard::array<Token> Tokenize(const char* buffer);

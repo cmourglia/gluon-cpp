@@ -1,6 +1,6 @@
 #include <gluon/lang/ast_printer.h>
 
-void ZASTPrinter::PrintAST(ZExpression& Root)
+void AstPrinter::PrintAST(Expr& Root)
 {
     Root.Accept(*this);
 
@@ -9,88 +9,88 @@ void ZASTPrinter::PrintAST(ZExpression& Root)
     test -= 42;
     printf("%d\n", test);
 
-    printf("Produced AST:\n%s\n", m_String.c_str());
+    printf("Produced AST:\n%s\n", m_string.c_str());
 }
 
-ZValue ZASTPrinter::VisitBinary(ZBinary& Binary)
+Value AstPrinter::VisitBinary(BinaryExpr& binary)
 {
     AddIndentation();
-    m_String += "Binary\n";
+    m_string += "Binary\n";
     {
-        m_Indentation += 1;
+        m_indentation += 1;
         AddIndentation();
-        m_String += "Left:\n";
+        m_string += "Left:\n";
         {
-            m_Indentation += 1;
-            Binary.Left()->Accept(*this);
-            m_Indentation -= 1;
+            m_indentation += 1;
+            binary.left()->Accept(*this);
+            m_indentation -= 1;
         }
 
         AddIndentation();
-        m_String += ("Right:\n");
+        m_string += ("Right:\n");
         {
-            m_Indentation += 1;
-            Binary.Right()->Accept(*this);
-            m_Indentation -= 1;
+            m_indentation += 1;
+            binary.right()->Accept(*this);
+            m_indentation -= 1;
         }
 
         AddIndentation();
-        m_String += "Operator: " + Binary.Operator().Text + "\n";
-        m_Indentation -= 1;
+        m_string += "op: " + binary.op().text + "\n";
+        m_indentation -= 1;
     }
 
-    return ZValue::Undefined;
+    return Value::Undefined;
 }
 
-ZValue ZASTPrinter::VisitGrouping(ZGrouping& Grouping)
+Value AstPrinter::VisitGrouping(GroupingExpr& grouping)
 {
     AddIndentation();
-    m_String += ("Group:\n");
-    m_Indentation += 1;
-    Grouping.Expression()->Accept(*this);
-    m_Indentation -= 1;
+    m_string += ("Group:\n");
+    m_indentation += 1;
+    grouping.expr()->Accept(*this);
+    m_indentation -= 1;
 
-    return ZValue::Undefined;
+    return Value::Undefined;
 }
 
-ZValue ZASTPrinter::VisitLiteral(ZLiteral& Literal)
+Value AstPrinter::VisitLiteral(LiteralExpr& literal)
 {
-    ZValue Value = Literal.Value();
+    Value Value = literal.value();
 
     AddIndentation();
-    m_String += "Literal: " + Value.ToString() + "\n";
+    m_string += "Literal: " + Value.ToString() + "\n";
 
-    return ZValue::Undefined;
+    return Value::Undefined;
 }
 
-ZValue ZASTPrinter::VisitUnary(ZUnary& Unary)
+Value AstPrinter::VisitUnary(UnaryExpr& unary)
 {
     AddIndentation();
-    m_String += ("Binary\n");
+    m_string += ("Binary\n");
     {
-        m_Indentation += 1;
+        m_indentation += 1;
         AddIndentation();
-        m_String += ("Right:\n");
+        m_string += ("Right:\n");
         {
-            m_Indentation += 1;
-            Unary.Right()->Accept(*this);
-            m_Indentation -= 1;
+            m_indentation += 1;
+            unary.right()->Accept(*this);
+            m_indentation -= 1;
         }
 
         AddIndentation();
-        m_String += "Operator: " + Unary.Operator().Text + "\n";
+        m_string += "op: " + unary.op().text + "\n";
 
-        m_Indentation -= 1;
+        m_indentation -= 1;
     }
 
-    return ZValue::Undefined;
+    return Value::Undefined;
 }
 
-void ZASTPrinter::AddIndentation()
+void AstPrinter::AddIndentation()
 {
     constexpr i32 INDENT_SIZE = 2;
-    for (int i = 0; i < m_Indentation * INDENT_SIZE; ++i)
+    for (int i = 0; i < m_indentation * INDENT_SIZE; ++i)
     {
-        m_String += " ";
+        m_string += " ";
     }
 }

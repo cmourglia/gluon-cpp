@@ -7,36 +7,36 @@
 
 #include <string>
 
-class ZLexer
+class Lexer
 {
 public:
-    NONCOPYABLE(ZLexer);
-    NONMOVEABLE(ZLexer);
+    NONCOPYABLE(Lexer);
+    NONMOVEABLE(Lexer);
 
-    ZLexer() = delete;
-    explicit ZLexer(const char* Filename);
+    Lexer() = delete;
+    explicit Lexer(const char* filename);
 
-    beard::array<ZToken> Lex();
+    beard::array<Token> Lex();
 
 private:
-    ZToken GetNextToken();
+    Token GetNextToken();
 
-    void AdvanceChars(u32 Count);
-    void HandleString(ZToken* Token);
-    void HandleSlash(ZToken* Token);
-    void HandleGeneralCase(ZToken* Token);
-    void HandleOperators(ZToken* Token);
+    void AdvanceChars(u32 count);
+    void HandleString(Token* token);
+    void HandleSlash(Token* token);
+    void HandleGeneralCase(Token* token);
+    void HandleOperators(Token* default_value);
 
     bool IsEOF();
-    bool NextMatches(char Char);
+    bool NextMatches(char ch);
 
     f32 ParseNumber();
 
-    std::string m_Filename;
+    std::string m_filename;
     u32         m_Column = 0;
     u32         m_Line   = 0;
 
-    std::string m_Buffer;
-    const char* m_Stream      = nullptr;
-    char        m_CurrentChar = '\0';
+    std::string m_buffer;
+    const char* m_stream       = nullptr;
+    char        m_current_char = '\0';
 };
