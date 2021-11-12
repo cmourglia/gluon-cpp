@@ -1,6 +1,8 @@
-.vscode
-.vs
-build
+.vscode/**
+out/**
+.vs/**
+.ccls-cache/**
+build/**
 *.spv
 *.dis
 shaders/bin
