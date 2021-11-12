@@ -1,15 +1,15 @@
 [submodule "loguru"]
 	path = thirdparty/loguru
 	url = https://github.com/emilk/loguru.git
-[submodule "thirdparty/json"]
-	path = thirdparty/json
-	url = https://github.com/nlohmann/json.git
-[submodule "thirdparty/raylib"]
-	path = thirdparty/raylib
-	url = https://github.com/raysan5/raylib
 [submodule "thirdparty/nanovg"]
 	path = thirdparty/nanovg
 	url = https://github.com/inniyah/nanovg.git
 [submodule "thirdparty/BeardLibrary"]
 	path = thirdparty/BeardLibrary
 	url = https://github.com/cmourglia/BeardLibrary.git
+[submodule "thirdparty/SDL"]
+	path = thirdparty/SDL
+	url = https://github.com/libsdl-org/SDL
+[submodule "thirdparty/SDL_image"]
+	path = thirdparty/SDL_image
+	url = https://github.com/libsdl-org/SDL_image
