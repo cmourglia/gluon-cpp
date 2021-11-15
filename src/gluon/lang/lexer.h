@@ -3,10 +3,13 @@
 #include <gluon/lang/token.h>
 
 #include <beard/containers/array.h>
+#include <beard/containers/hash_map.h>
 #include <beard/core/macros.h>
 
 #include <string>
 
+namespace lexer
+{
 class Lexer
 {
 public:
@@ -19,24 +22,34 @@ public:
     beard::array<Token> Lex();
 
 private:
-    Token GetNextToken();
+    void ReadNextToken();
+    void AddToken(TokenType::Enum token_type, beard::optional<Value> value = beard::optional<Value>{});
 
-    void AdvanceChars(u32 count);
-    void HandleString(Token* token);
-    void HandleSlash(Token* token);
-    void HandleGeneralCase(Token* token);
-    void HandleOperators(Token* default_value);
+    void HandleMultilineComment();
+    void HandleString();
+    void HandleNumber();
+    void HandleIdentifier();
 
-    bool IsEOF();
-    bool NextMatches(char ch);
+    bool Done();
+    u32  Advance();
+    u32  Peek();
+    u32  PeekNext();
+    u32  Previous();
+    bool MatchChar(u32 ch);
 
     f32 ParseNumber();
 
     std::string m_filename;
-    u32         m_Column = 0;
-    u32         m_Line   = 0;
+    u32         m_column = 0;
+    u32         m_line   = 0;
 
-    std::string m_buffer;
-    const char* m_stream       = nullptr;
-    char        m_current_char = '\0';
+    std::u32string m_source;
+    usize          m_current;
+    usize          m_start;
+
+    beard::array<Token>               m_tokens;
+    beard::string_hash_map<TokenType> m_keywords;
 };
+
+beard::array<Token> Lex(const char* filename);
+}

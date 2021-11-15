@@ -2,6 +2,11 @@
 
 #include <beard/io/io.h>
 
+#include <algorithm>
+#include <codecvt>
+
+namespace lexer
+{
 std::string ToString(TokenType::Enum token_type)
 {
     // clang-format off
@@ -104,41 +109,49 @@ inline bool IsValidIdentifierCharacter(char ch)
 Lexer::Lexer(const char* filename)
     : m_filename{filename}
 {
-    m_buffer = beard::io::read_whole_file(filename);
-    m_stream = m_buffer.c_str();
+    auto buffer = beard::io::read_whole_file(filename);
+    m_source = beard::io::to_utf8(buffer);
+
+    m_keywords = {};
 }
 
 beard::array<Token> Lexer::Lex()
 {
-    beard::array<Token> tokens;
+    m_tokens.clear();
 
-    for (;;)
+    m_current = 0;
+
+    while (!Done())
     {
-        Token token = GetNextToken();
-        tokens.add(token);
-
-        if (token.token_type == TokenType::kEOF)
-        {
-            break;
-        }
+        m_start = m_current;
+        ReadNextToken();
     }
 
-    return tokens;
+    return m_tokens;
 }
 
-Token Lexer::GetNextToken()
+void Lexer::AddToken(TokenType::Enum token_type, beard::optional<Value> value)
+{
+    Token token = {
+        .filename   = m_filename,
+        .column     = m_column,
+        .line       = m_line,
+        .token_type = token_type,
+        .value      = value,
+    };
+}
+
+void Lexer::ReadNextToken()
 {
     Token token = {
         .filename = m_filename,
-        .column   = m_Column,
-        .line     = m_Line,
+        .column   = m_column,
+        .line     = m_line,
     };
 
-    const char* Start = m_stream;
-    m_current_char    = m_stream[0];
-    AdvanceChars(1);
+    u32 ch = Advance();
 
-    switch (m_current_char)
+    switch (ch)
     {
         case '\0':
             token.token_type = TokenType::kEOF;
@@ -188,10 +201,33 @@ Token Lexer::GetNextToken()
             break;
 
         case '\n':
-            m_Column = 0;
-            m_Line += 1;
+            m_column = 0;
+            m_line += 1;
             token.token_type = TokenType::kEOL;
             break;
+
+        case '/':
+        {
+            if (MatchChar('/'))
+            {
+                while (!Done() && Peek() != '\n')
+                {
+                    Advance();
+                }
+            }
+            else if (MatchChar('*'))
+            {
+                HandleMultilineComment();
+            }
+            // else if (MatchChar('='))
+            // {
+            //    AddToken(TokenType::SlashEqual)
+            // }
+            else
+            {
+                Addtoken(TokenType::kSlash);
+            }
+        }
 
         default:
             HandleGeneralCase(&token);
@@ -260,12 +296,6 @@ Token Lexer::GetNextToken()
     return token;
 }
 
-void Lexer::AdvanceChars(u32 count)
-{
-    m_Column += count;
-    m_stream += count;
-}
-
 void Lexer::HandleString(Token* token)
 {
     token->token_type = TokenType::kString;
@@ -301,7 +331,7 @@ void Lexer::HandleSlash(Token* token)
         {
             if (IsEndOfLine(m_stream[0]))
             {
-                m_Line += 1;
+                m_line += 1;
             }
 
             AdvanceChars(1);
@@ -447,4 +477,54 @@ f32 Lexer::ParseNumber()
     }
 
     return Value;
+}
+
+bool Lexer::Done()
+{
+    return m_current >= m_source.size();
+}
+
+u32 Lexer::Advance()
+{
+    m_column += 1;
+    m_current += 1;
+
+    return m_source[m_current - 1];
+}
+
+u32 Lexer::Peek()
+{
+    if (Done())
+    {
+        return '\0';
+    }
+
+    return m_source[m_current];
+}
+
+u32 Lexer::PeekNext()
+{
+    if (m_current + 1 >= m_source.size())
+    {
+        return '\0';
+    }
+
+    return m_source[m_current + 1];
+}
+
+u32 Lexer::Previous()
+{
+    return m_source[m_current - 1];
+}
+
+bool Lexer::MatchChar(u32 ch)
+{
+    return false;
+}
+
+beard::array<Token> Lex(const char* filename)
+{
+    Lexer lexer{filename};
+    return lexer.Lex();
+}
 }

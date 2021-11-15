@@ -7,12 +7,14 @@
 #include <algorithm>
 #include <iterator>
 
+namespace parser
+{
 Parser::Parser(beard::array<Token> tokens)
     : m_tokens(std::move(tokens))
 {
 }
 
-std::unique_ptr<Expr> Parser::Parse()
+ExprPtr Parser::Parse()
 {
     /*auto Program = Make<ZBinary>(Make<ZUnary>(ZToken{.Type = ETokenType::Subtract, .Text = "-"},
                                               Make<ZLiteral>(ZValue{123})),
@@ -25,7 +27,8 @@ std::unique_ptr<Expr> Parser::Parse()
 }
 
 /**
- * expression -> equality ;
+ * expression -> assignment ;
+ * assignment -> IDENTIFIER "=" assignment | equality ;
  * equality   -> comparison ( ( "!=" | "==" ) comparison )* ;
  * comparison -> term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
  * term       -> factor ( ( "-" | "+" ) factor )* ;
@@ -35,85 +38,106 @@ std::unique_ptr<Expr> Parser::Parse()
  */
 
 /**
- * expression -> equality ;
+ * expression -> assignment ;
  */
-std::unique_ptr<Expr> Parser::Expression()
+ExprPtr Parser::Expression()
 {
-    return nullptr;
+    return Assignment();
+}
+
+/**
+ * assignment -> IDENTIFIER "=" assigment | equality ;
+ */
+ExprPtr Parser::Assignment()
+{
+    auto expr = Equality();
+
+    if (Match(TokenType::kAssign))
+    {
+        auto value = Assignment();
+        if (expr->type() != ExprType::kVariable)
+        {
+            throw std::exception("Expression is not an l-value");
+        }
+
+        return Make<AssignExpr>(std::move(expr), std::move(value));
+    }
+
+    return expr;
 }
 
 /**
  * equality   -> comparison ( ( "!=" | "==" ) comparison )* ;
  */
-std::unique_ptr<Expr> Parser::Equality()
+ExprPtr Parser::Equality()
 {
-    auto Expr = Comparison();
+    auto expr = Comparison();
 
     while (Match({TokenType::kEquals, TokenType::kNotEquals}))
     {
-        auto Operator = ConsumedToken();
-        Expr          = Make<BinaryExpr>(std::move(Expr), Operator, Comparison());
+        auto op = ConsumedToken();
+        expr    = Make<BinaryExpr>(std::move(expr), op, Comparison());
     }
 
-    return Expr;
+    return expr;
 }
 
 /**
  * comparison -> term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
  */
-std::unique_ptr<Expr> Parser::Comparison()
+ExprPtr Parser::Comparison()
 {
-    auto Expr = Term();
+    auto expr = Term();
 
     while (Match({TokenType::kGreater, TokenType::kGreaterEquals, TokenType::kLess, TokenType::kLessEquals}))
     {
-        auto Operator = ConsumedToken();
-        Expr          = Make<BinaryExpr>(std::move(Expr), Operator, Term());
+        auto op = ConsumedToken();
+        expr    = Make<BinaryExpr>(std::move(expr), op, Term());
     }
 
-    return Expr;
+    return expr;
 }
 
 /**
  * term       -> factor ( ( "-" | "+" ) factor )* ;
  */
-std::unique_ptr<Expr> Parser::Term()
+ExprPtr Parser::Term()
 {
-    auto Expr = Factor();
+    auto expr = Factor();
 
     while (Match({TokenType::kAdd, TokenType::kSubtract}))
     {
-        auto Operator = ConsumedToken();
-        Expr          = Make<BinaryExpr>(std::move(Expr), Operator, Factor());
+        auto op = ConsumedToken();
+        expr    = Make<BinaryExpr>(std::move(expr), op, Factor());
     }
 
-    return Expr;
+    return expr;
 }
 
 /**
  * factor     -> unary ( ( "/" | "*" ) unary )* ;
  */
-std::unique_ptr<Expr> Parser::Factor()
+ExprPtr Parser::Factor()
 {
-    auto Expr = Unary();
+    auto expr = Unary();
 
     while (Match({TokenType::kDivide, TokenType::kMultiply}))
     {
-        auto Operator = ConsumedToken();
-        Expr          = Make<BinaryExpr>(std::move(Expr), Operator, Unary());
+        auto op = ConsumedToken();
+        expr    = Make<BinaryExpr>(std::move(expr), op, Unary());
     }
-    return Expr;
+    return expr;
 }
 
 /**
  * unary      -> ( "not" | "-" ) unary | primary;
  */
-std::unique_ptr<Expr> Parser::Unary()
+ExprPtr Parser::Unary()
 {
     if (Match({TokenType::kNot, TokenType::kSubtract}))
     {
-        auto Operator = ConsumedToken();
-        return Make<UnaryExpr>(Operator, Unary());
+        auto op = ConsumedToken();
+        return Make<UnaryExpr>(op, Unary());
     }
 
     return Primary();
@@ -122,26 +146,31 @@ std::unique_ptr<Expr> Parser::Unary()
 /**
  * primary    -> NUMBER | STRING | "true" | "false" | "null" | "(" expression ")" ;
  */
-std::unique_ptr<Expr> Parser::Primary()
+ExprPtr Parser::Primary()
 {
     // clang-format off
-    if (Match({TokenType::kFalse}))  return Make<LiteralExpr>(Value{false});                // NOLINT
-    if (Match({TokenType::kTrue}))   return Make<LiteralExpr>(Value{true});                 // NOLINT
-    if (Match({TokenType::kNull}))   return Make<LiteralExpr>(Value{nullptr});                    // NOLINT
-    if (Match({TokenType::kNumber})) return Make<LiteralExpr>(Value{ConsumedToken().number});     // NOLINT
-    if (Match({TokenType::kString})) return Make<LiteralExpr>(Value{ConsumedToken().text}); // NOLINT
+    if (Match(TokenType::kFalse))  return Make<LiteralExpr>(Value{false});                // NOLINT
+    if (Match(TokenType::kTrue))   return Make<LiteralExpr>(Value{true});                 // NOLINT
+    if (Match(TokenType::kNull))   return Make<LiteralExpr>(Value{nullptr});                    // NOLINT
+    if (Match(TokenType::kNumber)) return Make<LiteralExpr>(Value{ConsumedToken().value.value().AsNumber()});     // NOLINT
+    if (Match(TokenType::kString)) return Make<LiteralExpr>(Value{ConsumedToken().lexeme}); // NOLINT
     // clang-format on
 
-    if (Match({TokenType::kOpenParen}))
+    if (Match(TokenType::kOpenParen))
     {
-        auto Expr = Expression();
+        auto expr = Expression();
         Consume(TokenType::kCloseParen, "Expecting ')' after expression.");
 
-        return Make<GroupingExpr>(std::move(Expr));
+        return Make<GroupingExpr>(std::move(expr));
     }
 
     ASSERT_UNREACHABLE();
     return nullptr;
+}
+
+bool Parser::Match(TokenType::Enum token_type)
+{
+    return Match({token_type});
 }
 
 bool Parser::Match(std::initializer_list<TokenType::Enum> token_types)
@@ -193,4 +222,11 @@ Token Parser::ConsumedToken() const
     }
 
     return Token{};
+}
+
+ExprPtr Parse(beard::array<Token> tokens)
+{
+    Parser parser{tokens};
+    return parser.Parse();
+}
 }

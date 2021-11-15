@@ -2,18 +2,22 @@
 
 #include <beard/core/macros.h>
 
+#include <iostream>
 #include <string>
 
 class Object;
 
-enum class EValueType
+struct ValueType
 {
-    Undefined,
-    Null,
-    Boolean,
-    Number,
-    String,
-    ZObject,
+    enum Enum
+    {
+        kUndefined,
+        kNull,
+        kBoolean,
+        kNumber,
+        kString,
+        kObject,
+    };
 };
 
 struct ZString
@@ -28,41 +32,41 @@ public:
     Value() = default;
 
     explicit Value(std::nullptr_t)
-        : m_ValueType{EValueType::Null}
+        : m_ValueType{ValueType::kNull}
         , m_Data{}
     {
     }
 
     explicit Value(f64 Value)
-        : m_ValueType{EValueType::Number}
+        : m_ValueType{ValueType::kNumber}
         , m_Data{}
     {
         m_Data.AsNumber = Value;
     }
 
     explicit Value(i32 Value)
-        : m_ValueType{EValueType::Number}
+        : m_ValueType{ValueType::kNumber}
         , m_Data{}
     {
         m_Data.AsNumber = Value;
     }
 
     explicit Value(bool Value)
-        : m_ValueType{EValueType::Boolean}
+        : m_ValueType{ValueType::kBoolean}
         , m_Data{}
     {
         m_Data.AsBoolean = Value;
     }
 
     explicit Value(Object* Object)
-        : m_ValueType{EValueType::ZObject}
+        : m_ValueType{ValueType::kObject}
         , m_Data{}
     {
         m_Data.AsObject = Object;
     }
 
     explicit Value(std::string String)
-        : m_ValueType{EValueType::String}
+        : m_ValueType{ValueType::kString}
         , m_Data{}
     {
         // FIXME: This will just leak for now
@@ -72,12 +76,12 @@ public:
     }
 
     // clang-format off
-	bool IsUndefined() const { return m_ValueType == EValueType::Undefined; }
-	bool IsNull()      const { return m_ValueType == EValueType::Null; }
-	bool IsBoolean()   const { return m_ValueType == EValueType::Boolean; }
-	bool IsNumber()    const { return m_ValueType == EValueType::Number; }
-	bool IsString()    const { return m_ValueType == EValueType::String; }
-	bool IsObject()    const { return m_ValueType == EValueType::ZObject; }
+	bool IsUndefined() const { return m_ValueType == ValueType::kUndefined; }
+	bool IsNull()      const { return m_ValueType == ValueType::kNull; }
+	bool IsBoolean()   const { return m_ValueType == ValueType::kBoolean; }
+	bool IsNumber()    const { return m_ValueType == ValueType::kNumber; }
+	bool IsString()    const { return m_ValueType == ValueType::kString; }
+	bool IsObject()    const { return m_ValueType == ValueType::kObject; }
     // clang-format on
 
     // clang-format off
@@ -90,10 +94,7 @@ public:
         return std::string{m_Data.AsString.String, m_Data.AsString.String + m_Data.AsString.Length};
     }
 
-    EValueType Type() const
-    {
-        return m_ValueType;
-    }
+    ValueType::Enum type() const { return m_ValueType; }
 
     std::string ToString() const;
 
@@ -101,7 +102,7 @@ public:
     static const Value Null;
 
 private:
-    EValueType m_ValueType = EValueType::Undefined;
+    ValueType::Enum m_ValueType = ValueType::kUndefined;
 
     union
     {
@@ -114,3 +115,5 @@ private:
 
 bool operator==(const Value& lhs, const Value& rhs);
 bool operator!=(const Value& lhs, const Value& rhs);
+
+std::ostream& operator<<(std::ostream& stream, const Value& value);

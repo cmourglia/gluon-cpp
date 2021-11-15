@@ -1,6 +1,9 @@
 #pragma once
 
+#include <gluon/lang/value.h>
+
 #include <beard/core/macros.h>
+#include <beard/misc/optional.h>
 
 #include <string>
 
@@ -77,7 +80,7 @@ struct Token
     std::string filename;
     u32         column, line;
 
-    TokenType::Enum token_type;
-    std::string     text;
-    f32             number;
+    TokenType::Enum        token_type;
+    std::u32string         lexeme;
+    beard::optional<Value> value;
 };

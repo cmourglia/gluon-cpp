@@ -9,24 +9,23 @@ std::string Value::ToString() const
 {
     switch (m_ValueType)
     {
-        case EValueType::Undefined:
-            return "ZValue (Type <Undefined>): undefined";
+        case ValueType::kUndefined:
+            return "Value (Type <Undefined>): undefined";
 
-        case EValueType::Null:
-            return "ZValue (Type <Null>): null";
+        case ValueType::kNull:
+            return "Value (Type <Null>): null";
 
-        case EValueType::Boolean:
-            return std::string("ZValue (Type <Boolean>): ") + (m_Data.AsBoolean ? "true" : "false");
+        case ValueType::kBoolean:
+            return std::string("Value (Type <Boolean>): ") + (m_Data.AsBoolean ? "true" : "false");
 
-        case EValueType::Number:
-            return std::string("ZValue (Type <Number>): ") + std::to_string(m_Data.AsNumber);
+        case ValueType::kNumber:
+            return std::string("Value (Type <Number>): ") + std::to_string(m_Data.AsNumber);
 
-        case EValueType::String:
-            return std::string("ZValue (Type <String>): ") +
-                   std::string(m_Data.AsString.String, m_Data.AsString.Length);
+        case ValueType::kString:
+            return std::string("Value (Type <String>): ") + std::string(m_Data.AsString.String, m_Data.AsString.Length);
 
-        case EValueType::ZObject:
-            return std::string("ZValue (Type <ZObject>): TODO");
+        case ValueType::kObject:
+            return std::string("Value (Type <ZObject>): TODO");
     }
 
     ASSERT_UNREACHABLE();
@@ -35,8 +34,8 @@ std::string Value::ToString() const
 
 bool operator==(const Value& lhs, const Value& rhs)
 {
-    auto lhs_type = lhs.Type();
-    auto rhs_type = rhs.Type();
+    auto lhs_type = lhs.type();
+    auto rhs_type = rhs.type();
 
     if (lhs_type != rhs_type)
     {
@@ -45,20 +44,20 @@ bool operator==(const Value& lhs, const Value& rhs)
 
     switch (lhs_type)
     {
-        case EValueType::Undefined:
-        case EValueType::Null:
+        case ValueType::kUndefined:
+        case ValueType::kNull:
             return true;
 
-        case EValueType::Boolean:
+        case ValueType::kBoolean:
             return lhs.AsBoolean() == rhs.AsBoolean();
 
-        case EValueType::Number:
+        case ValueType::kNumber:
             return lhs.AsNumber() == rhs.AsNumber();
 
-        case EValueType::ZObject:
+        case ValueType::kObject:
             return lhs.AsObject() == rhs.AsObject();
 
-        case EValueType::String:
+        case ValueType::kString:
             return lhs.AsString() == rhs.AsString();
     }
 
@@ -68,4 +67,9 @@ bool operator==(const Value& lhs, const Value& rhs)
 bool operator!=(const Value& lhs, const Value& rhs)
 {
     return !(lhs == rhs);
+}
+
+std::ostream& operator<<(std::ostream& stream, const Value& value)
+{
+    return stream << value.ToString();
 }

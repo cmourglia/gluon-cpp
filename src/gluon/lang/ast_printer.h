@@ -14,9 +14,18 @@ private:
     Value VisitGrouping(GroupingExpr& grouping) override;
     Value VisitLiteral(LiteralExpr& literal) override;
     Value VisitUnary(UnaryExpr& unary) override;
+    Value VisitVariable(VariableExpr& expr) override;
+    Value VisitAssign(AssignExpr& expr) override;
+
+    void VisitExpr(ExprStmt& expr) override;
+    void VisitPrint(PrintStmt& expr) override;
+    void VisitVarDecl(VarDeclStmt& expr) override;
+    void VisitBlock(BlockStmt& block) override;
+    void VisitIf(IfStmt& stmt) override;
+    void VisitWhile(WhileStmt& stmt) override;
 
     void AddIndentation();
 
-    std::string m_string;
-    i32         m_indentation = 0;
+    std::u32string m_string;
+    i32            m_indentation = 0;
 };

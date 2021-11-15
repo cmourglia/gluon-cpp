@@ -3,9 +3,12 @@
 #include <gluon/lang/ast.h>
 #include <gluon/lang/object.h>
 
+#include <iostream>
+
 Interpreter::Interpreter()
+    : m_scope_stack{this}
 {
-    m_heap          = std::make_unique<Heap>(this);
+    m_heap          = Make<Heap>(this);
     m_global_object = m_heap->Allocate<Object>();
 }
 
@@ -15,57 +18,125 @@ Interpreter::~Interpreter()
     m_heap->Garbage();
 }
 
-Value Interpreter::Run(ScopeNode* node)
+void Interpreter::Run(ExprPtr expr)
 {
-    PushScope(node);
+    m_scope_stack.PushScope();
 
-    Value last_value = Value::Undefined;
+    Value last_value = expr->Accept(*this);
 
-    // for (const auto& c : Node->Children())
-    //{
-    //	last_value = c->Execute(this);
-    //}
+    m_scope_stack.PopScope();
 
-    PopScope(node);
-
-    return last_value;
+    std::cout << last_value << std::endl;
 }
 
-void Interpreter::PushScope(ScopeNode* node)
+void Interpreter::VisitExpr(ExprStmt& expr)
 {
-    m_stack.add({.node = node});
+    UNUSED(expr);
+    TODO;
+}
+void Interpreter::VisitPrint(PrintStmt& print)
+{
+    UNUSED(print);
+    TODO;
+}
+void Interpreter::VisitVarDecl(VarDeclStmt& var_decl)
+{
+    UNUSED(var_decl);
+    TODO;
+}
+void Interpreter::VisitBlock(BlockStmt& block)
+{
+    UNUSED(block);
+    TODO;
+}
+void Interpreter::VisitIf(IfStmt& if_stmt)
+{
+    UNUSED(if_stmt);
+    TODO;
+}
+void Interpreter::VisitWhile(WhileStmt& while_stmt)
+{
+    UNUSED(while_stmt);
+    TODO;
 }
 
-void Interpreter::PopScope(ScopeNode* node)
+Value Interpreter::VisitBinary(BinaryExpr& binary)
 {
-    // FIXME: Check this
-    ASSERT(m_stack.last().node == node, "Stack mismatch");
+    UNUSED(binary);
+    TODO;
+}
 
+Value Interpreter::VisitGrouping(GroupingExpr& grouping)
+{
+    UNUSED(grouping);
+    TODO;
+}
+
+Value Interpreter::VisitLiteral(LiteralExpr& literal)
+{
+    UNUSED(literal);
+    TODO;
+}
+
+Value Interpreter::VisitUnary(UnaryExpr& unary)
+{
+    UNUSED(unary);
+    TODO;
+}
+
+Value Interpreter::VisitVariable(VariableExpr& variable)
+{
+    UNUSED(variable);
+    TODO;
+}
+
+Value Interpreter::VisitAssign(AssignExpr& assign)
+{
+    UNUSED(assign);
+    TODO;
+}
+
+ScopeStack::ScopeStack(Interpreter* interpreter)
+    : m_interpreter{interpreter}
+{
+}
+
+void ScopeStack::PushScope()
+{
+    m_stack.add({});
+}
+
+void ScopeStack::PopScope()
+{
     m_stack.pop_and_discard();
 }
 
-void Interpreter::DeclareVariable(const char* name)
+// FIXME: Not sure about this.
+void ScopeStack::DeclareVariable(const char* name)
 {
     ScopeFrame& frame     = m_stack.last();
     frame.variables[name] = Value::Null;
 }
 
-void Interpreter::SetVariable(const char* name, Value value)
+void ScopeStack::SetVariable(const char* name, Value value)
 {
     for (i32 i = m_stack.element_count() - 1; i >= 0; --i)
     {
         ScopeFrame& frame = m_stack[i];
         if (auto it = frame.variables.find(name); it != frame.variables.end())
         {
+            if (it->second.type() != ValueType::kNull && value.type() != it->second.type())
+            {
+                throw std::exception("Cannot mutate variable types");
+            }
+
             it->second = value;
             return;
         }
     }
-
-    m_global_object->Add(name, value);
 }
 
-Value Interpreter::GetVariable(const char* name)
+Value ScopeStack::GetVariable(const char* name)
 {
     for (i32 i = m_stack.element_count() - 1; i >= 0; --i)
     {
@@ -76,6 +147,5 @@ Value Interpreter::GetVariable(const char* name)
         }
     }
 
-    // Look in the global object
-    return m_global_object->Get(name);
+    throw std::exception("Cannot find variable");
 }

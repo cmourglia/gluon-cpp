@@ -338,9 +338,9 @@ Widget* GetWidgetById(Widget* root_widget, const std::string& name)
 
 void BuildDependencyGraph(Widget* root_widget, Widget* current_widget)
 {
-    for (auto ID : current_widget->dependency_ids)
+    for (auto id : current_widget->dependency_ids)
     {
-        Widget* dep = ID == "Parent" ? current_widget->parent : GetWidgetById(root_widget, ID);
+        Widget* dep = id == "Parent" ? current_widget->parent : GetWidgetById(root_widget, id);
 
         if (dep != nullptr)
         {
