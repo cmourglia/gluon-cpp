@@ -7,87 +7,84 @@
 
 class Object;
 
-struct ValueType {
-  enum Enum {
-    kUndefined,
-    kNull,
-    kBoolean,
-    kNumber,
-    kString,
-    kObject,
-  };
+enum class ValueType {
+  Undefined,
+  Null,
+  Boolean,
+  Number,
+  String,
+  Object,
 };
 
-struct ZString {
-  char* String;
-  i32 Length;
+struct String {
+  char* str;
+  usize len;
 };
 
 class Value {
  public:
   Value() = default;
 
-  explicit Value(std::nullptr_t) : m_ValueType{ValueType::kNull}, m_Data{} {}
+  explicit Value(std::nullptr_t) : m_type{ValueType::Null}, m_data{} {}
 
-  explicit Value(f64 Value) : m_ValueType{ValueType::kNumber}, m_Data{} {
-    m_Data.AsNumber = Value;
+  explicit Value(f64 value) : m_type{ValueType::Number}, m_data{} {
+    m_data.as_number = value;
   }
 
-  explicit Value(i32 Value) : m_ValueType{ValueType::kNumber}, m_Data{} {
-    m_Data.AsNumber = Value;
+  explicit Value(i32 value) : m_type{ValueType::Number}, m_data{} {
+    m_data.as_number = value;
   }
 
-  explicit Value(bool Value) : m_ValueType{ValueType::kBoolean}, m_Data{} {
-    m_Data.AsBoolean = Value;
+  explicit Value(bool value) : m_type{ValueType::Boolean}, m_data{} {
+    m_data.as_boolean = value;
   }
 
-  explicit Value(Object* Object) : m_ValueType{ValueType::kObject}, m_Data{} {
-    m_Data.AsObject = Object;
+  explicit Value(Object* object) : m_type{ValueType::Object}, m_data{} {
+    m_data.as_object = object;
   }
 
-  explicit Value(std::string String)
-      : m_ValueType{ValueType::kString}, m_Data{} {
+  explicit Value(std::string_view string)
+      : m_type{ValueType::String}, m_data{} {
     // FIXME: This will just leak for now
-    m_Data.AsString.Length = static_cast<i32>(String.size());
-    m_Data.AsString.String = static_cast<char*>(malloc(m_Data.AsString.Length));
-    memcpy(m_Data.AsString.String, String.c_str(), m_Data.AsString.Length);
+    m_data.as_string.len = static_cast<i32>(string.size());
+    m_data.as_string.str = static_cast<char*>(malloc(m_data.as_string.len));
+    memcpy(m_data.as_string.str, string.data(), m_data.as_string.len);
   }
 
   // clang-format off
-	bool IsUndefined() const { return m_ValueType == ValueType::kUndefined; }
-	bool IsNull()      const { return m_ValueType == ValueType::kNull; }
-	bool IsBoolean()   const { return m_ValueType == ValueType::kBoolean; }
-	bool IsNumber()    const { return m_ValueType == ValueType::kNumber; }
-	bool IsString()    const { return m_ValueType == ValueType::kString; }
-	bool IsObject()    const { return m_ValueType == ValueType::kObject; }
+	bool is_undefined() const { return m_type == ValueType::Undefined; }
+	bool is_null()      const { return m_type == ValueType::Null; }
+	bool is_boolean()   const { return m_type == ValueType::Boolean; }
+	bool is_number()    const { return m_type == ValueType::Number; }
+	bool is_string()    const { return m_type == ValueType::String; }
+	bool is_object()    const { return m_type == ValueType::Object; }
   // clang-format on
 
   // clang-format off
-	bool AsBoolean() const { return m_Data.AsBoolean; }
-	f64 AsNumber() const { return m_Data.AsNumber; }
-	Object* AsObject() const { return m_Data.AsObject; }
+	bool as_boolean() const { return m_data.as_boolean; }
+	f64 as_number() const { return m_data.as_number; }
+	Object* as_object() const { return m_data.as_object; }
   // clang-format on
-  std::string AsString() const {
-    return std::string{m_Data.AsString.String,
-                       m_Data.AsString.String + m_Data.AsString.Length};
+  std::string_view as_string() const {
+    return std::string_view{m_data.as_string.str, m_data.as_string.len};
   }
 
-  ValueType::Enum type() const { return m_ValueType; }
+  ValueType type() const { return m_type; }
 
-  std::string ToString() const;
+  std::string to_string() const;
 
-  static const Value Undefined;
-  static const Value Null;
+  static const Value kUndefined;
+  static const Value kNull;
 
  private:
-  ValueType::Enum m_ValueType = ValueType::kUndefined;
+  ValueType m_type = ValueType::Undefined;
 
   union {
-    bool AsBoolean;
-    f64 AsNumber;
-    ZString AsString;
-    Object* AsObject;
-  } m_Data;
+    bool as_boolean;
+    f64 as_number;
+    String as_string;
+    Object* as_object;
+  } m_data;
 };
 
 bool operator==(const Value& lhs, const Value& rhs);

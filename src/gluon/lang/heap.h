@@ -11,7 +11,7 @@ class Interpreter;
 struct Cell;
 
 struct HeapBlock {
-  static constexpr usize kBlockSize = 16_KB;
+  static constexpr usize kBlockSize = KB(16);
 
   NONCOPYABLE(HeapBlock);
   NONMOVEABLE(HeapBlock);

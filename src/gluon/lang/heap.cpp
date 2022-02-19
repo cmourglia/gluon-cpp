@@ -23,7 +23,7 @@ void* Heap::AllocateCell(usize size) {
     }
   }
 
-  // We did not find a compatible heap block, Make a new one
+  // We did not find a compatible heap block, make a new one
   auto* memory = malloc(HeapBlock::kBlockSize);
   auto* block = new (memory) HeapBlock{size};
   void* cell = block->Allocate();
@@ -128,7 +128,7 @@ Cell* HeapBlock::Allocate() {
     return nullptr;
   }
 
-  // Copy the pointer and Make the freelist head pointing to the next element
+  // Copy the pointer and make the freelist head pointing to the next element
   auto* cell = m_free_list;
   std::swap(m_free_list, m_free_list->next);
 

@@ -46,19 +46,19 @@ class Interpreter : public StmtVisitor, public ExprVisitor {
   [[nodiscard]] Heap* heap() const { return m_heap.get(); }
 
  private:
-  void VisitExpr(ExprStmt& expr) override;
-  void VisitPrint(PrintStmt& print) override;
-  void VisitVarDecl(VarDeclStmt& var_decl) override;
-  void VisitBlock(BlockStmt& block) override;
-  void VisitIf(IfStmt& if_stmt) override;
-  void VisitWhile(WhileStmt& while_stmt) override;
+  void visit_expr(ExprStmt& expr) override;
+  void visit_print(PrintStmt& print) override;
+  void visit_var_decl(VarDeclStmt& var_decl) override;
+  void visit_block(BlockStmt& block) override;
+  void visit_if(IfStmt& if_stmt) override;
+  void visit_while(WhileStmt& while_stmt) override;
 
-  Value VisitBinary(BinaryExpr& binary) override;
-  Value VisitGrouping(GroupingExpr& grouping) override;
-  Value VisitLiteral(LiteralExpr& literal) override;
-  Value VisitUnary(UnaryExpr& unary) override;
-  Value VisitVariable(VariableExpr& variable) override;
-  Value VisitAssign(AssignExpr& assign) override;
+  Value visit_binary(BinaryExpr& binary) override;
+  Value visit_grouping(GroupingExpr& grouping) override;
+  Value visit_literal(LiteralExpr& literal) override;
+  Value visit_unary(UnaryExpr& unary) override;
+  Value visit_variable(VariableExpr& variable) override;
+  Value visit_assign(AssignExpr& assign) override;
 
   ExprPtr m_program;
   ScopeStack m_scope_stack;

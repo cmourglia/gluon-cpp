@@ -7,22 +7,22 @@ class AstPrinter : public ExprVisitor, public StmtVisitor {
   void PrintAST(Expr& ASTRoot);
 
  private:
-  Value VisitBinary(BinaryExpr& binary) override;
-  Value VisitGrouping(GroupingExpr& grouping) override;
-  Value VisitLiteral(LiteralExpr& literal) override;
-  Value VisitUnary(UnaryExpr& unary) override;
-  Value VisitVariable(VariableExpr& expr) override;
-  Value VisitAssign(AssignExpr& expr) override;
+  Value visit_binary(BinaryExpr& binary) override;
+  Value visit_grouping(GroupingExpr& grouping) override;
+  Value visit_literal(LiteralExpr& literal) override;
+  Value visit_unary(UnaryExpr& unary) override;
+  Value visit_variable(VariableExpr& expr) override;
+  Value visit_assign(AssignExpr& expr) override;
 
-  void VisitExpr(ExprStmt& expr) override;
-  void VisitPrint(PrintStmt& expr) override;
-  void VisitVarDecl(VarDeclStmt& expr) override;
-  void VisitBlock(BlockStmt& block) override;
-  void VisitIf(IfStmt& stmt) override;
-  void VisitWhile(WhileStmt& stmt) override;
+  void visit_expr(ExprStmt& expr) override;
+  void visit_print(PrintStmt& expr) override;
+  void visit_var_decl(VarDeclStmt& expr) override;
+  void visit_block(BlockStmt& block) override;
+  void visit_if(IfStmt& stmt) override;
+  void visit_while(WhileStmt& stmt) override;
 
-  void AddIndentation();
+  void add_indentation();
 
-  std::u32string m_string;
+  std::string m_string;
   i32 m_indentation = 0;
 };

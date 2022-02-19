@@ -36,7 +36,7 @@ ZValue ZReturnStatement::Execute(ZInterpreter* interpreter)
 ZValue ZCallExpression::Execute(ZInterpreter* interpreter)
 {
 	ZValue functionValue = interpreter->GlobalObject()->Get(m_Callee);
-	auto*  object        = functionValue.AsObject();
+	auto*  object        = functionValue.as_object();
 
 	ASSERT(object->IsFunction(), "Could this happen in real life ?");
 	if (object->IsFunction())
@@ -50,24 +50,24 @@ ZValue ZCallExpression::Execute(ZInterpreter* interpreter)
 
 inline ZValue add(ZValue lhs, ZValue rhs)
 {
-	if ((lhs.IsNumber() && rhs.IsUndefined()) || (lhs.IsUndefined() && rhs.IsNumber()))
+	if ((lhs.is_number() && rhs.is_undefined()) || (lhs.is_undefined() && rhs.is_number()))
 	{
 		return ZValue{std::numeric_limits<f64>::quiet_NaN()};
 	}
 
-	if (lhs.IsNumber() && rhs.IsNull())
+	if (lhs.is_number() && rhs.is_null())
 	{
-		return ZValue{lhs.AsNumber()};
+		return ZValue{lhs.as_number()};
 	}
 
-	if (lhs.IsNull() && rhs.IsNumber())
+	if (lhs.is_null() && rhs.is_number())
 	{
-		return ZValue{rhs.AsNumber()};
+		return ZValue{rhs.as_number()};
 	}
 
-	if (lhs.IsNumber() && rhs.IsNumber())
+	if (lhs.is_number() && rhs.is_number())
 	{
-		return ZValue{lhs.AsNumber() + rhs.AsNumber()};
+		return ZValue{lhs.as_number() + rhs.as_number()};
 	}
 
 	ASSERT_UNREACHABLE();
@@ -76,24 +76,24 @@ inline ZValue add(ZValue lhs, ZValue rhs)
 
 inline ZValue Sub(ZValue lhs, ZValue rhs)
 {
-	if ((lhs.IsNumber() && rhs.IsUndefined()) || (lhs.IsUndefined() && rhs.IsNumber()))
+	if ((lhs.is_number() && rhs.is_undefined()) || (lhs.is_undefined() && rhs.is_number()))
 	{
 		return ZValue{std::numeric_limits<f64>::quiet_NaN()};
 	}
 
-	if (lhs.IsNumber() && rhs.IsNull())
+	if (lhs.is_number() && rhs.is_null())
 	{
-		return ZValue{lhs.AsNumber()};
+		return ZValue{lhs.as_number()};
 	}
 
-	if (lhs.IsNull() && rhs.IsNumber())
+	if (lhs.is_null() && rhs.is_number())
 	{
-		return ZValue{-rhs.AsNumber()};
+		return ZValue{-rhs.as_number()};
 	}
 
-	if (lhs.IsNumber() && rhs.IsNumber())
+	if (lhs.is_number() && rhs.is_number())
 	{
-		return ZValue{lhs.AsNumber() - rhs.AsNumber()};
+		return ZValue{lhs.as_number() - rhs.as_number()};
 	}
 
 	ASSERT_UNREACHABLE();

@@ -12,29 +12,29 @@ class Parser {
  public:
   explicit Parser(beard::array<Token> tokens);
 
-  ExprPtr Parse();
+  ExprPtr parse();
 
  private:
-  ExprPtr Expression();
-  ExprPtr Assignment();
-  ExprPtr Equality();
-  ExprPtr Comparison();
-  ExprPtr Term();
-  ExprPtr Factor();
-  ExprPtr Unary();
-  ExprPtr Primary();
+  ExprPtr expression();
+  ExprPtr assignment();
+  ExprPtr equality();
+  ExprPtr comparison();
+  ExprPtr term();
+  ExprPtr factor();
+  ExprPtr unary();
+  ExprPtr primary();
 
-  [[nodiscard]] bool Match(TokenType::Enum token_type);
-  [[nodiscard]] bool Match(std::initializer_list<TokenType::Enum> token_types);
-  [[nodiscard]] bool Check(TokenType::Enum token_type) const;
-  [[nodiscard]] bool Done() const;
-  void Advance();
-  void Consume(TokenType::Enum token_type, const char* err);
-  [[nodiscard]] Token ConsumedToken() const;
+  [[nodiscard]] bool match(TokenType token_type);
+  [[nodiscard]] bool match(std::initializer_list<TokenType> token_types);
+  [[nodiscard]] bool check(TokenType token_type) const;
+  [[nodiscard]] bool done() const;
+  void advance();
+  void consume(TokenType token_type, const char* err);
+  [[nodiscard]] Token consumed_token() const;
 
   beard::array<Token> m_tokens;
   i32 m_current_token = 0;
 };
 
-ExprPtr Parse(beard::array<Token> tokens);
+ExprPtr parse(const beard::array<Token>& tokens);
 }  // namespace parser

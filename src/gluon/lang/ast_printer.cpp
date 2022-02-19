@@ -1,127 +1,126 @@
 #include <gluon/lang/ast_printer.h>
 
-#include <beard/io/io.h>
+#include <fmt/format.h>
 
 void AstPrinter::PrintAST(Expr& Root) {
-  Root.Accept(*this);
+  Root.accept(*this);
 
   int test = 2;
   test += 3;
   test -= 42;
   printf("%d\n", test);
 
-  std::cout << "Produced AST:" << std::endl
-            << beard::io::from_utf8(m_string) << std::endl;
+  std::cout << "Produced AST:" << std::endl << m_string << std::endl;
 }
 
-Value AstPrinter::VisitBinary(BinaryExpr& binary) {
-  AddIndentation();
-  m_string += U"Binary\n";
+Value AstPrinter::visit_binary(BinaryExpr& binary) {
+  add_indentation();
+  m_string += "Binary\n";
   {
     m_indentation += 1;
-    AddIndentation();
-    m_string += U"Left:\n";
+    add_indentation();
+    m_string += "Left:\n";
     {
       m_indentation += 1;
-      binary.left()->Accept(*this);
+      binary.left()->accept(*this);
       m_indentation -= 1;
     }
 
-    AddIndentation();
-    m_string += U"Right:\n";
+    add_indentation();
+    m_string += "Right:\n";
     {
       m_indentation += 1;
-      binary.right()->Accept(*this);
+      binary.right()->accept(*this);
       m_indentation -= 1;
     }
 
-    AddIndentation();
-    m_string += U"op: " + binary.op().lexeme + U"\n";
+    add_indentation();
+    m_string += fmt::format("op: {}\n", binary.op().lexeme);
     m_indentation -= 1;
   }
 
-  return Value::Undefined;
+  return Value::kUndefined;
 }
 
-Value AstPrinter::VisitGrouping(GroupingExpr& grouping) {
-  AddIndentation();
-  m_string += U"Group:\n";
+Value AstPrinter::visit_grouping(GroupingExpr& grouping) {
+  add_indentation();
+  m_string += "Group:\n";
   m_indentation += 1;
-  grouping.expr()->Accept(*this);
+  grouping.expr()->accept(*this);
   m_indentation -= 1;
 
-  return Value::Undefined;
+  return Value::kUndefined;
 }
 
-Value AstPrinter::VisitLiteral(LiteralExpr& literal) {
+Value AstPrinter::visit_literal(LiteralExpr& literal) {
   Value value = literal.value();
 
-  AddIndentation();
+  add_indentation();
 
-  m_string += U"Literal: " + beard::io::to_utf8(value.ToString()) + U"\n";
+  m_string += "Literal: " + value.to_string() + "\n";
 
-  return Value::Undefined;
+  return Value::kUndefined;
 }
 
-Value AstPrinter::VisitUnary(UnaryExpr& unary) {
-  AddIndentation();
-  m_string += U"Binary\n";
+Value AstPrinter::visit_unary(UnaryExpr& unary) {
+  add_indentation();
+  m_string += "Binary\n";
   {
     m_indentation += 1;
-    AddIndentation();
-    m_string += U"Right:\n";
+    add_indentation();
+    m_string += "Right:\n";
     {
       m_indentation += 1;
-      unary.right()->Accept(*this);
+      unary.right()->accept(*this);
       m_indentation -= 1;
     }
 
-    AddIndentation();
-    m_string += U"op: " + unary.op().lexeme + U"\n";
+    add_indentation();
+    m_string += fmt::format("op: {}\n", unary.op().lexeme);
 
     m_indentation -= 1;
   }
 
-  return Value::Undefined;
+  return Value::kUndefined;
 }
 
-void AstPrinter::AddIndentation() {
+void AstPrinter::add_indentation() {
   constexpr i32 INDENT_SIZE = 2;
   for (int i = 0; i < m_indentation * INDENT_SIZE; ++i) {
-    m_string += U" ";
+    m_string += " ";
   }
 }
 
-Value AstPrinter::VisitVariable(VariableExpr& expr) {
+Value AstPrinter::visit_variable(VariableExpr& expr) {
   UNUSED(expr);
-  return Value::Undefined;
+  return Value::kUndefined;
 }
 
-Value AstPrinter::VisitAssign(AssignExpr& expr) {
+Value AstPrinter::visit_assign(AssignExpr& expr) {
   UNUSED(expr);
-  return Value::Undefined;
+  return Value::kUndefined;
 }
 
-void AstPrinter::VisitExpr(ExprStmt& stmt) {
+void AstPrinter::visit_expr(ExprStmt& stmt) {
   UNUSED(stmt);
 }
 
-void AstPrinter::VisitPrint(PrintStmt& stmt) {
+void AstPrinter::visit_print(PrintStmt& stmt) {
   UNUSED(stmt);
 }
 
-void AstPrinter::VisitVarDecl(VarDeclStmt& stmt) {
+void AstPrinter::visit_var_decl(VarDeclStmt& stmt) {
   UNUSED(stmt);
 }
 
-void AstPrinter::VisitBlock(BlockStmt& stmt) {
+void AstPrinter::visit_block(BlockStmt& stmt) {
   UNUSED(stmt);
 }
 
-void AstPrinter::VisitIf(IfStmt& stmt) {
+void AstPrinter::visit_if(IfStmt& stmt) {
   UNUSED(stmt);
 }
 
-void AstPrinter::VisitWhile(WhileStmt& stmt) {
+void AstPrinter::visit_while(WhileStmt& stmt) {
   UNUSED(stmt);
 }

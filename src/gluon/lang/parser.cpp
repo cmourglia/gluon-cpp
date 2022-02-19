@@ -5,18 +5,19 @@
 #include <gluon/lang/lexer.h>
 
 #include <algorithm>
+#include <charconv>
 #include <iterator>
 
 namespace parser {
 Parser::Parser(beard::array<Token> tokens) : m_tokens(std::move(tokens)) {}
 
-ExprPtr Parser::Parse() {
-  /*auto Program = Make<ZBinary>(Make<ZUnary>(ZToken{.Type =
-     ETokenType::Subtract, .Text = "-"}, Make<ZLiteral>(ZValue{123})),
+ExprPtr Parser::parse() {
+  /*auto Program = make<ZBinary>(make<ZUnary>(ZToken{.Type =
+     ETokenType::Subtract, .Text = "-"}, make<ZLiteral>(ZValue{123})),
                                ZToken{.Type = ETokenType::Multiply, .Text =
-     "*"}, Make<ZGrouping>(Make<ZLiteral>(ZValue{45.67})));*/
+     "*"}, make<ZGrouping>(make<ZLiteral>(ZValue{45.67})));*/
 
-  auto Program = Expression();
+  auto Program = expression();
 
   return Program;
 }
@@ -36,23 +37,23 @@ ExprPtr Parser::Parse() {
 /**
  * expression -> assignment ;
  */
-ExprPtr Parser::Expression() {
-  return Assignment();
+ExprPtr Parser::expression() {
+  return assignment();
 }
 
 /**
  * assignment -> IDENTIFIER "=" assigment | equality ;
  */
-ExprPtr Parser::Assignment() {
-  auto expr = Equality();
+ExprPtr Parser::assignment() {
+  auto expr = equality();
 
-  if (Match(TokenType::kAssign)) {
-    auto value = Assignment();
-    if (expr->type() != ExprType::kVariable) {
+  if (match(TokenType::Equal)) {
+    auto value = assignment();
+    if (expr->type() != ExprType::Variable) {
       throw std::exception("Expression is not an l-value");
     }
 
-    return Make<AssignExpr>(std::move(expr), std::move(value));
+    return make<AssignExpr>(std::move(expr), std::move(value));
   }
 
   return expr;
@@ -61,12 +62,12 @@ ExprPtr Parser::Assignment() {
 /**
  * equality   -> comparison ( ( "!=" | "==" ) comparison )* ;
  */
-ExprPtr Parser::Equality() {
-  auto expr = Comparison();
+ExprPtr Parser::equality() {
+  auto expr = comparison();
 
-  while (Match({TokenType::kEquals, TokenType::kNotEquals})) {
-    auto op = ConsumedToken();
-    expr = Make<BinaryExpr>(std::move(expr), op, Comparison());
+  while (match({TokenType::EqualEqual, TokenType::BangEqual})) {
+    auto op = consumed_token();
+    expr = make<BinaryExpr>(std::move(expr), op, comparison());
   }
 
   return expr;
@@ -75,13 +76,13 @@ ExprPtr Parser::Equality() {
 /**
  * comparison -> term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
  */
-ExprPtr Parser::Comparison() {
-  auto expr = Term();
+ExprPtr Parser::comparison() {
+  auto expr = term();
 
-  while (Match({TokenType::kGreater, TokenType::kGreaterEquals,
-                TokenType::kLess, TokenType::kLessEquals})) {
-    auto op = ConsumedToken();
-    expr = Make<BinaryExpr>(std::move(expr), op, Term());
+  while (match({TokenType::Greater, TokenType::GreaterEqual, TokenType::Less,
+                TokenType::LessEqual})) {
+    auto op = consumed_token();
+    expr = make<BinaryExpr>(std::move(expr), op, term());
   }
 
   return expr;
@@ -90,12 +91,12 @@ ExprPtr Parser::Comparison() {
 /**
  * term       -> factor ( ( "-" | "+" ) factor )* ;
  */
-ExprPtr Parser::Term() {
-  auto expr = Factor();
+ExprPtr Parser::term() {
+  auto expr = factor();
 
-  while (Match({TokenType::kAdd, TokenType::kSubtract})) {
-    auto op = ConsumedToken();
-    expr = Make<BinaryExpr>(std::move(expr), op, Factor());
+  while (match({TokenType::Plus, TokenType::PlusEqual})) {
+    auto op = consumed_token();
+    expr = make<BinaryExpr>(std::move(expr), op, factor());
   }
 
   return expr;
@@ -104,12 +105,12 @@ ExprPtr Parser::Term() {
 /**
  * factor     -> unary ( ( "/" | "*" ) unary )* ;
  */
-ExprPtr Parser::Factor() {
-  auto expr = Unary();
+ExprPtr Parser::factor() {
+  auto expr = unary();
 
-  while (Match({TokenType::kDivide, TokenType::kMultiply})) {
-    auto op = ConsumedToken();
-    expr = Make<BinaryExpr>(std::move(expr), op, Unary());
+  while (match({TokenType::Slash, TokenType::Star})) {
+    auto op = consumed_token();
+    expr = make<BinaryExpr>(std::move(expr), op, unary());
   }
   return expr;
 }
@@ -117,47 +118,60 @@ ExprPtr Parser::Factor() {
 /**
  * unary      -> ( "not" | "-" ) unary | primary;
  */
-ExprPtr Parser::Unary() {
-  if (Match({TokenType::kNot, TokenType::kSubtract})) {
-    auto op = ConsumedToken();
-    return Make<UnaryExpr>(op, Unary());
+ExprPtr Parser::unary() {
+  if (match({TokenType::Not, TokenType::Minus})) {
+    auto op = consumed_token();
+    return make<UnaryExpr>(op, unary());
   }
 
-  return Primary();
+  return primary();
 }
 
 /**
  * primary    -> NUMBER | STRING | "true" | "false" | "null" | "(" expression
  * ")" ;
  */
-ExprPtr Parser::Primary() {
-  // clang-format off
-    if (Match(TokenType::kFalse))  return Make<LiteralExpr>(Value{false});                // NOLINT
-    if (Match(TokenType::kTrue))   return Make<LiteralExpr>(Value{true});                 // NOLINT
-    if (Match(TokenType::kNull))   return Make<LiteralExpr>(Value{nullptr});                    // NOLINT
-    if (Match(TokenType::kNumber)) return Make<LiteralExpr>(Value{ConsumedToken().value.value().AsNumber()});     // NOLINT
-    if (Match(TokenType::kString)) return Make<LiteralExpr>(Value{ConsumedToken().lexeme}); // NOLINT
-  // clang-format on
+ExprPtr Parser::primary() {
+  if (match(TokenType::True))
+    return make<LiteralExpr>(Value{true});
+  if (match(TokenType::Nil))
+    return make<LiteralExpr>(Value{nullptr});
+  if (match(TokenType::String))
+    return make<LiteralExpr>(Value{consumed_token().lexeme});
 
-  if (Match(TokenType::kOpenParen)) {
-    auto expr = Expression();
-    Consume(TokenType::kCloseParen, "Expecting ')' after expression.");
+  if (match(TokenType::Number)) {
+    f64 number = 0.0;
+    auto lexeme = consumed_token().lexeme;
+    auto num_result =
+        std::from_chars(lexeme.data(), lexeme.data() + lexeme.size(), number);
 
-    return Make<GroupingExpr>(std::move(expr));
+    if (num_result.ec != std::errc{}) {
+      // Error
+      return make<LiteralExpr>(Value::kUndefined);
+    }
+
+    return make<LiteralExpr>(Value{number});  // NOLINT
+  }
+
+  if (match(TokenType::OpenParen)) {
+    auto expr = expression();
+    consume(TokenType::CloseParen, "Expecting ')' after expression.");
+
+    return make<GroupingExpr>(std::move(expr));
   }
 
   ASSERT_UNREACHABLE();
   return nullptr;
 }
 
-bool Parser::Match(TokenType::Enum token_type) {
-  return Match({token_type});
+bool Parser::match(TokenType token_type) {
+  return match({token_type});
 }
 
-bool Parser::Match(std::initializer_list<TokenType::Enum> token_types) {
+bool Parser::match(std::initializer_list<TokenType> token_types) {
   for (auto token_type : token_types) {
-    if (Check(token_type)) {
-      Advance();
+    if (check(token_type)) {
+      advance();
       return true;
     }
   }
@@ -165,27 +179,27 @@ bool Parser::Match(std::initializer_list<TokenType::Enum> token_types) {
   return false;
 }
 
-bool Parser::Check(TokenType::Enum token_type) const {
+bool Parser::check(TokenType token_type) const {
   return m_tokens[m_current_token].token_type == token_type;
 }
 
-bool Parser::Done() const {
+bool Parser::done() const {
   return m_current_token >= m_tokens.element_count();
 }
 
-void Parser::Advance() {
+void Parser::advance() {
   m_current_token += 1;
 }
 
-void Parser::Consume(TokenType::Enum token_type, const char* ErrorString) {
-  if (Check(token_type)) {
-    Advance();
+void Parser::consume(TokenType token_type, const char* ErrorString) {
+  if (check(token_type)) {
+    advance();
   } else {
     throw std::exception(ErrorString);
   }
 }
 
-Token Parser::ConsumedToken() const {
+Token Parser::consumed_token() const {
   if (m_current_token > 0) {
     return m_tokens[m_current_token - 1];
   }
@@ -193,8 +207,8 @@ Token Parser::ConsumedToken() const {
   return Token{};
 }
 
-ExprPtr Parse(beard::array<Token> tokens) {
+ExprPtr parse(const beard::array<Token>& tokens) {
   Parser parser{tokens};
-  return parser.Parse();
+  return parser.parse();
 }
 }  // namespace parser
