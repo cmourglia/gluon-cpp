@@ -1,7 +1,3 @@
-add_library(loguru STATIC loguru/loguru.cpp)
-target_include_directories(loguru PUBLIC loguru)
-add_library(loguru::loguru ALIAS loguru)
-
 set(BEARD_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 add_subdirectory(BeardLibrary)
 
