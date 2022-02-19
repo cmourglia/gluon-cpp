@@ -76,7 +76,7 @@ add_executable(gluon src/main.cpp
         ${APP_SRC}
         )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE loguru::loguru glm::glm SDL2main SDL2_image nanovg stb_truetype beardLibrary)
+target_link_libraries(${PROJECT_NAME} PRIVATE loguru glm::glm SDL2main SDL2_image nanovg stb_truetype beard)
 target_include_directories(${PROJECT_NAME} PRIVATE src)
 target_compile_definitions(${PROJECT_NAME} PRIVATE $<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>)
 target_compile_options(${PROJECT_NAME} PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/W4> $<$<CXX_COMPILER_ID:MSVC>:/WX>)
