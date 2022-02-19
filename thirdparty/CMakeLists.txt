@@ -1,4 +1,5 @@
 set(BEARD_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(BEARD_ENABLE_GLM ON CACHE BOOL "" FORCE)
 add_subdirectory(BeardLibrary)
 
 add_subdirectory(SDL)
