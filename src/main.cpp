@@ -1,5 +1,5 @@
 #if 0
-#    include <gluon/app/app.h>
+#include <gluon/app/app.h>
 
 int main(int argc, char** argv)
 {
@@ -8,89 +8,89 @@ int main(int argc, char** argv)
 }
 #elif 0
 
-#    include <gluon/lang/Gluon_AST.h>
-#    include <gluon/lang/Gluon_Interpreter.h>
-#    include <gluon/lang/object.h>
+#include <gluon/lang/Gluon_AST.h>
+#include <gluon/lang/Gluon_Interpreter.h>
+#include <gluon/lang/object.h>
 
 void test1(ZProgram* program);
 void test2(ZProgram* program);
 
-int main()
-{
-    auto program = Make<ZProgram>();
+int main() {
+  auto program = Make<ZProgram>();
 
-    // test1(program.get());
-    test2(program.get());
+  // test1(program.get());
+  test2(program.get());
 
-    program->Dump(0);
+  program->Dump(0);
 
-    ZInterpreter interpreter;
-    auto         Result = interpreter.Run(program.get());
+  ZInterpreter interpreter;
+  auto Result = interpreter.Run(program.get());
 
-    printf("Interpreter returned: %s\n", Result.ToString().c_str());
+  printf("Interpreter returned: %s\n", Result.ToString().c_str());
 
-    interpreter.Heap()->Allocate<ZObject>();
-    interpreter.GlobalObject()->Add("foo", ZValue{interpreter.Heap()->Allocate<ZObject>()});
+  interpreter.Heap()->Allocate<ZObject>();
+  interpreter.GlobalObject()->Add(
+      "foo", ZValue{interpreter.Heap()->Allocate<ZObject>()});
 
-    interpreter.Heap()->Garbage();
+  interpreter.Heap()->Garbage();
 
-    return 0;
+  return 0;
 }
 
-void test1(ZProgram* program)
-{
-    auto* function = program->add<ZFunctionDeclaration>("foo");
+void test1(ZProgram* program) {
+  auto* function = program->add<ZFunctionDeclaration>("foo");
 
-    function->Body()->add<ZReturnStatement>(
-        Make<ZBinaryExpression>(EBinaryOp::Addition,
-                                Make<ZBinaryExpression>(EBinaryOp::Addition, Make<ZLiteral>(ZValue{1}),
-                                                        Make<ZLiteral>(ZValue{2})),
-                                Make<ZLiteral>(ZValue{3})));
+  function->Body()->add<ZReturnStatement>(Make<ZBinaryExpression>(
+      EBinaryOp::Addition,
+      Make<ZBinaryExpression>(EBinaryOp::Addition, Make<ZLiteral>(ZValue{1}),
+                              Make<ZLiteral>(ZValue{2})),
+      Make<ZLiteral>(ZValue{3})));
 
-    program->add<ExpressionStatement>(Make<ZCallExpression>("foo"));
+  program->add<ExpressionStatement>(Make<ZCallExpression>("foo"));
 }
 
-void test2(ZProgram* program)
-{
-    program->add<ExpressionStatement>(
-        Make<AssignmentExpression>(EAssignmentOperator::Assign, Make<ZIdentifier>("x"), Make<ZLiteral>(ZValue{42})));
+void test2(ZProgram* program) {
+  program->add<ExpressionStatement>(Make<AssignmentExpression>(
+      EAssignmentOperator::Assign, Make<ZIdentifier>("x"),
+      Make<ZLiteral>(ZValue{42})));
 
-    auto* function = program->add<ZFunctionDeclaration>("bar");
+  auto* function = program->add<ZFunctionDeclaration>("bar");
 
-    function->Body()->add<ZVariableDeclaration>(Make<ZIdentifier>("a"), Make<ZLiteral>(ZValue{2}));
+  function->Body()->add<ZVariableDeclaration>(Make<ZIdentifier>("a"),
+                                              Make<ZLiteral>(ZValue{2}));
 
-    function->Body()->add<ZVariableDeclaration>(Make<ZIdentifier>("b"));
+  function->Body()->add<ZVariableDeclaration>(Make<ZIdentifier>("b"));
 
-    function->Body()->add<ExpressionStatement>(
-        Make<AssignmentExpression>(EAssignmentOperator::Assign, Make<ZIdentifier>("b"), Make<ZLiteral>(ZValue{3})));
+  function->Body()->add<ExpressionStatement>(Make<AssignmentExpression>(
+      EAssignmentOperator::Assign, Make<ZIdentifier>("b"),
+      Make<ZLiteral>(ZValue{3})));
 
-    function->Body()->add<ZReturnStatement>(
-        Make<ZBinaryExpression>(EBinaryOp::Addition,
-                                Make<ZBinaryExpression>(EBinaryOp::Addition, Make<ZIdentifier>("a"),
-                                                        Make<ZIdentifier>("b")),
-                                Make<ZIdentifier>("x")));
+  function->Body()->add<ZReturnStatement>(Make<ZBinaryExpression>(
+      EBinaryOp::Addition,
+      Make<ZBinaryExpression>(EBinaryOp::Addition, Make<ZIdentifier>("a"),
+                              Make<ZIdentifier>("b")),
+      Make<ZIdentifier>("x")));
 
-    program->add<ExpressionStatement>(Make<ZCallExpression>("bar"));
+  program->add<ExpressionStatement>(Make<ZCallExpression>("bar"));
 }
 #elif 1
 
-#    include <gluon/lang/ast_printer.h>
-#    include <gluon/lang/interpreter.h>
-#    include <gluon/lang/lexer.h>
-#    include <gluon/lang/parser.h>
+#include <gluon/lang/ast_printer.h>
+#include <gluon/lang/interpreter.h>
+#include <gluon/lang/lexer.h>
+#include <gluon/lang/parser.h>
 
-int main()
-{
-    auto tokens  = lexer::Lex("gluon/TestLexer.gluon");
-    auto program = parser::Parse(tokens);
+int main() {
+  auto tokens = lexer::Lex("gluon/TestLexer.gluon");
+  auto program = parser::Parse(tokens);
 
-    Interpreter interpreter;
-    interpreter.Run(program);
-    // ZInterpreter Interpreter;
-    // auto         Result = Interpreter.Run(Program.get());
-    // printf("Result: %s\n", Result.ToString().c_str());
+  Interpreter interpreter;
+  interpreter.Run(program);
+  // ZInterpreter Interpreter;
+  // auto         Result = Interpreter.Run(Program.get());
+  // printf("Result: %s\n", Result.ToString().c_str());
 
-    return 0;
+  return 0;
 }
 
 #endif

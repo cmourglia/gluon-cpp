@@ -7,56 +7,52 @@
 #include <string>
 #include <vector>
 
-struct TokenType
-{
-    enum Enum
-    {
-        kUnknown,
+struct TokenType {
+  enum Enum {
+    kUnknown,
 
-        kOpenBrace,
-        kCloseBrace,
-        kOpenParen,
-        kCloseParen,
-        kOpenBracket,
-        kCloseBracket,
-        kComma,
-        kColon,
-        kSemicolon,
-        kDot,
+    kOpenBrace,
+    kCloseBrace,
+    kOpenParen,
+    kCloseParen,
+    kOpenBracket,
+    kCloseBracket,
+    kComma,
+    kColon,
+    kSemicolon,
+    kDot,
 
-        kPlus,
-        kMinus,
-        kAsterisk,
-        kSlash,
+    kPlus,
+    kMinus,
+    kAsterisk,
+    kSlash,
 
-        kNumber,
-        kString,
-        kIdentifier,
+    kNumber,
+    kString,
+    kIdentifier,
 
-        kSpacing,
-        kEOL,
-        kComment,
+    kSpacing,
+    kEOL,
+    kComment,
 
-        kEOF,
-    };
+    kEOF,
+  };
 };
 
-struct Token
-{
-    std::string filename;
-    u32         column, line;
+struct Token {
+  std::string filename;
+  u32 column, line;
 
-    TokenType::Enum token_type;
-    std::string     text;
-    f32             number;
+  TokenType::Enum token_type;
+  std::string text;
+  f32 number;
 };
 
-struct Tokenizer
-{
-    std::string filename;
-    u32         column, line;
+struct Tokenizer {
+  std::string filename;
+  u32 column, line;
 
-    const char* stream;
+  const char* stream;
 };
 
 beard::array<Token> Tokenize(const char* buffer);

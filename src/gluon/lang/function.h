@@ -4,36 +4,20 @@
 
 struct ScopeNode;
 
-class Function : public Object
-{
-public:
-    Function(std::string name, ScopeNode* body)
-        : m_name{std::move(name)}
-        , m_body{body}
-    {
-    }
+class Function : public Object {
+ public:
+  Function(std::string name, ScopeNode* body)
+      : m_name{std::move(name)}, m_body{body} {}
 
-    const char* ToString() const override
-    {
-        return "Function";
-    }
+  const char* ToString() const override { return "Function"; }
 
-    std::string name() const
-    {
-        return m_name;
-    }
+  std::string name() const { return m_name; }
 
-    ScopeNode* body() const
-    {
-        return m_body;
-    }
+  ScopeNode* body() const { return m_body; }
 
-    bool IsFunction() const override
-    {
-        return true;
-    }
+  bool IsFunction() const override { return true; }
 
-private:
-    std::string m_name;
-    ScopeNode*  m_body;
+ private:
+  std::string m_name;
+  ScopeNode* m_body;
 };

@@ -7,80 +7,77 @@
 
 #include <string>
 
-struct TokenType
-{
-    enum Enum
-    {
-        kUnknown,
+struct TokenType {
+  enum Enum {
+    kUnknown,
 
-        kOpenBrace,
-        kCloseBrace,
-        kOpenParen,
-        kCloseParen,
-        kOpenBracket,
-        kCloseBracket,
+    kOpenBrace,
+    kCloseBrace,
+    kOpenParen,
+    kCloseParen,
+    kOpenBracket,
+    kCloseBracket,
 
-        kComma,
-        kColon,
-        kSemicolon,
-        kDot,
+    kComma,
+    kColon,
+    kSemicolon,
+    kDot,
 
-        kAdd,      // +
-        kSubtract, // -
-        kMultiply, // *
-        kDivide,   // /
-        kModulo,   // %
-        kPower,    // ^
+    kAdd,       // +
+    kSubtract,  // -
+    kMultiply,  // *
+    kDivide,    // /
+    kModulo,    // %
+    kPower,     // ^
 
-        kIf,    // if
-        kElse,  // else
-        kWhile, // while
-        kFor,   // for
-        kLet,   // let
+    kIf,     // if
+    kElse,   // else
+    kWhile,  // while
+    kFor,    // for
+    kLet,    // let
 
-        kNull,  // null
-        kTrue,  // true
-        kFalse, // false
+    kNull,   // null
+    kTrue,   // true
+    kFalse,  // false
 
-        kAnd, // and
-        kOr,  // or
-        kNot, // not
+    kAnd,  // and
+    kOr,   // or
+    kNot,  // not
 
-        kEquals,        // ==
-        kNotEquals,     // !=
-        kGreater,       // >
-        kGreaterEquals, // >=
-        kLess,          // <
-        kLessEquals,    // <=
+    kEquals,         // ==
+    kNotEquals,      // !=
+    kGreater,        // >
+    kGreaterEquals,  // >=
+    kLess,           // <
+    kLessEquals,     // <=
 
-        kAssign,         // =
-        kAddAssign,      // +=
-        kSubtractAssign, // -=
-        kMultiplyAssign, // *=
-        kDivideAssign,   // /=
-        kModuloAssign,   // %=
-        kPowerAssign,    // ^=
+    kAssign,          // =
+    kAddAssign,       // +=
+    kSubtractAssign,  // -=
+    kMultiplyAssign,  // *=
+    kDivideAssign,    // /=
+    kModuloAssign,    // %=
+    kPowerAssign,     // ^=
 
-        kNumber,
-        kString,
-        kIdentifier,
+    kNumber,
+    kString,
+    kIdentifier,
 
-        kComment,
+    kComment,
 
-        // Spacing,
-        kEOL,
-        kEOF,
-    };
+    // Spacing,
+    kEOL,
+    kEOF,
+  };
 };
 
 std::string ToString(TokenType::Enum token_type);
 
-struct Token
-{
-    std::string filename;
-    u32         column, line;
+struct Token {
+  std::string filename;
+  u32 column, line;
 
-    TokenType::Enum        token_type;
-    std::u32string         lexeme;
-    beard::optional<Value> value;
+  TokenType::Enum token_type;
+  std::u32string lexeme;
+  beard::optional<Value> value;
 };

@@ -9,9 +9,8 @@
 #include <string>
 
 template <typename T, typename... Args>
-std::unique_ptr<T> Make(Args&&... args)
-{
-	return std::make_unique<T>(std::forward<Args>(args)...);
+std::unique_ptr<T> Make(Args&&... args) {
+  return std::make_unique<T>(std::forward<Args>(args)...);
 }
 
 class Interpreter;
@@ -141,7 +140,7 @@ enum class EBinaryOp
 {
 	Addition,     // +
 	Substraction, // -
-#	if 0
+#if 0
 	Multiplication,   // *
 	Division,         // /
 	Modulo,           // %
@@ -152,7 +151,7 @@ enum class EBinaryOp
 	LessEqualThan,    // <=
 	GreaterThan,      // >
 	GreaterEqualThan, // <=
-#	endif
+#endif
 };
 
 struct ZBinaryExpression : public ZExpression

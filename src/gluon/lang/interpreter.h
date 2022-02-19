@@ -11,62 +11,57 @@
 
 class Object;
 
-struct ScopeFrame
-{
-    beard::string_hash_map<Value> variables;
+struct ScopeFrame {
+  beard::string_hash_map<Value> variables;
 };
 
 class Interpreter;
-class ScopeStack
-{
-public:
-    explicit ScopeStack(Interpreter* interpreter);
+class ScopeStack {
+ public:
+  explicit ScopeStack(Interpreter* interpreter);
 
-    void  DeclareVariable(const char* name);
-    void  SetVariable(const char* name, Value value);
-    Value GetVariable(const char* name);
+  void DeclareVariable(const char* name);
+  void SetVariable(const char* name, Value value);
+  Value GetVariable(const char* name);
 
-    void PushScope();
-    void PopScope();
+  void PushScope();
+  void PopScope();
 
-private:
-    Interpreter*             m_interpreter = nullptr;
-    beard::array<ScopeFrame> m_stack;
+ private:
+  Interpreter* m_interpreter = nullptr;
+  beard::array<ScopeFrame> m_stack;
 };
 
-class Interpreter
-    : public StmtVisitor
-    , public ExprVisitor
-{
-public:
-    Interpreter();
-    ~Interpreter();
+class Interpreter : public StmtVisitor, public ExprVisitor {
+ public:
+  Interpreter();
+  ~Interpreter();
 
-    NONCOPYABLE(Interpreter);
-    NONMOVEABLE(Interpreter);
+  NONCOPYABLE(Interpreter);
+  NONMOVEABLE(Interpreter);
 
-    void Run(ExprPtr expr);
+  void Run(ExprPtr expr);
 
-    [[nodiscard]] Object* global_object() const { return m_global_object; }
-    [[nodiscard]] Heap*   heap() const { return m_heap.get(); }
+  [[nodiscard]] Object* global_object() const { return m_global_object; }
+  [[nodiscard]] Heap* heap() const { return m_heap.get(); }
 
-private:
-    void VisitExpr(ExprStmt& expr) override;
-    void VisitPrint(PrintStmt& print) override;
-    void VisitVarDecl(VarDeclStmt& var_decl) override;
-    void VisitBlock(BlockStmt& block) override;
-    void VisitIf(IfStmt& if_stmt) override;
-    void VisitWhile(WhileStmt& while_stmt) override;
+ private:
+  void VisitExpr(ExprStmt& expr) override;
+  void VisitPrint(PrintStmt& print) override;
+  void VisitVarDecl(VarDeclStmt& var_decl) override;
+  void VisitBlock(BlockStmt& block) override;
+  void VisitIf(IfStmt& if_stmt) override;
+  void VisitWhile(WhileStmt& while_stmt) override;
 
-    Value VisitBinary(BinaryExpr& binary) override;
-    Value VisitGrouping(GroupingExpr& grouping) override;
-    Value VisitLiteral(LiteralExpr& literal) override;
-    Value VisitUnary(UnaryExpr& unary) override;
-    Value VisitVariable(VariableExpr& variable) override;
-    Value VisitAssign(AssignExpr& assign) override;
+  Value VisitBinary(BinaryExpr& binary) override;
+  Value VisitGrouping(GroupingExpr& grouping) override;
+  Value VisitLiteral(LiteralExpr& literal) override;
+  Value VisitUnary(UnaryExpr& unary) override;
+  Value VisitVariable(VariableExpr& variable) override;
+  Value VisitAssign(AssignExpr& assign) override;
 
-    ExprPtr               m_program;
-    ScopeStack            m_scope_stack;
-    std::unique_ptr<Heap> m_heap          = nullptr;
-    Object*               m_global_object = nullptr;
+  ExprPtr m_program;
+  ScopeStack m_scope_stack;
+  std::unique_ptr<Heap> m_heap = nullptr;
+  Object* m_global_object = nullptr;
 };

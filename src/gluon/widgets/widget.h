@@ -10,60 +10,57 @@
 #include <memory>
 #include <string>
 
-struct Widget
-{
-    Widget() = default;
-    virtual ~Widget();
+struct Widget {
+  Widget() = default;
+  virtual ~Widget();
 
-    NONMOVEABLE(Widget);
-    NONCOPYABLE(Widget);
+  NONMOVEABLE(Widget);
+  NONCOPYABLE(Widget);
 
-    virtual void deserialize(parser::Node::Ptr node) final;
-    virtual void BuildRenderInfos(beard::array<RectangleInfo>* result) final;
+  virtual void deserialize(parser::Node::Ptr node) final;
+  virtual void BuildRenderInfos(beard::array<RectangleInfo>* result) final;
 
-    virtual bool WindowResized(i32 new_width, i32 new_height);
-    virtual void touch() final;
+  virtual bool WindowResized(i32 new_width, i32 new_height);
+  virtual void touch() final;
 
-    beard::array<Widget*> children;
-    Widget*               parent = nullptr;
+  beard::array<Widget*> children;
+  Widget* parent = nullptr;
 
-    std::string id;
+  std::string id;
 
-    glm::vec2 pos  = glm::vec2(0.0f);
-    glm::vec2 size = glm::vec2(0.0f);
+  glm::vec2 pos = glm::vec2(0.0f);
+  glm::vec2 size = glm::vec2(0.0f);
 
-    beard::string_hash_set                    dependency_ids;
-    beard::hash_map<u32, beard::array<Token>> geometry_expressions;
+  beard::string_hash_set dependency_ids;
+  beard::hash_map<u32, beard::array<Token>> geometry_expressions;
 
-    beard::array<Widget*> dependencies;
-    beard::array<Widget*> dependees;
-    bool                  is_dirty = true;
+  beard::array<Widget*> dependencies;
+  beard::array<Widget*> dependees;
+  bool is_dirty = true;
 
-    beard::array<std::pair<f32*, shunting_yard::Expression>> evaluators;
+  beard::array<std::pair<f32*, shunting_yard::Expression>> evaluators;
 
-    static void Evaluate();
+  static void Evaluate();
 
-protected:
-    static beard::array<Widget*> s_widget_map;
+ protected:
+  static beard::array<Widget*> s_widget_map;
 
-    virtual void EvaluateInternal();
+  virtual void EvaluateInternal();
 
-private:
-    virtual void ParseProperty(parser::Node::Ptr node) final;
-    virtual void ParserPropertyInternal(parser::Node::Ptr node, u32 node_hash) = 0;
+ private:
+  virtual void ParseProperty(parser::Node::Ptr node) final;
+  virtual void ParserPropertyInternal(parser::Node::Ptr node,
+                                      u32 node_hash) = 0;
 
-    virtual void BuildRenderInfosInternal(beard::array<RectangleInfo>* result) = 0;
+  virtual void BuildRenderInfosInternal(
+      beard::array<RectangleInfo>* result) = 0;
 
-    virtual void PreEvaluate()
-    {
-    }
-    virtual void PostEvaluate()
-    {
-    }
+  virtual void PreEvaluate() {}
+  virtual void PostEvaluate() {}
 };
 
 using WidgetFactory = Widget*();
 
 Widget* GetWidgetById(Widget* root_widget, const std::string& name);
-void    BuildDependencyGraph(Widget* root_widget, Widget* current_widget);
-void    BuildExpressionEvaluators(Widget* root_widget, Widget* current_widget);
+void BuildDependencyGraph(Widget* root_widget, Widget* current_widget);
+void BuildExpressionEvaluators(Widget* root_widget, Widget* current_widget);
