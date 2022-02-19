@@ -12,16 +12,6 @@ set(CORE_SRC
         src/gluon/core/types.h
         )
 
-set(COMPILER_SRC
-        src/gluon/compiler/parser.cpp
-        src/gluon/compiler/shunting_yard.cpp
-        src/gluon/compiler/tokenizer.cpp
-
-        src/gluon/compiler/parser.h
-        src/gluon/compiler/shunting_yard.h
-        src/gluon/compiler/tokenizer.h
-        )
-
 set(LANGUAGE_SRC
         src/gluon/lang/ast.cpp
         src/gluon/lang/ast_printer.cpp
@@ -70,13 +60,12 @@ set(APP_SRC
 
 add_executable(gluon src/main.cpp
         ${CORE_SRC}
-        ${COMPILER_SRC}
         ${LANGUAGE_SRC}
-        ${WIDGETS_SRC}
-        ${APP_SRC}
+        #${WIDGETS_SRC}
+        #${APP_SRC}
         )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE loguru glm::glm SDL2main SDL2_image nanovg stb_truetype beard)
+target_link_libraries(${PROJECT_NAME} PRIVATE loguru glm::glm SDL2main SDL2_image  beard)
 target_include_directories(${PROJECT_NAME} PRIVATE src)
 target_compile_definitions(${PROJECT_NAME} PRIVATE $<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>)
 target_compile_options(${PROJECT_NAME} PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/W4> $<$<CXX_COMPILER_ID:MSVC>:/WX>)
