@@ -1,22 +1,27 @@
-#include <gluon/lang/parser.h>
+#include "gluon/lang/parser.h"
 
-#include <gluon/lang/ast.h>
-#include <gluon/lang/grammar.h>
-#include <gluon/lang/lexer.h>
+#include "gluon/lang/fwd.h"
+#include "gluon/lang/grammar.h"
+#include "gluon/lang/lexer.h"
 
 #include <algorithm>
 #include <charconv>
 #include <iterator>
 
-namespace parser {
-Parser::Parser(beard::array<Token> tokens) : m_tokens(std::move(tokens)) {}
+#include <fmt/format.h>
+
+namespace gluon::lang {
+
+Parser::Parser(Lexer lexer) {
+  std::optional<Token> token;
+  while (token = lexer.next()) {
+    m_tokens.add(*token);
+    auto tk = *token;
+    fmt::print("{}: `{}`\n", to_string(tk.type), tk.lexeme);
+  }
+}
 
 ExprPtr Parser::parse() {
-  /*auto Program = make<ZBinary>(make<ZUnary>(ZToken{.Type =
-     ETokenType::Subtract, .Text = "-"}, make<ZLiteral>(ZValue{123})),
-                               ZToken{.Type = ETokenType::Multiply, .Text =
-     "*"}, make<ZGrouping>(make<ZLiteral>(ZValue{45.67})));*/
-
   auto Program = expression();
 
   return Program;
@@ -180,7 +185,7 @@ bool Parser::match(std::initializer_list<TokenType> token_types) {
 }
 
 bool Parser::check(TokenType token_type) const {
-  return m_tokens[m_current_token].token_type == token_type;
+  return m_tokens[m_current_token].type == token_type;
 }
 
 bool Parser::done() const {
@@ -207,8 +212,9 @@ Token Parser::consumed_token() const {
   return Token{};
 }
 
-ExprPtr parse(const beard::array<Token>& tokens) {
-  Parser parser{tokens};
+ExprPtr parse(Lexer lexer) {
+  Parser parser{lexer};
   return parser.parse();
 }
-}  // namespace parser
+
+}  // namespace gluon::lang

@@ -9,6 +9,8 @@
 #include <beard/containers/hash_map.h>
 #include <memory>
 
+namespace gluon::lang {
+
 class Object;
 
 struct ScopeFrame {
@@ -20,12 +22,12 @@ class ScopeStack {
  public:
   explicit ScopeStack(Interpreter* interpreter);
 
-  void DeclareVariable(const char* name);
-  void SetVariable(const char* name, Value value);
-  Value GetVariable(const char* name);
+  void declare_variable(const char* name);
+  void set_variable(const char* name, Value value);
+  Value get_variable(const char* name);
 
-  void PushScope();
-  void PopScope();
+  void push_scope();
+  void pop_scope();
 
  private:
   Interpreter* m_interpreter = nullptr;
@@ -40,7 +42,7 @@ class Interpreter : public StmtVisitor, public ExprVisitor {
   NONCOPYABLE(Interpreter);
   NONMOVEABLE(Interpreter);
 
-  void Run(ExprPtr expr);
+  void run(ExprPtr expr);
 
   [[nodiscard]] Object* global_object() const { return m_global_object; }
   [[nodiscard]] Heap* heap() const { return m_heap.get(); }
@@ -65,3 +67,5 @@ class Interpreter : public StmtVisitor, public ExprVisitor {
   std::unique_ptr<Heap> m_heap = nullptr;
   Object* m_global_object = nullptr;
 };
+
+}  // namespace gluon::lang

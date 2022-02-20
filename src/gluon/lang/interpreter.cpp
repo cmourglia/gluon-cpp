@@ -1,9 +1,11 @@
 #include <gluon/lang/interpreter.h>
 
-#include <gluon/lang/ast.h>
+#include <gluon/lang/fwd.h>
 #include <gluon/lang/object.h>
 
 #include <iostream>
+
+namespace gluon::lang {
 
 Interpreter::Interpreter() : m_scope_stack{this} {
   m_heap = make<Heap>(this);
@@ -15,12 +17,12 @@ Interpreter::~Interpreter() {
   m_heap->Garbage();
 }
 
-void Interpreter::Run(ExprPtr expr) {
-  m_scope_stack.PushScope();
+void Interpreter::run(ExprPtr expr) {
+  m_scope_stack.push_scope();
 
   Value last_value = expr->accept(*this);
 
-  m_scope_stack.PopScope();
+  m_scope_stack.pop_scope();
 
   std::cout << last_value << std::endl;
 }
@@ -82,21 +84,21 @@ Value Interpreter::visit_assign(AssignExpr& assign) {
 
 ScopeStack::ScopeStack(Interpreter* interpreter) : m_interpreter{interpreter} {}
 
-void ScopeStack::PushScope() {
+void ScopeStack::push_scope() {
   m_stack.add({});
 }
 
-void ScopeStack::PopScope() {
+void ScopeStack::pop_scope() {
   m_stack.pop_and_discard();
 }
 
 // FIXME: Not sure about this.
-void ScopeStack::DeclareVariable(const char* name) {
+void ScopeStack::declare_variable(const char* name) {
   ScopeFrame& frame = m_stack.last();
   frame.variables[name] = Value::kNull;
 }
 
-void ScopeStack::SetVariable(const char* name, Value value) {
+void ScopeStack::set_variable(const char* name, Value value) {
   for (i32 i = m_stack.element_count() - 1; i >= 0; --i) {
     ScopeFrame& frame = m_stack[i];
     if (auto it = frame.variables.find(name); it != frame.variables.end()) {
@@ -111,7 +113,7 @@ void ScopeStack::SetVariable(const char* name, Value value) {
   }
 }
 
-Value ScopeStack::GetVariable(const char* name) {
+Value ScopeStack::get_variable(const char* name) {
   for (i32 i = m_stack.element_count() - 1; i >= 0; --i) {
     ScopeFrame& frame = m_stack[i];
     if (auto it = frame.variables.find(name); it != frame.variables.end()) {
@@ -121,3 +123,5 @@ Value ScopeStack::GetVariable(const char* name) {
 
   throw std::exception("Cannot find variable");
 }
+
+}  // namespace gluon::lang

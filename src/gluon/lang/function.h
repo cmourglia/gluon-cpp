@@ -2,6 +2,8 @@
 
 #include <gluon/lang/object.h>
 
+namespace gluon::lang {
+
 struct ScopeNode;
 
 class Function : public Object {
@@ -9,15 +11,17 @@ class Function : public Object {
   Function(std::string name, ScopeNode* body)
       : m_name{std::move(name)}, m_body{body} {}
 
-  const char* ToString() const override { return "Function"; }
+  const char* to_string() const override { return "Function"; }
 
   std::string name() const { return m_name; }
 
   ScopeNode* body() const { return m_body; }
 
-  bool IsFunction() const override { return true; }
+  bool is_function() const override { return true; }
 
  private:
   std::string m_name;
   ScopeNode* m_body;
 };
+
+}  // namespace gluon::lang

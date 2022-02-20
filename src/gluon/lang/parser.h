@@ -1,16 +1,18 @@
 #pragma once
 
-#include <gluon/lang/grammar.h>
-#include <gluon/lang/token.h>
+#include "gluon/lang/grammar.h"
+#include "gluon/lang/lexer.h"
+#include "gluon/lang/token.h"
 
 #include <beard/containers/array.h>
 
 #include <memory>
 
-namespace parser {
+namespace gluon::lang {
+
 class Parser {
  public:
-  explicit Parser(beard::array<Token> tokens);
+  explicit Parser(Lexer lexer);
 
   ExprPtr parse();
 
@@ -36,5 +38,6 @@ class Parser {
   i32 m_current_token = 0;
 };
 
-ExprPtr parse(const beard::array<Token>& tokens);
-}  // namespace parser
+ExprPtr parse(Lexer lexer);
+
+}  // namespace gluon::lang

@@ -8,7 +8,7 @@
 
 #include <string>
 
-namespace lexer {
+namespace gluon::lang {
 class Lexer {
  public:
   NONCOPYABLE(Lexer);
@@ -50,5 +50,4 @@ class Lexer {
   beard::string_hash_map<TokenType> m_keywords;
 };
 
-beard::array<Token> Lex(const char* filename);
-}  // namespace lexer
+}  // namespace gluon::lang

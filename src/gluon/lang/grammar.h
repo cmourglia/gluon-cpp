@@ -9,6 +9,8 @@
 
 #include <memory>
 
+namespace gluon::lang {
+
 class BinaryExpr;
 class GroupingExpr;
 class LiteralExpr;
@@ -287,3 +289,5 @@ class WhileStmt : public Stmt {
   ExprPtr m_test;
   StmtPtr m_stmt;
 };
+
+}  // namespace gluon::lang

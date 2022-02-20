@@ -7,17 +7,21 @@
 
 #include <string>
 
+namespace gluon::lang {
+
 class Object : public Cell {
  public:
-  Value Get(const std::string& name) const;
-  void Add(const std::string& property_name, Value value);
+  Value get(std::string_view name) const;
+  void add(std::string_view property_name, Value value);
 
-  virtual const char* ToString() const override { return "Object"; }
+  virtual const char* to_string() const override { return "Object"; }
 
-  virtual bool IsFunction() const { return false; }
+  virtual bool is_function() const { return false; }
 
-  void VisitGraph(VisitorCallback Callback) override;
+  void visit_graph(VisitorCallback Callback) override;
 
  private:
   beard::string_hash_map<Value> m_values;
 };
+
+}  // namespace gluon::lang

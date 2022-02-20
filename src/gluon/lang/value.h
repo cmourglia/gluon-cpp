@@ -5,6 +5,8 @@
 #include <iostream>
 #include <string>
 
+namespace gluon::lang {
+
 class Object;
 
 enum class ValueType {
@@ -90,4 +92,6 @@ class Value {
 bool operator==(const Value& lhs, const Value& rhs);
 bool operator!=(const Value& lhs, const Value& rhs);
 
-std::ostream& operator<<(std::ostream& stream, const Value& value);
+}  // namespace gluon::lang
+
+std::ostream& operator<<(std::ostream& stream, const gluon::lang::Value& value);

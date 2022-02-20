@@ -2,6 +2,8 @@
 
 #include <fmt/format.h>
 
+namespace gluon::lang {
+
 void AstPrinter::PrintAST(Expr& Root) {
   Root.accept(*this);
 
@@ -124,3 +126,5 @@ void AstPrinter::visit_if(IfStmt& stmt) {
 void AstPrinter::visit_while(WhileStmt& stmt) {
   UNUSED(stmt);
 }
+
+}  // namespace gluon::lang

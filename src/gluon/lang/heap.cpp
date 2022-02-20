@@ -8,6 +8,8 @@
 
 #include <loguru.hpp>
 
+namespace gluon::lang {
+
 Heap::Heap(Interpreter* interpreter) : interpreter(interpreter) {}
 
 void* Heap::AllocateCell(usize size) {
@@ -39,7 +41,7 @@ inline void clear_objects(
   for (auto&& block : blocks) {
     for (usize i = 0; i < block->cell_count(); ++i) {
       if (auto* cell = block->cell(i); cell->is_used) {
-        LOG_F(INFO, "Clearing cell (%s) %p mark flag", cell->ToString(), cell);
+        LOG_F(INFO, "Clearing cell (%s) %p mark flag", cell->to_string(), cell);
         block->cell(i)->is_marked = false;
       }
     }
@@ -59,12 +61,12 @@ inline beard::array<Cell*> collect_roots(Interpreter* interpreter) {
 inline void mark_objects(const beard::array<Cell*>& roots) {
   auto MarkObject = [](Cell* visited) {
     visited->is_marked = true;
-    LOG_F(INFO, "Marking cell (%s) %p as visited", visited->ToString(),
+    LOG_F(INFO, "Marking cell (%s) %p as visited", visited->to_string(),
           visited);
   };
 
   for (auto&& root : roots) {
-    root->VisitGraph(MarkObject);
+    root->visit_graph(MarkObject);
   }
 }
 
@@ -75,7 +77,7 @@ inline void sweep_objects(
   for (auto&& block : blocks) {
     for (usize i = 0; i < block->cell_count(); ++i) {
       if (auto* cell = block->cell(i); cell->is_used && !cell->is_marked) {
-        LOG_F(INFO, "Deallocating  cell (%s) %p", cell->ToString(), cell);
+        LOG_F(INFO, "Deallocating  cell (%s) %p", cell->to_string(), cell);
         block->Deallocate(cell);
       }
     }
@@ -143,3 +145,5 @@ void HeapBlock::Deallocate(Cell* cell) {
   item->is_used = false;
   m_free_list = item;
 }
+
+}  // namespace gluon::lang

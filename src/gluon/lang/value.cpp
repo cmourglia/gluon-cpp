@@ -2,6 +2,8 @@
 
 #include <stdio.h>
 
+namespace gluon::lang {
+
 const Value Value::kUndefined = {};
 const Value Value::kNull = Value{nullptr};
 
@@ -66,6 +68,8 @@ bool operator!=(const Value& lhs, const Value& rhs) {
   return !(lhs == rhs);
 }
 
-std::ostream& operator<<(std::ostream& stream, const Value& value) {
+}  // namespace gluon::lang
+
+std::ostream& operator<<(std::ostream& stream, const gluon::lang::Value& value) {
   return stream << value.to_string();
 }

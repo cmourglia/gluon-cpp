@@ -7,8 +7,9 @@
 
 #include <memory>
 
+namespace gluon::lang {
+
 class Interpreter;
-struct Cell;
 
 struct HeapBlock {
   static constexpr usize kBlockSize = KB(16);
@@ -74,3 +75,5 @@ class Heap {
 
   beard::array<std::unique_ptr<HeapBlock>> m_blocks;
 };
+
+}  // namespace gluon::lang

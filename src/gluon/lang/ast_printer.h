@@ -2,6 +2,8 @@
 
 #include <gluon/lang/grammar.h>
 
+namespace gluon::lang {
+
 class AstPrinter : public ExprVisitor, public StmtVisitor {
  public:
   void PrintAST(Expr& ASTRoot);
@@ -26,3 +28,5 @@ class AstPrinter : public ExprVisitor, public StmtVisitor {
   std::string m_string;
   i32 m_indentation = 0;
 };
+
+}  // namespace gluon::lang
