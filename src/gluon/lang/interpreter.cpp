@@ -104,7 +104,7 @@ void ScopeStack::set_variable(const char* name, Value value) {
     if (auto it = frame.variables.find(name); it != frame.variables.end()) {
       if (it->second.type() != ValueType::Null &&
           value.type() != it->second.type()) {
-        throw std::exception("Cannot mutate variable types");
+        throw std::runtime_error{"Cannot mutate variable types"};
       }
 
       it->second = value;
@@ -121,7 +121,7 @@ Value ScopeStack::get_variable(const char* name) {
     }
   }
 
-  throw std::exception("Cannot find variable");
+  throw std::runtime_error{"Cannot find variable"};
 }
 
 }  // namespace gluon::lang
