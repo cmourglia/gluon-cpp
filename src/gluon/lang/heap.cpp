@@ -103,7 +103,7 @@ void Heap::Garbage() {
   sweep_objects(m_blocks);
 
   timer.tick();
-  LOG_F(INFO, "Garbage done in %lfs (%lldμs)", timer.delta_time(),
+  LOG_F(INFO, "Garbage done in %lfs (%lluμs)", timer.delta_time(),
         timer.delta_time_us());
 }
 
