@@ -2,6 +2,7 @@
 
 #include <beard/core/macros.h>
 
+#include <cstring>  // memcpy
 #include <iostream>
 #include <string>
 
