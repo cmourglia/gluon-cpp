@@ -1,96 +1,27 @@
-#if 0
-#include <gluon/app/app.h>
+#include "gluon/lang/ast_printer.h"
+#include "gluon/lang/interpreter.h"
+#include "gluon/lang/lexer.h"
+#include "gluon/lang/parser.h"
 
-int main(int argc, char** argv)
-{
-	GluonApp app(argc, argv);
-	return app.Run();
-}
-#elif 0
-
-#include <gluon/lang/Gluon_AST.h>
-#include <gluon/lang/Gluon_Interpreter.h>
-#include <gluon/lang/object.h>
-
-void test1(ZProgram* program);
-void test2(ZProgram* program);
+using namespace gluon::lang;
 
 int main() {
-  auto program = Make<ZProgram>();
+  auto test_prg = R"(
+// Comment
+print("Hello");
 
-  // test1(program.get());
-  test2(program.get());
+print("String with \"nested quotes\" and an escaped \\");
 
-  program->Dump(0);
+let a = 42;
+let b = 0.25;
+let c = 22;
+  )";
 
-  ZInterpreter interpreter;
-  auto Result = interpreter.Run(program.get());
-
-  printf("Interpreter returned: %s\n", Result.ToString().c_str());
-
-  interpreter.Heap()->Allocate<ZObject>();
-  interpreter.GlobalObject()->Add(
-      "foo", ZValue{interpreter.Heap()->Allocate<ZObject>()});
-
-  interpreter.Heap()->Garbage();
-
-  return 0;
-}
-
-void test1(ZProgram* program) {
-  auto* function = program->add<ZFunctionDeclaration>("foo");
-
-  function->Body()->add<ZReturnStatement>(Make<ZBinaryExpression>(
-      EBinaryOp::Addition,
-      Make<ZBinaryExpression>(EBinaryOp::Addition, Make<ZLiteral>(ZValue{1}),
-                              Make<ZLiteral>(ZValue{2})),
-      Make<ZLiteral>(ZValue{3})));
-
-  program->add<ExpressionStatement>(Make<ZCallExpression>("foo"));
-}
-
-void test2(ZProgram* program) {
-  program->add<ExpressionStatement>(Make<AssignmentExpression>(
-      EAssignmentOperator::Assign, Make<ZIdentifier>("x"),
-      Make<ZLiteral>(ZValue{42})));
-
-  auto* function = program->add<ZFunctionDeclaration>("bar");
-
-  function->Body()->add<ZVariableDeclaration>(Make<ZIdentifier>("a"),
-                                              Make<ZLiteral>(ZValue{2}));
-
-  function->Body()->add<ZVariableDeclaration>(Make<ZIdentifier>("b"));
-
-  function->Body()->add<ExpressionStatement>(Make<AssignmentExpression>(
-      EAssignmentOperator::Assign, Make<ZIdentifier>("b"),
-      Make<ZLiteral>(ZValue{3})));
-
-  function->Body()->add<ZReturnStatement>(Make<ZBinaryExpression>(
-      EBinaryOp::Addition,
-      Make<ZBinaryExpression>(EBinaryOp::Addition, Make<ZIdentifier>("a"),
-                              Make<ZIdentifier>("b")),
-      Make<ZIdentifier>("x")));
-
-  program->add<ExpressionStatement>(Make<ZCallExpression>("bar"));
-}
-#elif 1
-
-#include <gluon/lang/ast_printer.h>
-#include <gluon/lang/interpreter.h>
-#include <gluon/lang/lexer.h>
-#include <gluon/lang/parser.h>
-
-int main() {
-  auto tokens = lexer::Lex("gluon/TestLexer.gluon");
-  auto program = parser::Parse(tokens);
+  auto lexer = Lexer{test_prg};
+  auto program = parse(lexer);
 
   Interpreter interpreter;
-  interpreter.Run(program);
-  // ZInterpreter Interpreter;
-  // auto         Result = Interpreter.Run(Program.get());
-  // printf("Result: %s\n", Result.ToString().c_str());
+  interpreter.run(program);
 
   return 0;
 }
-
-#endif
