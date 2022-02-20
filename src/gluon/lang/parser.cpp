@@ -55,7 +55,7 @@ ExprPtr Parser::assignment() {
   if (match(TokenType::Equal)) {
     auto value = assignment();
     if (expr->type() != ExprType::Variable) {
-      throw std::exception("Expression is not an l-value");
+      throw std::runtime_error{"Expression is not an l-value"};
     }
 
     return make<AssignExpr>(std::move(expr), std::move(value));
@@ -200,7 +200,7 @@ void Parser::consume(TokenType token_type, const char* ErrorString) {
   if (check(token_type)) {
     advance();
   } else {
-    throw std::exception(ErrorString);
+    throw std::runtime_error{ErrorString};
   }
 }
 
