@@ -13,7 +13,7 @@ jobs:
       - name: Install packages
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends libglfw3 libglfw3-dev libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libxext-dev libxfixes-dev
+          sudo apt-get install -y --no-install-recommends gcc-11 g++-11 libglfw3 libglfw3-dev libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libxext-dev libxfixes-dev
       - name: Setup gcc version
         run: echo "CC=gcc-11" >> $GITHUB_ENV && echo "CXX=g++-11" >> $GITHUB_ENV
       
