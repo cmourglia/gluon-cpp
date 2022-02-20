@@ -9,7 +9,6 @@ add_subdirectory(thirdparty)
 set(CORE_SRC src/gluon/core/types.cpp src/gluon/core/types.h)
 
 set(LANG_SRC
-    src/gluon/lang/ast.cpp
     src/gluon/lang/ast_printer.cpp
     src/gluon/lang/cell.cpp
     src/gluon/lang/function.cpp
@@ -19,7 +18,6 @@ set(LANG_SRC
     src/gluon/lang/value.cpp
     src/gluon/lang/lexer.cpp
     src/gluon/lang/parser.cpp
-    src/gluon/lang/ast.h
     src/gluon/lang/ast_printer.h
     src/gluon/lang/grammar.h
     src/gluon/lang/token.h
@@ -51,17 +49,14 @@ target_include_directories(gluon_core PUBLIC src)
 target_link_libraries(gluon_core PUBLIC beard loguru)
 target_compile_definitions(
   gluon_core PUBLIC $<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>)
-target_compile_options(gluon_core PUBLIC $<$<CXX_COMPILER_ID:MSVC>:/W4>
-                                         $<$<CXX_COMPILER_ID:MSVC>:/WX>)
-target_compile_options(gluon_core PUBLIC $<$<CXX_COMPILER_ID:GNUC>:-Wall>
-                                         $<$<CXX_COMPILER_ID:GNU>:-Werror>)
+target_compile_options(
+  gluon_core
+  PUBLIC $<$<CXX_COMPILER_ID:MSVC>:/W4> $<$<CXX_COMPILER_ID:MSVC>:/WX>
+         $<$<CXX_COMPILER_ID:GNUC>:-Wall> $<$<CXX_COMPILER_ID:GNU>:-Werror>)
 
 add_library(gluon_lang STATIC ${LANG_SRC})
 target_link_libraries(gluon_lang PUBLIC gluon_core)
 
-add_executable(
-  gluon src/main.cpp # ${WIDGETS_SRC}
-  # ${APP_SRC}
-)
+add_executable(gluon src/main.cpp)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE gluon_lang)
