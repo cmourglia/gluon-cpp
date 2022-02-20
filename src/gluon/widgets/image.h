@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Gluon/Widgets/widget.h>
+#include "gluon/widgets/widget.h"
 
 struct Image : public Widget {
   enum class FitMode {

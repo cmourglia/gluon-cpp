@@ -1,9 +1,9 @@
-#include <gluon/lang/interpreter.h>
-
-#include <gluon/lang/fwd.h>
-#include <gluon/lang/object.h>
+#include "gluon/lang/interpreter.h"
 
 #include <iostream>
+
+#include "gluon/lang/fwd.h"
+#include "gluon/lang/object.h"
 
 namespace gluon::lang {
 
@@ -84,13 +84,9 @@ Value Interpreter::visit_assign(AssignExpr& assign) {
 
 ScopeStack::ScopeStack(Interpreter* interpreter) : m_interpreter{interpreter} {}
 
-void ScopeStack::push_scope() {
-  m_stack.add({});
-}
+void ScopeStack::push_scope() { m_stack.add({}); }
 
-void ScopeStack::pop_scope() {
-  m_stack.pop_and_discard();
-}
+void ScopeStack::pop_scope() { m_stack.pop_and_discard(); }
 
 // FIXME: Not sure about this.
 void ScopeStack::declare_variable(const char* name) {

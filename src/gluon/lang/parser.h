@@ -1,12 +1,12 @@
 #pragma once
 
-#include "gluon/lang/grammar.h"
-#include "gluon/lang/lexer.h"
-#include "gluon/lang/token.h"
-
 #include <beard/containers/array.h>
 
 #include <memory>
+
+#include "gluon/lang/grammar.h"
+#include "gluon/lang/lexer.h"
+#include "gluon/lang/token.h"
 
 namespace gluon::lang {
 

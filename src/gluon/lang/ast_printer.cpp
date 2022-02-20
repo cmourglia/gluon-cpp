@@ -1,4 +1,4 @@
-#include <gluon/lang/ast_printer.h>
+#include "gluon/lang/ast_printer.h"
 
 #include <fmt/format.h>
 
@@ -103,28 +103,16 @@ Value AstPrinter::visit_assign(AssignExpr& expr) {
   return Value::kUndefined;
 }
 
-void AstPrinter::visit_expr(ExprStmt& stmt) {
-  UNUSED(stmt);
-}
+void AstPrinter::visit_expr(ExprStmt& stmt) { UNUSED(stmt); }
 
-void AstPrinter::visit_print(PrintStmt& stmt) {
-  UNUSED(stmt);
-}
+void AstPrinter::visit_print(PrintStmt& stmt) { UNUSED(stmt); }
 
-void AstPrinter::visit_var_decl(VarDeclStmt& stmt) {
-  UNUSED(stmt);
-}
+void AstPrinter::visit_var_decl(VarDeclStmt& stmt) { UNUSED(stmt); }
 
-void AstPrinter::visit_block(BlockStmt& stmt) {
-  UNUSED(stmt);
-}
+void AstPrinter::visit_block(BlockStmt& stmt) { UNUSED(stmt); }
 
-void AstPrinter::visit_if(IfStmt& stmt) {
-  UNUSED(stmt);
-}
+void AstPrinter::visit_if(IfStmt& stmt) { UNUSED(stmt); }
 
-void AstPrinter::visit_while(WhileStmt& stmt) {
-  UNUSED(stmt);
-}
+void AstPrinter::visit_while(WhileStmt& stmt) { UNUSED(stmt); }
 
 }  // namespace gluon::lang

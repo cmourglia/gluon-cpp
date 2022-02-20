@@ -1,6 +1,6 @@
-#include <Gluon/Widgets/rectangle.h>
+#include "gluon/widgets/rectangle.h"
 
-#include <Gluon/Widgets/hashes.h>
+#include "gluon/widgets/hashes.h"
 
 namespace utils {
 glm::vec4 ExtractColor(const beard::array<Token>& tokens);

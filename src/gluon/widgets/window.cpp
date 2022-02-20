@@ -1,16 +1,13 @@
-#include <Gluon/Widgets/window.h>
+#include "gluon/widgets/window.h"
 
-#include <Gluon/Widgets/hashes.h>
-
-#include <Gluon/App/app.h>
+#include "gluon/app/app.h"
+#include "gluon/widgets/hashes.h"
 
 namespace utils {
 glm::vec4 ExtractColor(const beard::array<Token>& tokens);
 }
 
-Window::Window() {
-  size = GluonApp::instance()->GetWindowSize();
-}
+Window::Window() { size = GluonApp::instance()->GetWindowSize(); }
 
 void Window::ParserPropertyInternal(parser::Node::Ptr node, u32 node_hash) {
   UNUSED(node);

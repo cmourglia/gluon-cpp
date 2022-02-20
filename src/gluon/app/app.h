@@ -1,8 +1,8 @@
 #pragma once
 
-#include <gluon/core/types.h>
-
 #include <beard/containers/array.h>
+
+#include "gluon/core/types.h"
 
 struct SDL_Window;
 struct SDL_Surface;

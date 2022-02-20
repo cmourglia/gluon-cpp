@@ -1,14 +1,14 @@
 #include "gluon/lang/parser.h"
 
-#include "gluon/lang/fwd.h"
-#include "gluon/lang/grammar.h"
-#include "gluon/lang/lexer.h"
+#include <fmt/format.h>
 
 #include <algorithm>
 #include <charconv>
 #include <iterator>
 
-#include <fmt/format.h>
+#include "gluon/lang/fwd.h"
+#include "gluon/lang/grammar.h"
+#include "gluon/lang/lexer.h"
 
 namespace gluon::lang {
 
@@ -42,9 +42,7 @@ ExprPtr Parser::parse() {
 /**
  * expression -> assignment ;
  */
-ExprPtr Parser::expression() {
-  return assignment();
-}
+ExprPtr Parser::expression() { return assignment(); }
 
 /**
  * assignment -> IDENTIFIER "=" assigment | equality ;
@@ -137,10 +135,8 @@ ExprPtr Parser::unary() {
  * ")" ;
  */
 ExprPtr Parser::primary() {
-  if (match(TokenType::True))
-    return make<LiteralExpr>(Value{true});
-  if (match(TokenType::Nil))
-    return make<LiteralExpr>(Value{nullptr});
+  if (match(TokenType::True)) return make<LiteralExpr>(Value{true});
+  if (match(TokenType::Nil)) return make<LiteralExpr>(Value{nullptr});
   if (match(TokenType::String))
     return make<LiteralExpr>(Value{consumed_token().lexeme});
 
@@ -169,9 +165,7 @@ ExprPtr Parser::primary() {
   return nullptr;
 }
 
-bool Parser::match(TokenType token_type) {
-  return match({token_type});
-}
+bool Parser::match(TokenType token_type) { return match({token_type}); }
 
 bool Parser::match(std::initializer_list<TokenType> token_types) {
   for (auto token_type : token_types) {
@@ -192,9 +186,7 @@ bool Parser::done() const {
   return m_current_token >= m_tokens.element_count();
 }
 
-void Parser::advance() {
-  m_current_token += 1;
-}
+void Parser::advance() { m_current_token += 1; }
 
 void Parser::consume(TokenType token_type, const char* ErrorString) {
   if (check(token_type)) {

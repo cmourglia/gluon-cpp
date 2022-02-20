@@ -1,6 +1,6 @@
 #pragma once
 
-#include <gluon/lang/grammar.h>
+#include "gluon/lang/grammar.h"
 
 namespace gluon::lang {
 

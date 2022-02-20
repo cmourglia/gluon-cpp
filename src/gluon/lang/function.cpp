@@ -1,3 +1,3 @@
-#include <gluon/lang/function.h>
+#include "gluon/lang/function.h"
 
 namespace gluon::lang {}

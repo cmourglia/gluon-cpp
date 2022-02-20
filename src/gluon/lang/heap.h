@@ -1,11 +1,11 @@
 #pragma once
 
-#include <gluon/lang/cell.h>
-
 #include <beard/containers/array.h>
 #include <beard/core/macros.h>
 
 #include <memory>
+
+#include "gluon/lang/cell.h"
 
 namespace gluon::lang {
 
