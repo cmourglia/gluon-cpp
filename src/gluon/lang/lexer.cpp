@@ -1,4 +1,4 @@
-#include <gluon/lang/lexer.h>
+#include "gluon/lang/lexer.h"
 
 #include <beard/io/io.h>
 
@@ -78,8 +78,7 @@ void Lexer::skip_empty() {
           return;
         }
 
-        while (peek() != '\n')
-          advance();
+        while (peek() != '\n') advance();
       } break;
 
       default:
@@ -91,8 +90,7 @@ void Lexer::skip_empty() {
 std::optional<Token> Lexer::next() {
   skip_empty();
 
-  if (m_current == m_source.length())
-    return std::nullopt;
+  if (m_current == m_source.length()) return std::nullopt;
 
   m_start = m_current;
   m_start_line = m_line;
@@ -169,8 +167,7 @@ std::optional<Token> Lexer::next() {
   }
 }
 
-Token Lexer::handle_one_or_two_char_token(char ch,
-                                          TokenType one_char,
+Token Lexer::handle_one_or_two_char_token(char ch, TokenType one_char,
                                           TokenType two_char) {
   if (match(ch)) {
     return make_token(two_char);
@@ -236,9 +233,7 @@ Token Lexer::handle_identifier() {
   return token;
 }
 
-bool Lexer::done() {
-  return m_current >= m_source.size();
-}
+bool Lexer::done() { return m_current >= m_source.size(); }
 
 u8 Lexer::advance() {
   m_column += 1;
@@ -263,9 +258,7 @@ u8 Lexer::peek_next() {
   return m_source[m_current + 1];
 }
 
-u8 Lexer::previous() {
-  return m_source[m_current - 1];
-}
+u8 Lexer::previous() { return m_source[m_current - 1]; }
 
 bool Lexer::match(u8 ch) {
   char next = peek();

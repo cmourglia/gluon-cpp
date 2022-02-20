@@ -1,13 +1,13 @@
 #pragma once
 
-#include <gluon/lang/token.h>
-
 #include <beard/containers/array.h>
 #include <beard/containers/hash_map.h>
 #include <beard/core/macros.h>
 
 #include <optional>
 #include <string>
+
+#include "gluon/lang/token.h"
 
 namespace gluon::lang {
 
@@ -28,8 +28,7 @@ class Lexer {
   Token handle_string();
   Token handle_number();
   Token handle_identifier();
-  Token handle_one_or_two_char_token(char match_ch,
-                                     TokenType one_char_type,
+  Token handle_one_or_two_char_token(char match_ch, TokenType one_char_type,
                                      TokenType two_chars_type);
 
   // Skip whitespaces and comments

@@ -1,14 +1,13 @@
-#include <Gluon/Widgets/image.h>
-
-#include <Gluon/Widgets/hashes.h>
+#include "gluon/widgets/image.h"
 
 #include <SDL.h>
 #include <SDL_image.h>
 #include <nanosvg.h>
 
+#include <filesystem>
 #include <loguru.hpp>
 
-#include <filesystem>
+#include "gluon/widgets/hashes.h"
 
 namespace utils {
 glm::vec4 ExtractColor(const beard::array<Token>& tokens);

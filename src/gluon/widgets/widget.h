@@ -1,14 +1,14 @@
 #pragma once
 
-#include <Gluon/Compiler/parser.h>
-#include <Gluon/Compiler/shunting_yard.h>
-
 #include <beard/containers/array.h>
 #include <beard/containers/hash_map.h>
 #include <beard/containers/hash_set.h>
 
 #include <memory>
 #include <string>
+
+#include "gluon/compiler/parser.h"
+#include "gluon/compiler/shunting_yard.h"
 
 struct Widget {
   Widget() = default;

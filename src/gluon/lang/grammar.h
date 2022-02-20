@@ -1,13 +1,13 @@
 #pragma once
 
-#include <gluon/lang/token.h>
-#include <gluon/lang/value.h>
-
 #include <beard/containers/array.h>
 #include <beard/core/macros.h>
 #include <beard/misc/optional.h>
 
 #include <memory>
+
+#include "gluon/lang/token.h"
+#include "gluon/lang/value.h"
 
 namespace gluon::lang {
 

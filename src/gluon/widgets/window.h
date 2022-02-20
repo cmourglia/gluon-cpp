@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Gluon/Widgets/widget.h>
+#include "gluon/widgets/widget.h"
 
 struct Window : public Widget {
   static Widget* create() { return new Window{}; }

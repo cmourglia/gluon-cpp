@@ -1,8 +1,8 @@
+#include <fmt/format.h>
+
 #include <catch2/catch_all.hpp>
 
-#include <gluon/lang/lexer.h>
-
-#include <fmt/format.h>
+#include "gluon/lang/lexer.h"
 
 using namespace gluon::lang;
 

@@ -1,4 +1,4 @@
-#include <gluon/lang/value.h>
+#include "gluon/lang/value.h"
 
 #include <stdio.h>
 
@@ -64,12 +64,11 @@ bool operator==(const Value& lhs, const Value& rhs) {
   return false;
 }
 
-bool operator!=(const Value& lhs, const Value& rhs) {
-  return !(lhs == rhs);
-}
+bool operator!=(const Value& lhs, const Value& rhs) { return !(lhs == rhs); }
 
 }  // namespace gluon::lang
 
-std::ostream& operator<<(std::ostream& stream, const gluon::lang::Value& value) {
+std::ostream& operator<<(std::ostream& stream,
+                         const gluon::lang::Value& value) {
   return stream << value.to_string();
 }

@@ -1,21 +1,18 @@
-#include <gluon/app/app.h>
+#include "gluon/app/app.h"
 
-// #include <gluon/core/Utils.h>
-#include <gluon/widgets/widget.h>
-
-#include <beard/io/io.h>
-
+// #include "gluon/core/Utils.h"
 #include <SDL.h>
 #include <SDL_image.h>
+#include <beard/io/io.h>
 #include <nanosvg.h>
 
 #include <vector>
 
+#include "gluon/widgets/widget.h"
+
 GluonApp* GluonApp::s_instance = nullptr;
 
-GluonApp* GluonApp::instance() {
-  return s_instance;
-}
+GluonApp* GluonApp::instance() { return s_instance; }
 
 GluonApp::GluonApp(int argc, char** argv)
     : m_background_color{0.8f, 0.8f, 0.8f, 1.0f} {

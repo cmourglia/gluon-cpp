@@ -1,13 +1,12 @@
-#include <Gluon/Widgets/widget.h>
-
-#include <Gluon/Widgets/hashes.h>
+#include "gluon/widgets/widget.h"
 
 #include <beard/containers/hash_map.h>
 #include <beard/misc/hash.h>
 
+#include <filesystem>
 #include <loguru.hpp>
 
-#include <filesystem>
+#include "gluon/widgets/hashes.h"
 
 namespace utils {
 glm::vec4 ExtractColor(const beard::array<Token>& tokens) {
