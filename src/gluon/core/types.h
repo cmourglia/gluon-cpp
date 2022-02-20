@@ -4,6 +4,7 @@
 #include <beard/core/macros.h>
 #include <beard/math/math.h>
 
+#if 0
 START_EXTERNAL_INCLUDE
 #include <glm/glm.hpp>
 END_EXTERNAL_INCLUDE
@@ -287,3 +288,4 @@ struct RectangleInfo {
   // f32       dropShadowScale    = 0.0f;
   // f32       dropShadowStrength = 15.0f;
 };
+#endif

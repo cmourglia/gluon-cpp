@@ -1,5 +1,6 @@
 #include <gluon/core/types.h>
 
+#if 0
 namespace color {
 const glm::vec4 kAliceBlue = FromRGBA(240, 248, 255);
 const glm::vec4 kAntiqueWhite = FromRGBA(250, 235, 215);
@@ -301,3 +302,4 @@ const beard::string_hash_map<glm::vec4> kColorsByName = {
     {"YellowGreen", kYellowGreen},
 };
 }  // namespace color
+#endif
