@@ -6,48 +6,52 @@
 #include <beard/containers/hash_map.h>
 #include <beard/core/macros.h>
 
+#include <optional>
 #include <string>
 
 namespace gluon::lang {
+
 class Lexer {
  public:
-  NONCOPYABLE(Lexer);
-  NONMOVEABLE(Lexer);
+  DEFAULT_COPYABLE(Lexer);
 
   Lexer() = delete;
-  explicit Lexer(const char* filename);
+  explicit Lexer(std::string_view input);
 
-  beard::array<Token> Lex();
+  std::optional<Token> next();
+
+  static beard::array<Token> lex(std::string_view source);
 
  private:
-  void ReadNextToken();
-  void AddToken(TokenType::Enum token_type,
-                beard::optional<Value> value = beard::optional<Value>{});
+  Token make_token(TokenType type);
 
-  void HandleMultilineComment();
-  void HandleString();
-  void HandleNumber();
-  void HandleIdentifier();
+  Token handle_string();
+  Token handle_number();
+  Token handle_identifier();
+  Token handle_one_or_two_char_token(char match_ch,
+                                     TokenType one_char_type,
+                                     TokenType two_chars_type);
 
-  bool Done();
-  u32 Advance();
-  u32 Peek();
-  u32 PeekNext();
-  u32 Previous();
-  bool MatchChar(u32 ch);
+  // Skip whitespaces and comments
+  void skip_empty();
 
-  f32 ParseNumber();
+  bool done();
+  [[maybe_unused]] u8 advance();
+  u8 peek();
+  u8 peek_next();
+  u8 previous();
+  bool match(u8 ch);
 
-  std::string m_filename;
+  u32 m_start_column = 0;
+  u32 m_start_line = 0;
   u32 m_column = 0;
   u32 m_line = 0;
 
-  std::u32string m_source;
-  usize m_current;
-  usize m_start;
+  std::string_view m_source;
+  usize m_current = 0;
+  usize m_start = 0;
 
   beard::array<Token> m_tokens;
-  beard::string_hash_map<TokenType> m_keywords;
 };
 
 }  // namespace gluon::lang

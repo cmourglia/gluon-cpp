@@ -5,82 +5,9 @@
 #include <algorithm>
 #include <codecvt>
 
-namespace lexer {
-std::string ToString(TokenType::Enum token_type) {
-  // clang-format off
-	switch (token_type)
-	{
-		case TokenType::kUnknown:        return "Unknown";
-		case TokenType::kOpenBrace:      return "OpenBrace";
-		case TokenType::kCloseBrace:     return "CloseBrace";
-		case TokenType::kOpenParen:      return "OpenParen";
-		case TokenType::kCloseParen:     return "CloseParen";
-		case TokenType::kOpenBracket:    return "OpenBracket";
-		case TokenType::kCloseBracket:   return "CloseBracket";
-		case TokenType::kComma:          return "Comma";
-		case TokenType::kColon:          return "Colon";
-		case TokenType::kSemicolon:      return "Semicolon";
-		case TokenType::kDot:            return "Dot";
-		case TokenType::kAdd:            return "Add";
-		case TokenType::kSubtract:       return "Subtract";
-		case TokenType::kMultiply:       return "Multiply";
-		case TokenType::kDivide:         return "Divide";
-		case TokenType::kModulo:         return "Modulo";
-		case TokenType::kPower:          return "Power";
-		case TokenType::kIf:             return "If";
-		case TokenType::kElse:           return "Else";
-		case TokenType::kWhile:          return "While";
-		case TokenType::kFor:            return "For";
-		case TokenType::kLet:            return "Let";
-		case TokenType::kNull:           return "Null";
-		case TokenType::kTrue:           return "True";
-		case TokenType::kFalse:          return "False";
-		case TokenType::kAnd:            return "And";
-		case TokenType::kOr:             return "Or";
-		case TokenType::kNot:            return "Not";
-		case TokenType::kEquals:         return "Equals";
-		case TokenType::kNotEquals:      return "NotEquals";
-		case TokenType::kGreater:        return "Greater";
-		case TokenType::kGreaterEquals:  return "GreaterEquals";
-		case TokenType::kLess:           return "Less";
-		case TokenType::kLessEquals:     return "LessEquals";
-		case TokenType::kAssign:         return "Assign";
-		case TokenType::kAddAssign:      return "AddAssign";
-		case TokenType::kSubtractAssign: return "SubtractAssign";
-		case TokenType::kMultiplyAssign: return "MultiplyAssign";
-		case TokenType::kDivideAssign:   return "DivideAssign";
-		case TokenType::kModuloAssign:   return "ModuloAssign";
-		case TokenType::kPowerAssign:    return "PowerAssign";
-		case TokenType::kNumber:         return "Number";
-		case TokenType::kString:         return "String";
-		case TokenType::kIdentifier:     return "Identifier";
-		case TokenType::kComment:        return "Comment";
-		// case ETokenType::Spacing:        return "Spacing";
-		case TokenType::kEOL:      return "EndOfLine";
-		case TokenType::kEOF:    return "EndOfStream";
-	}
-  // clang-format on
+namespace gluon::lang {
 
-  ASSERT_UNREACHABLE();
-  return "";
-}
-
-inline bool IsEndOfLine(char ch) {
-  bool is_eol = (ch == '\n');
-  return is_eol;
-}
-
-inline bool IsSpacing(char ch) {
-  bool is_spacing = (ch == ' ') || (ch == '\t') || (ch == '\v') || (ch == '\f');
-  return is_spacing;
-}
-
-inline bool IsWhitespace(char ch) {
-  bool is_whitespace = IsEndOfLine(ch) || IsSpacing(ch);
-  return is_whitespace;
-}
-
-inline bool IsAlpha(char ch) {
+inline bool is_alpha(char ch) {
   bool is_lower_case = (ch >= 'a' && ch <= 'z');
   bool is_upper_case = (ch >= 'A' && ch <= 'Z');
   bool is_alpha = is_lower_case || is_upper_case;
@@ -88,336 +15,247 @@ inline bool IsAlpha(char ch) {
   return is_alpha;
 }
 
-inline bool IsNumber(char ch) {
+inline bool is_number(char ch) {
   bool is_number = (ch >= '0' && ch <= '9');
   return is_number;
 }
 
-inline bool IsValidIdentifierCharacter(char ch) {
-  bool is_valid = IsAlpha(ch) || IsNumber(ch) || ch == '_';
+inline bool is_valid_identifier_character(char ch) {
+  bool is_valid = is_alpha(ch) || is_number(ch) || ch == '_';
   return is_valid;
 }
 
-Lexer::Lexer(const char* filename) : m_filename{filename} {
-  auto buffer = beard::io::read_whole_file(filename);
-  m_source = beard::io::to_utf8(buffer);
+beard::array<Token> Lexer::lex(std::string_view source) {
+  beard::array<Token> tokens;
+  Lexer lexer{source};
 
-  m_keywords = {};
-}
-
-beard::array<Token> Lexer::Lex() {
-  m_tokens.clear();
-
-  m_current = 0;
-
-  while (!Done()) {
-    m_start = m_current;
-    ReadNextToken();
+  while (true) {
+    if (auto tk = lexer.next(); tk.has_value()) {
+      tokens.add(std::move(*tk));
+    } else {
+      break;
+    }
   }
 
-  return m_tokens;
+  return tokens;
 }
 
-void Lexer::AddToken(TokenType::Enum token_type, beard::optional<Value> value) {
+Lexer::Lexer(std::string_view input) : m_source{input} {}
+
+Token Lexer::make_token(TokenType token_type) {
   Token token = {
-      .filename = m_filename,
-      .column = m_column,
-      .line = m_line,
-      .token_type = token_type,
-      .value = value,
+      .lexeme = m_source.substr(m_start, m_current - m_start),
+      .column = m_start_column,
+      .line = m_start_line,
+      .type = token_type,
   };
+
+  return token;
 }
 
-void Lexer::ReadNextToken() {
-  Token token = {
-      .filename = m_filename,
-      .column = m_column,
-      .line = m_line,
-  };
+void Lexer::skip_empty() {
+  while (!done()) {
+    u8 ch = peek();
 
-  u32 ch = Advance();
+    switch (ch) {
+      // TODO: At some point, we will want to parse EOLs and allow
+      // not requiring semicolons.
+      // For now we do not handle it at all.
+      case '\n': {
+        m_column = 0;
+        m_line += 1;
+        advance();
+      } break;
+
+      case ' ':
+      case '\r':
+      case '\t': {
+        advance();
+      } break;
+
+      case '/': {
+        if (peek_next() != '/') {
+          return;
+        }
+
+        while (peek() != '\n')
+          advance();
+      } break;
+
+      default:
+        return;
+    }
+  }
+}
+
+std::optional<Token> Lexer::next() {
+  skip_empty();
+
+  if (m_current == m_source.length())
+    return std::nullopt;
+
+  m_start = m_current;
+  m_start_line = m_line;
+  m_start_column = m_column;
+
+  u8 ch = advance();
 
   switch (ch) {
     case '\0':
-      token.token_type = TokenType::kEOF;
-      break;
-
+      return std::nullopt;
     case '{':
-      token.token_type = TokenType::kOpenBrace;
-      break;
+      return make_token(TokenType::OpenBrace);
     case '}':
-      token.token_type = TokenType::kCloseBrace;
-      break;
+      return make_token(TokenType::CloseBrace);
     case '(':
-      token.token_type = TokenType::kOpenParen;
-      break;
+      return make_token(TokenType::OpenParen);
     case ')':
-      token.token_type = TokenType::kCloseParen;
-      break;
+      return make_token(TokenType::CloseParen);
     case '[':
-      token.token_type = TokenType::kOpenBracket;
-      break;
+      return make_token(TokenType::OpenBracket);
     case ']':
-      token.token_type = TokenType::kCloseBracket;
-      break;
+      return make_token(TokenType::CloseBracket);
     case ',':
-      token.token_type = TokenType::kComma;
-      break;
+      return make_token(TokenType::Comma);
     case ':':
-      token.token_type = TokenType::kColon;
-      break;
+      return make_token(TokenType::Colon);
     case ';':
-      token.token_type = TokenType::kSemicolon;
-      break;
+      return make_token(TokenType::Semicolon);
     case '.':
-      token.token_type = TokenType::kDot;
-      break;
-
+      return make_token(TokenType::Dot);
     case '"':
-    case '\'':
-    case '`':
-      HandleString(&token);
-      break;
+      return handle_string();
+    case '=':
+      return handle_one_or_two_char_token('=', TokenType::Equal,
+                                          TokenType::EqualEqual);
+    case '>':
+      return handle_one_or_two_char_token('=', TokenType::Greater,
+                                          TokenType::GreaterEqual);
+    case '<':
+      return handle_one_or_two_char_token('=', TokenType::Less,
+                                          TokenType::LessEqual);
+    case '+':
+      return handle_one_or_two_char_token('=', TokenType::Plus,
+                                          TokenType::PlusEqual);
+    case '-':
+      return handle_one_or_two_char_token('=', TokenType::Minus,
+                                          TokenType::MinusEqual);
+    case '*':
+      return handle_one_or_two_char_token('=', TokenType::Star,
+                                          TokenType::StarEqual);
+    case '/':
+      return handle_one_or_two_char_token('=', TokenType::Slash,
+                                          TokenType::SlashEqual);
+    case '%':
+      return handle_one_or_two_char_token('=', TokenType::Percent,
+                                          TokenType::PercentEqual);
 
-    case ' ':
-    case '\t':
-    case '\r':
-      // Do nothing
-      break;
-
-    case '\n':
-      m_column = 0;
-      m_line += 1;
-      token.token_type = TokenType::kEOL;
-      break;
-
-    case '/': {
-      if (MatchChar('/')) {
-        while (!Done() && Peek() != '\n') {
-          Advance();
-        }
-      } else if (MatchChar('*')) {
-        HandleMultilineComment();
+    case '!':
+      if (match('=')) {
+        return make_token(TokenType::BangEqual);
+      } else {
+        throw std::runtime_error{
+            "! is not a valid token by itself. Maybe you meant to use `not` ?"};
       }
-      // else if (MatchChar('='))
-      // {
-      //    AddToken(TokenType::SlashEqual)
-      // }
-      else {
-        Addtoken(TokenType::kSlash);
-      }
-    }
 
     default:
-      HandleGeneralCase(&token);
-      break;
+      if (is_number(ch)) {
+        return handle_number();
+      } else if (is_valid_identifier_character(ch)) {
+        return handle_identifier();
+      } else {
+        throw std::runtime_error{"Invalid character"};
+      }
   }
+}
 
-  if (token.token_type == TokenType::kString) {
-    // Do not keep "" or ''
-    token.text = std::string(Start + 1, m_stream - 1);
+Token Lexer::handle_one_or_two_char_token(char ch,
+                                          TokenType one_char,
+                                          TokenType two_char) {
+  if (match(ch)) {
+    return make_token(two_char);
   } else {
-    token.text = std::string(Start, m_stream);
+    return make_token(one_char);
+  }
+}
+
+Token Lexer::handle_string() {
+  // Skip first quote
+  advance();
+
+  while (true) {
+    if (done()) {
+      throw std::runtime_error{"Unmatched string"};
+    }
+
+    char ch = peek();
+    if (ch == '\\') {
+      // Skip next character
+      advance();
+      advance();
+    } else if (ch == '"') {
+      auto token = make_token(TokenType::String);
+      // We do not want to include the enclosing quotes
+      token.lexeme = m_source.substr(m_start + 1, (m_current - m_start) - 1);
+      advance();
+
+      return token;
+    } else {
+      advance();
+    }
+  }
+}
+
+Token Lexer::handle_number() {
+  while (!done() && is_number(peek())) {
+    advance();
   }
 
-  if (token.token_type == TokenType::kIdentifier) {
-    // Maybe it is not and identifier after all...
-    if (token.text == "if") {
-      token.token_type = TokenType::kIf;
-    } else if (token.text == "else") {
-      token.token_type = TokenType::kElse;
-    } else if (token.text == "while") {
-      token.token_type = TokenType::kWhile;
-    } else if (token.text == "for") {
-      token.token_type = TokenType::kFor;
-    } else if (token.text == "let") {
-      token.token_type = TokenType::kLet;
-    } else if (token.text == "null") {
-      token.token_type = TokenType::kNull;
-    } else if (token.text == "true") {
-      token.token_type = TokenType::kTrue;
-    } else if (token.text == "false") {
-      token.token_type = TokenType::kFalse;
-    } else if (token.text == "and") {
-      token.token_type = TokenType::kAnd;
-    } else if (token.text == "or") {
-      token.token_type = TokenType::kOr;
-    } else if (token.text == "not") {
-      token.token_type = TokenType::kNot;
+  if (match('.')) {
+    if (!is_number(peek())) {
+      throw std::runtime_error{"Number cannot finish by `.`"};
     }
+    while (!done() && is_number(peek())) {
+      advance();
+    }
+  }
+
+  return make_token(TokenType::Number);
+}
+
+Token Lexer::handle_identifier() {
+  while (is_valid_identifier_character(peek())) {
+    advance();
+  }
+
+  auto token = make_token(TokenType::Identifier);
+  if (auto it = kKeywords.find(token.lexeme); it != kKeywords.end()) {
+    token.type = it->second;
   }
 
   return token;
 }
 
-void Lexer::HandleString(Token* token) {
-  token->token_type = TokenType::kString;
-
-  while (m_stream[0] != '\0' && m_stream[0] != m_current_char) {
-    // \' should not stop the string
-    if (m_stream[0] == '\\' && m_stream[1] != '\0') {
-      AdvanceChars(1);
-    }
-    AdvanceChars(1);
-  }
-  AdvanceChars(1);
-}
-
-void Lexer::HandleSlash(Token* token) {
-  if (NextMatches('/')) {
-    token->token_type = TokenType::kComment;
-
-    while (!IsEOF() && !IsEndOfLine(m_stream[0])) {
-      AdvanceChars(1);
-    }
-  } else if (NextMatches('*')) {
-    token->token_type = TokenType::kComment;
-
-    while ((m_stream[0] != '\0' && m_stream[1] != '\0') &&
-           !(m_stream[0] == '*' && m_stream[1] == '/')) {
-      if (IsEndOfLine(m_stream[0])) {
-        m_line += 1;
-      }
-
-      AdvanceChars(1);
-    }
-
-    if (m_stream[0] == '*') {
-      AdvanceChars(2);
-    }
-  } else if (NextMatches('=')) {
-    token->token_type = TokenType::kDivideAssign;
-    AdvanceChars(1);
-  } else {
-    token->token_type = TokenType::kDivide;
-  }
-}
-
-bool Lexer::NextMatches(char ch) {
-  return !IsEOF() && m_stream[0] == ch;
-}
-
-bool Lexer::IsEOF() {
-  return m_stream[0] == '\0';
-}
-
-void Lexer::HandleGeneralCase(Token* token) {
-  if (IsAlpha(m_current_char) || m_current_char == '_' ||
-      m_current_char == '$') {
-    // _ and $ are valid identifier starting characters
-    token->token_type = TokenType::kIdentifier;
-
-    while (IsEOF() && IsValidIdentifierCharacter(m_stream[0])) {
-      AdvanceChars(1);
-    }
-  } else if (IsNumber(m_current_char)) {
-    token->token_type = TokenType::kNumber;
-    token->number = ParseNumber();
-  } else {
-    HandleOperators(token);
-  }
-}
-
-void Lexer::HandleOperators(Token* token) {
-  auto WithFollowingEqual = [&token, this](TokenType::Enum default_value,
-                                           TokenType::Enum assign_value) {
-    if (NextMatches('=')) {
-      token->token_type = assign_value;
-      AdvanceChars(1);
-    } else {
-      token->token_type = default_value;
-    }
-  };
-
-  switch (m_current_char) {
-    case '=':
-      WithFollowingEqual(TokenType::kAssign, TokenType::kEquals);
-      break;
-    case '!':
-      if (NextMatches('=')) {
-        token->token_type = TokenType::kNotEquals;
-        AdvanceChars(1);
-      } else {
-        // This is an error
-        ASSERT_UNREACHABLE();
-      }
-    case '>':
-      WithFollowingEqual(TokenType::kGreater, TokenType::kGreaterEquals);
-      break;
-    case '<':
-      WithFollowingEqual(TokenType::kLess, TokenType::kLessEquals);
-      break;
-    case '+':
-      WithFollowingEqual(TokenType::kAdd, TokenType::kAddAssign);
-      break;
-    case '-':
-      WithFollowingEqual(TokenType::kSubtract, TokenType::kSubtractAssign);
-      break;
-    case '*':
-      WithFollowingEqual(TokenType::kMultiply, TokenType::kMultiplyAssign);
-      break;
-    case '%':
-      WithFollowingEqual(TokenType::kModulo, TokenType::kModuloAssign);
-      break;
-    case '^':
-      WithFollowingEqual(TokenType::kPower, TokenType::kPowerAssign);
-      break;
-
-    default:
-      // This is an error
-      ASSERT_UNREACHABLE();
-  }
-}
-
-f32 Lexer::ParseNumber() {
-  f32 Value = static_cast<f32>(m_current_char - '0');
-
-  while (m_stream[0] != '\0' && IsNumber(m_stream[0])) {
-    f32 Digit = static_cast<f32>(m_stream[0] - '0');
-    Value = 10.0f * Value + Digit;
-    AdvanceChars(1);
-  }
-
-  if (m_stream[0] != '\0' && m_stream[0] == '.') {
-    AdvanceChars(1);
-
-    f32 Mult = 0.1f;
-
-    while (IsNumber(m_stream[0])) {
-      f32 Digit = static_cast<f32>(m_stream[0] - '0');
-      Value = Value + Mult * Digit;
-      Mult *= 0.1f;
-      AdvanceChars(1);
-    }
-  }
-
-  if (m_stream[0] == 'f') {
-    AdvanceChars(1);
-  }
-
-  return Value;
-}
-
-bool Lexer::Done() {
+bool Lexer::done() {
   return m_current >= m_source.size();
 }
 
-u32 Lexer::Advance() {
+u8 Lexer::advance() {
   m_column += 1;
   m_current += 1;
 
   return m_source[m_current - 1];
 }
 
-u32 Lexer::Peek() {
-  if (Done()) {
+u8 Lexer::peek() {
+  if (done()) {
     return '\0';
   }
 
   return m_source[m_current];
 }
 
-u32 Lexer::PeekNext() {
+u8 Lexer::peek_next() {
   if (m_current + 1 >= m_source.size()) {
     return '\0';
   }
@@ -425,16 +263,17 @@ u32 Lexer::PeekNext() {
   return m_source[m_current + 1];
 }
 
-u32 Lexer::Previous() {
+u8 Lexer::previous() {
   return m_source[m_current - 1];
 }
 
-bool Lexer::MatchChar(u32 ch) {
+bool Lexer::match(u8 ch) {
+  char next = peek();
+  if (next == ch) {
+    advance();
+    return true;
+  }
   return false;
 }
 
-beard::array<Token> Lex(const char* filename) {
-  Lexer lexer{filename};
-  return lexer.Lex();
-}
-}  // namespace lexer
+}  // namespace gluon::lang
