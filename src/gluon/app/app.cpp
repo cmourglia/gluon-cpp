@@ -1,7 +1,6 @@
 #include <gluon/app/app.h>
 
 // #include <gluon/core/Utils.h>
-#include <gluon/compiler/parser.h>
 #include <gluon/widgets/widget.h>
 
 #include <beard/io/io.h>
