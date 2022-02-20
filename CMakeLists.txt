@@ -10,6 +10,7 @@ set(CORE_SRC src/gluon/core/types.cpp src/gluon/core/types.h)
 
 set(LANG_SRC
     src/gluon/lang/ast_printer.cpp
+    src/gluon/lang/token.cpp
     src/gluon/lang/cell.cpp
     src/gluon/lang/function.cpp
     src/gluon/lang/heap.cpp
@@ -60,3 +61,6 @@ target_link_libraries(gluon_lang PUBLIC gluon_core)
 add_executable(gluon src/main.cpp)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE gluon_lang)
+
+enable_testing()
+add_subdirectory(tests)
