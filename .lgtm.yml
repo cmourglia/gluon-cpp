@@ -2,7 +2,9 @@ extraction:
   cpp:
     prepare: 
       packages:
-        - g++-11
+        - build-essential
+        - g++-10
+        - gcc-10
     after_prepare:
       - mkdir $HOME/cmake-3.20 \
           \ && wget -qO- "https://cmake.org/files/v3.20/cmake-3.20.6-linux-x86_64.tar.gz" \
