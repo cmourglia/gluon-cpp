@@ -1,5 +1,7 @@
 # Gluon
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/fa66a8ec0534402cab56480d4819328f)](https://app.codacy.com/gh/cmourglia/gluon-cpp?utm_source=github.com&utm_medium=referral&utm_content=cmourglia/gluon-cpp&utm_campaign=Badge_Grade_Settings)
+
 ![Linux](https://github.com/cmourglia/gluon-cpp/actions/workflows/linux.yml/badge.svg)
 ![Windows](https://github.com/cmourglia/gluon-cpp/actions/workflows/windows.yml/badge.svg)
 
