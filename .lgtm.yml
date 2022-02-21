@@ -1,5 +1,8 @@
 extraction:
   cpp:
+    prepare: 
+      packages:
+        - g++-11
     after_prepare:
       - mkdir $HOME/cmake-3.20 \
           \ && wget -qO- "https://cmake.org/files/v3.20/cmake-3.20.6-Linux-x86_64.tar.gz" \
@@ -7,17 +10,11 @@ extraction:
       - export PATH=$HOME/cmake-3.20/bin:$PATH
 
     # Pre-analysis step.
-    #configure:
-    #  command:
-    #    - "./configure -cmake -opensource -confirm-license -debug -no-pch \
-    #      \ -nomake tests -nomake examples -no-harfbuzz \
-    #      \ -system-pcre -system-zlib -system-freetype -system-libpng \
-    #      \ -system-libjpeg -system-sqlite"
-    #    # We skip analyzing the bootstrap library, since the same code is
-    #    # built with non-standard flags and false-positives are flagged.
-    #    - ninja bootstrap_tools
+    configure:
+      command:
+        - cmake . -GNinja
 
     ## Actual analysis.
-    #index:
-    #  build_command:
-    #    - ninja
+    index:
+      build_command:
+        - ninja
