@@ -5,7 +5,7 @@ extraction:
         - g++-11
     after_prepare:
       - mkdir $HOME/cmake-3.20 \
-          \ && wget -qO- "https://cmake.org/files/v3.20/cmake-3.20.6-Linux-x86_64.tar.gz" \
+          \ && wget -qO- "https://cmake.org/files/v3.20/cmake-3.20.6-linux-x86_64.tar.gz" \
             \ | tar -xzf - --strip-components=1 -C $HOME/cmake-3.20
       - export PATH=$HOME/cmake-3.20/bin:$PATH
 
