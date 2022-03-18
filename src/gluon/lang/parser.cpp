@@ -179,6 +179,9 @@ bool Parser::match(std::initializer_list<TokenType> token_types) {
 }
 
 bool Parser::check(TokenType token_type) const {
+  if (done())
+    return false;
+
   return m_tokens[m_current_token].type == token_type;
 }
 
