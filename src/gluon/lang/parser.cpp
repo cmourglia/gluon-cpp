@@ -97,7 +97,7 @@ ExprPtr Parser::comparison() {
 ExprPtr Parser::term() {
   auto expr = factor();
 
-  while (match({TokenType::Plus, TokenType::PlusEqual})) {
+  while (match({TokenType::Plus, TokenType::Minus})) {
     auto op = consumed_token();
     expr = make<BinaryExpr>(std::move(expr), op, factor());
   }
