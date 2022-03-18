@@ -53,23 +53,42 @@ void Interpreter::visit_while(WhileStmt& while_stmt) {
 }
 
 Value Interpreter::visit_binary(BinaryExpr& binary) {
-  UNUSED(binary);
-  TODO;
+  Value left = binary.left()->accept(*this);
+  Value right = binary.right()->accept(*this);
+  switch (binary.op().type) {
+    case TokenType::Plus:
+      return left + right;
+    case TokenType::Minus:
+      return left - right;
+    case TokenType::Star:
+      return left * right;
+    case TokenType::Slash:
+      return left / right;
+    case TokenType::Percent:
+      return left % right;
+  }
+
+  throw std::runtime_error{"Invalid binary operator"};
 }
 
 Value Interpreter::visit_grouping(GroupingExpr& grouping) {
-  UNUSED(grouping);
-  TODO;
+  return grouping.expr()->accept(*this);
 }
 
 Value Interpreter::visit_literal(LiteralExpr& literal) {
-  UNUSED(literal);
-  TODO;
+  return literal.value();
 }
 
 Value Interpreter::visit_unary(UnaryExpr& unary) {
-  UNUSED(unary);
-  TODO;
+  auto value = unary.right()->accept(*this);
+  switch (unary.op().type) {
+    case TokenType::Minus:
+      return -value;
+    case TokenType::Not:
+      return !value;
+  }
+
+  throw std::runtime_error{"Invalid unary operator"};
 }
 
 Value Interpreter::visit_variable(VariableExpr& variable) {
@@ -84,9 +103,13 @@ Value Interpreter::visit_assign(AssignExpr& assign) {
 
 ScopeStack::ScopeStack(Interpreter* interpreter) : m_interpreter{interpreter} {}
 
-void ScopeStack::push_scope() { m_stack.add({}); }
+void ScopeStack::push_scope() {
+  m_stack.add({});
+}
 
-void ScopeStack::pop_scope() { m_stack.pop_and_discard(); }
+void ScopeStack::pop_scope() {
+  m_stack.pop_and_discard();
+}
 
 // FIXME: Not sure about this.
 void ScopeStack::declare_variable(const char* name) {
