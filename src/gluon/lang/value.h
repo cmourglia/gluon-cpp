@@ -93,6 +93,17 @@ class Value {
 bool operator==(const Value& lhs, const Value& rhs);
 bool operator!=(const Value& lhs, const Value& rhs);
 
+// Unary
+Value operator-(const Value& lhs);
+Value operator!(const Value& lhs);
+
+// Binary
+Value operator+(const Value& lhs, const Value& rhs);
+Value operator-(const Value& lhs, const Value& rhs);
+Value operator*(const Value& lhs, const Value& rhs);
+Value operator/(const Value& lhs, const Value& rhs);
+Value operator%(const Value& lhs, const Value& rhs);
+
 }  // namespace gluon::lang
 
 std::ostream& operator<<(std::ostream& stream, const gluon::lang::Value& value);

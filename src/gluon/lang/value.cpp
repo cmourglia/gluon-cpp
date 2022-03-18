@@ -64,8 +64,85 @@ bool operator==(const Value& lhs, const Value& rhs) {
   return false;
 }
 
-bool operator!=(const Value& lhs, const Value& rhs) { return !(lhs == rhs); }
+bool operator!=(const Value& lhs, const Value& rhs) {
+  return !(lhs == rhs);
+}
 
+Value operator-(const Value& lhs) {
+  if (lhs.is_number()) {
+    return Value{-lhs.as_number()};
+  }
+  throw std::runtime_error{"Invalid call to -"};
+}
+
+Value operator!(const Value& lhs) {
+  if (lhs.is_boolean()) {
+    return Value{!lhs.as_boolean()};
+  }
+  throw std::runtime_error{"Invalid call to `not`"};
+}
+
+Value operator+(const Value& lhs, const Value& rhs) {
+  if (lhs.is_number()) {
+    if (rhs.is_number()) {
+      return Value{lhs.as_number() + rhs.as_number()};
+    } else {
+      throw std::runtime_error{"Cannot add a number with another type"};
+    }
+  }
+
+  if (lhs.is_string()) {
+    if (rhs.is_string()) {
+      auto l_str = lhs.as_string();
+      auto r_str = rhs.as_string();
+
+      // TODO: Proper allocation
+      char* str = (char*)malloc(l_str.size() + r_str.size() + 1);
+      memset(str, 0, l_str.size() + r_str.size() + 1);
+      memcpy(str, l_str.data(), l_str.size());
+      memcpy(str + l_str.size(), r_str.data(), r_str.size());
+
+      return Value{std::string_view{str}};
+    } else {
+      throw std::runtime_error{"Cannot concatenate a string with another type"};
+    }
+  }
+
+  throw std::runtime_error{"Invalid call to +"};
+}
+
+Value operator-(const Value& lhs, const Value& rhs) {
+  if (lhs.is_number() && rhs.is_number()) {
+    return Value{lhs.as_number() - rhs.as_number()};
+  }
+
+  throw std::runtime_error{"Invalid call to -"};
+}
+
+Value operator*(const Value& lhs, const Value& rhs) {
+  if (lhs.is_number() && rhs.is_number()) {
+    return Value{lhs.as_number() * rhs.as_number()};
+  }
+
+  // TODO: Concatenate n times a string
+  throw std::runtime_error{"Invalid call to *"};
+}
+
+Value operator/(const Value& lhs, const Value& rhs) {
+  if (lhs.is_number() && rhs.is_number()) {
+    return Value{lhs.as_number() / rhs.as_number()};
+  }
+
+  throw std::runtime_error{"Invalid call to /"};
+}
+
+Value operator%(const Value& lhs, const Value& rhs) {
+  if (lhs.is_number() && rhs.is_number()) {
+    return Value{fmod(lhs.as_number(), rhs.as_number())};
+  }
+
+  throw std::runtime_error{"Invalid call to %"};
+}
 }  // namespace gluon::lang
 
 std::ostream& operator<<(std::ostream& stream,
